@@ -1,0 +1,29 @@
+<idea-plugin version="2">
+  <id>cc.cflags.nixitch</id>
+  <name>Nixitch</name>
+  <version>0.1.1</version>
+  <vendor email="ed@cflags.cc" url="http://cflags.cc">cc $CFLAGS</vendor>
+
+  <description><![CDATA[
+    A Nix expression language plugin. Guaranteed no itching.
+  ]]></description>
+
+  <change-notes><![CDATA[
+    No changes.
+    ]]>
+  </change-notes>
+
+  <idea-version since-build="131"/>
+
+  <!-- depends>com.intellij.modules.lang</depends -->
+  <extensions defaultExtensionNs="com.intellij">
+    <fileTypeFactory implementation="cc.cflags.nixitch.file.NixFileTypeFactory"/>
+    <lang.parserDefinition
+            language="Nix"
+            implementationClass="cc.cflags.nixitch.lang.NixParserDefinition" />
+    <lang.syntaxHighlighterFactory key="Nix" implementationClass="cc.cflags.nixitch.lang.NixSyntaxHighlighterFactory"/>
+  </extensions>
+  <application-components />
+  <project-components />
+  <actions />
+</idea-plugin>
