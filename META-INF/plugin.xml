@@ -5,7 +5,19 @@
   <vendor email="ed@cflags.cc" url="http://cflags.cc">cc $CFLAGS</vendor>
 
   <description><![CDATA[
+
+    <h1>Nixitch!</h1>
+    <br />
+
     A Nix expression language plugin. Guaranteed no itching.
+    <br />
+      <a href="https://github.com/edwtjo/nixitch">GitHub</a> | Donate <a href="https://blockchain.info/address/15eWtromv9U1g8knFy7hkLJg942DRHmHrC">BTC</a>
+    <br /><br />
+
+    <b>Features</b>
+    <ul>
+        <li>Syntax highlighting</li>
+    </ul>
   ]]></description>
 
   <change-notes><![CDATA[
