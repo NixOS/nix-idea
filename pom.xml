@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>cc.cflags.nixitch</groupId>
+    <artifactId>cc.cflags.nixitch</artifactId>
+    <version>0.1.2</version>
+    <name>nixitch</name>
+    <description>A Nix(nixpkgs/NixOS/nixops) language plugin for Intellij IDEA.</description>
+    <packaging>jar</packaging>
+
+    <properties>
+        <vendor.url>http://cflags.cc</vendor.url>
+        <vendor.email>ed@cflags.cc</vendor.email>
+        <vendor.name>cc $CFLAGS</vendor.name>
+        <idea.group>org.jetbrains</idea.group>
+        <idea.artifact>idea-IC</idea.artifact>
+        <idea.version>14.1.1</idea.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>${idea.group}</groupId>
+            <artifactId>${idea.artifact}</artifactId>
+            <version>${idea.version}</version>
+            <type>zip</type>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+        <!-- HELPER: install fetched intellij-idea as artifact locally -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.2</version>
+                <goals>
+                    <goal>install-file</goal>
+                </goals>
+                <configuration>
+                    <repositoryId>artifactory</repositoryId>
+                    <packaging>zip</packaging>
+                    <generatePom>true</generatePom>
+                    <groupId>${idea.group}</groupId>
+                    <artifactId>${idea.artifact}</artifactId>
+                    <version>${idea.version}</version>
+                    <file>${project.basedir}/vendor/idea-IC.zip</file>
+                </configuration>
+            </plugin>
+
+            <!-- HELPER: unpack stored artifact intellij-idea into target directory -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>${idea.group}</groupId>
+                            <artifactId>${idea.artifact}</artifactId>
+                            <version>${idea.version}</version>
+                            <type>zip</type>
+                            <outputDirectory>${project.build.directory}/vendor/</outputDirectory>
+                            <includes>**/*.jar</includes>
+                        </artifactItem>
+                    </artifactItems>
+                </configuration>
+            </plugin>
+
+            <!-- Tell the compile about the languge version and extra libraries -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <compilerArguments>
+                        <extdirs>${project.build.directory}/vendor/idea-IC/lib/</extdirs>
+                    </compilerArguments>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+
+            <!-- Add all source folders.. why maven-compiler-plugin cannot do this is beyond me -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.9.1</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/main/java</source>
+                                <source>src/generated/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Run the actual plugin build as an ant task, since it is.. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>compile-forms</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <path id="maven.plugin.complete.classpath">
+                                    <path refid="maven.plugin.classpath"/>
+                                    <fileset dir="${project.build.directory}/vendor/idea-IC/lib">
+                                        <include name="**/*.jar"/>
+                                    </fileset>
+                                </path>
+                                <taskdef name="instrumentIdeaExtensions"
+                                         classname="com.intellij.ant.InstrumentIdeaExtensions"
+                                         classpathref="maven.plugin.complete.classpath"/>
+                                <path id="sourcepath">
+                                    <dirset dir="${project.basedir}">
+                                        <include name="src/main/java"/>
+                                        <include name="src/generated/java"/>
+                                        <include name="src/main/resources"/>
+                                    </dirset>
+                                </path>
+                                <instrumentIdeaExtensions destdir="${project.build.outputDirectory}"
+                                                          extdirs="${project.build.directory}/vendor/idea-IC/lib">
+                                    <classpath refid="maven.compile.classpath"/>
+                                    <src refid="sourcepath"/>
+                                </instrumentIdeaExtensions>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.openjdk</groupId>
+                        <artifactId>tools</artifactId>
+                        <version>1.7.0</version>
+                        <scope>system</scope>
+                        <systemPath>${env.JDK_HOME}/lib/tools.jar</systemPath>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!-- HELPER: Actually assemble the plugin -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/nixitch-plugin.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>${project.name}-plugin</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <finalName>${project.name}-v${project.version}</finalName>
+                            <attach>true</attach>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

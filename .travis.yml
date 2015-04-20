@@ -1,0 +1,6 @@
+language: java
+env:
+    global:
+        - JDK_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+install: ./get-idea.sh
+script: ./build.sh

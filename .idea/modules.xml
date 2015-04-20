@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/nixitch.iml" filepath="$PROJECT_DIR$/nixitch.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cc.cflags.nixitch.iml" filepath="$PROJECT_DIR$/cc.cflags.nixitch.iml" />
     </modules>
   </component>
 </project>

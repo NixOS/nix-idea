@@ -1,15 +1,15 @@
 <idea-plugin version="2">
-  <id>cc.cflags.nixitch</id>
-  <name>Nixitch</name>
-  <version>0.1.1.1</version>
-  <vendor email="ed@cflags.cc" url="http://cflags.cc">cc $CFLAGS</vendor>
+  <id>${project.artifactId}</id>
+  <name>${project.name}</name>
+  <version>${project.version}</version>
+  <vendor email="${vendor.email}" url="${vendor.url}">${vendor.name}</vendor>
 
   <description><![CDATA[
 
-    <h1>Nixitch!</h1>
+    <h1>Nixitch</h1>
     <br />
 
-    A Nix expression language plugin. Guaranteed no itching.
+    ${project.description}
     <br />
       <a href="https://github.com/edwtjo/nixitch">GitHub</a> | Donate <a href="https://blockchain.info/address/15eWtromv9U1g8knFy7hkLJg942DRHmHrC">BTC</a>
     <br /><br />
@@ -31,6 +31,14 @@
     </p>
 
     <p>
+      <b>v0.1.2</b>
+      <ul>
+        <li>Mavenized project</li>
+        <li>Added Travis</li>
+      </ul>
+    </p>
+
+    <p>
         <b>v0.1.1.1</b>
         <ul>
             <li>Read environment variables on start</li>
@@ -43,7 +51,7 @@
 
   <idea-version since-build="131"/>
 
-  <!-- depends>com.intellij.modules.lang</depends -->
+  <depends>com.intellij.modules.lang</depends>
   <extensions defaultExtensionNs="com.intellij">
     <fileTypeFactory implementation="cc.cflags.nixitch.file.NixFileTypeFactory"/>
     <lang.parserDefinition
