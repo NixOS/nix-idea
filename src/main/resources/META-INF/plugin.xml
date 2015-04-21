@@ -22,10 +22,6 @@
 
   <change-notes><![CDATA[
     <p>
-        <span style="color:red">You cannot use multiple Nix plugins at the same time, be sure to always uninstall
-        any previously installed when updating.</span>
-    </p>
-    <p>
         If you encounter any issues, please
         <a href="https://github.com/edwtjo/nixitch/issues">report them</a>.
     </p>
@@ -34,7 +30,8 @@
       <b>v0.1.2</b>
       <ul>
         <li>Mavenized project</li>
-        <li>Added Travis</li>
+        <li>Added Travis CI</li>
+        <li>Use proguard to minimize distzip</li>
       </ul>
     </p>
 
