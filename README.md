@@ -16,5 +16,6 @@ to provide the following:
 
 # Install
 
-Downlad [NixIDEA](https://plugins.jetbrains.com/plugin/7752) to your home and install locally using the Plugin tab. Or 
-just install it from the plugins tab.
+Preferably from within IDEA, or use the releases tab to download it and install
+from file. The plugin can be found at the Jetbrains plugin repository as
+[NixIDEA](https://plugins.jetbrains.com/plugin/8607).
