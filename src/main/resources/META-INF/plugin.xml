@@ -6,12 +6,12 @@
 
   <description><![CDATA[
 
-    <h1>Nixitch</h1>
+    <h1>${project.name}</h1>
     <br />
 
     ${project.description}
     <br />
-      <a href="https://github.com/edwtjo/nixitch">GitHub</a> | Donate <a href="https://blockchain.info/address/15eWtromv9U1g8knFy7hkLJg942DRHmHrC">BTC</a>
+      <a href="https://github.com/NixOS/nix-idea">GitHub</a> | Consider donating to the NixOS <a href="https://nixos.org/nixos/community.html">organization</a>
     <br /><br />
 
     <b>Features</b>
@@ -23,26 +23,14 @@
   <change-notes><![CDATA[
     <p>
         If you encounter any issues, please
-        <a href="https://github.com/edwtjo/nixitch/issues">report them</a>.
+        <a href="https://github.com/NixOS/nix-idea/issues">report them</a>.
     </p>
-
     <p>
-      <b>v0.1.2</b>
+      <b>v0.2</b>
       <ul>
-        <li>Mavenized project</li>
-        <li>Added Travis CI</li>
-        <li>Use proguard to minimize distzip</li>
+        <li>Project name change and move to NixOS organization</li>
       </ul>
     </p>
-
-    <p>
-        <b>v0.1.1.1</b>
-        <ul>
-            <li>Read environment variables on start</li>
-            <li>Modify environment variables via plugin settings.</li>
-        </ul>
-    </p>
-
     ]]>
   </change-notes>
 
@@ -50,12 +38,13 @@
 
   <depends>com.intellij.modules.lang</depends>
   <extensions defaultExtensionNs="com.intellij">
-    <fileTypeFactory implementation="cc.cflags.nixitch.file.NixFileTypeFactory"/>
+    <fileTypeFactory implementation="org.nixos.idea.file.NixFileTypeFactory"/>
     <lang.parserDefinition
             language="Nix"
-            implementationClass="cc.cflags.nixitch.lang.NixParserDefinition" />
-    <lang.syntaxHighlighterFactory key="Nix" implementationClass="cc.cflags.nixitch.lang.NixSyntaxHighlighterFactory"/>
-      <projectConfigurable instance="cc.cflags.nixitch.settings.NixitchSettings"/>
+            implementationClass="org.nixos.idea.lang.NixParserDefinition" />
+    <lang.syntaxHighlighterFactory key="Nix" implementationClass="org.nixos.idea.lang.NixSyntaxHighlighterFactory"/>
+      <projectConfigurable instance="org.nixos.idea.settings.NixIDEASettings"/>
+    <!-- completion.contributor language="Nix" implementationClass="org.nixos.idea.suggestions.NixAttributeCompletionContributor"/-->
   </extensions>
   <application-components />
   <project-components />

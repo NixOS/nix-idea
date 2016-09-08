@@ -1,6 +1,6 @@
-# nixitch - A Nix language plugin for Intellij IDEA.
+# NixIDEA - A Nix language plugin for Intellij IDEA.
 
-[![Build Status](https://travis-ci.org/edwtjo/nixitch.svg?branch=master)](https://travis-ci.org/edwtjo/nixitch)
+[![Build Status](https://travis-ci.org/NixOS/nix-idea.svg?branch=master)](https://travis-ci.org/NixOS/nix-idea)
 
 This plugin has the goal of being generally useful when working with nixpkgs/NixOS/nixops, it aims
 to provide the following:
@@ -16,5 +16,5 @@ to provide the following:
 
 # Install
 
-Downlad [nixitch](https://plugins.jetbrains.com/plugin/7752) to your home and install locally using the Plugin tab. Or 
-just install it from the IDEA plugins tab.
+Downlad [NixIDEA](https://plugins.jetbrains.com/plugin/7752) to your home and install locally using the Plugin tab. Or 
+just install it from the plugins tab.

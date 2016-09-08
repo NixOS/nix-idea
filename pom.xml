@@ -3,20 +3,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>cc.cflags.nixitch</groupId>
-    <artifactId>cc.cflags.nixitch</artifactId>
-    <version>0.1.2</version>
-    <name>nixitch</name>
+    <groupId>org.nixos.idea</groupId>
+    <artifactId>nix-idea</artifactId>
+    <version>0.2</version>
+    <name>NixIDEA</name>
     <description>A Nix(nixpkgs/NixOS/nixops) language plugin for Intellij IDEA.</description>
     <packaging>jar</packaging>
 
     <properties>
-        <vendor.url>http://cflags.cc</vendor.url>
+        <vendor.url>http://nixos.org</vendor.url>
         <vendor.email>ed@cflags.cc</vendor.email>
-        <vendor.name>cc $CFLAGS</vendor.name>
+        <vendor.name>NixOS</vendor.name>
         <idea.group>org.jetbrains</idea.group>
         <idea.artifact>idea-IC</idea.artifact>
-        <idea.version>14.1.1</idea.version>
+        <idea.version>2016.2.3</idea.version>
         <jdk.home>${env.JDK_HOME}</jdk.home>
         <idea.lib>${project.build.directory}/vendor/${idea.artifact}/lib/</idea.lib>
     </properties>
@@ -49,7 +49,6 @@
                     <goal>install-file</goal>
                 </goals>
                 <configuration>
-                    <repositoryId>artifactory</repositoryId>
                     <packaging>zip</packaging>
                     <generatePom>true</generatePom>
                     <groupId>${idea.group}</groupId>
@@ -87,8 +86,8 @@
                     <compilerArguments>
                         <extdirs>${idea.lib}</extdirs>
                     </compilerArguments>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
 
@@ -107,7 +106,7 @@
                         <configuration>
                             <sources>
                                 <source>src/main/java</source>
-                                <source>src/generated/java</source>
+                                <source>gen</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -140,7 +139,7 @@
                                 <path id="sourcepath">
                                     <dirset dir="${project.basedir}">
                                         <include name="src/main/java"/>
-                                        <include name="src/generated/java"/>
+                                        <include name="gen"/>
                                         <include name="src/main/resources"/>
                                     </dirset>
                                 </path>
@@ -170,7 +169,7 @@
                 <version>2.4</version>
                 <configuration>
                     <descriptors>
-                        <descriptor>src/main/assembly/nixitch-plugin.xml</descriptor>
+                        <descriptor>src/main/assembly/nix-idea.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>
@@ -203,8 +202,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <injar>${name}-v${version}.zip</injar>
-                    <outjar>${name}-v${version}-dist.zip</outjar>
+                    <injar>${project.name}-v${project.version}.zip</injar>
+                    <outjar>${project.name}-v${project.version}-dist.zip</outjar>
                     <outputDirectory>${project.build.directory}</outputDirectory>
                     <options>
                         <option>-dontoptimize</option>
