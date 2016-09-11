@@ -26,6 +26,12 @@
         <a href="https://github.com/NixOS/nix-idea/issues">report them</a>.
     </p>
     <p>
+      <b>v0.2.0.1</b>
+      <ul>
+        <li>Parser corrections</li>
+      </ul>
+    </p>
+    <p>
       <b>v0.2</b>
       <ul>
         <li>Project name change and move to NixOS organization</li>
