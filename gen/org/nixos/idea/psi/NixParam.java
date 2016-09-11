@@ -5,15 +5,15 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NixLetIn extends PsiElement {
+public interface NixParam extends PsiElement {
 
-  @NotNull
-  NixPureBind getPureBind();
+  @Nullable
+  NixDefval getDefval();
 
-  @NotNull
-  PsiElement getIn();
+  @Nullable
+  PsiElement getEllipsis();
 
-  @NotNull
-  PsiElement getLet();
+  @Nullable
+  PsiElement getId();
 
 }

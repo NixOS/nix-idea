@@ -40,12 +40,6 @@ public class NixLiteralImpl extends ASTWrapperPsiElement implements NixLiteral {
 
   @Override
   @Nullable
-  public PsiElement getId() {
-    return findChildByType(ID);
-  }
-
-  @Override
-  @Nullable
   public PsiElement getInt() {
     return findChildByType(INT);
   }

@@ -5,21 +5,18 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NixExprIf extends PsiElement {
-
-  @NotNull
-  List<NixExpr> getExprList();
+public interface NixListExpr extends PsiElement {
 
   @Nullable
-  NixExprOp getExprOp();
+  NixAttrPath getAttrPath();
 
   @Nullable
-  PsiElement getElse();
+  NixBindOrSelect getBindOrSelect();
 
   @Nullable
-  PsiElement getIf();
+  NixEvalOrSelect getEvalOrSelect();
 
   @Nullable
-  PsiElement getThen();
+  NixStringParts getStringParts();
 
 }

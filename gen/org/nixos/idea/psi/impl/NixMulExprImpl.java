@@ -46,12 +46,6 @@ public class NixMulExprImpl extends ASTWrapperPsiElement implements NixMulExpr {
 
   @Override
   @Nullable
-  public PsiElement getImpl() {
-    return findChildByType(IMPL);
-  }
-
-  @Override
-  @Nullable
   public PsiElement getTimes() {
     return findChildByType(TIMES);
   }

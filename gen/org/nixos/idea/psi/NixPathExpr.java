@@ -5,18 +5,18 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NixFormal extends PsiElement {
+public interface NixPathExpr extends PsiElement {
 
   @Nullable
-  NixExpr getExpr();
+  NixListExpr getListExpr();
 
   @Nullable
-  PsiElement getEllipsis();
+  PsiElement getHpath();
 
   @Nullable
-  PsiElement getId();
+  PsiElement getPath();
 
   @Nullable
-  PsiElement getIs();
+  PsiElement getSpath();
 
 }

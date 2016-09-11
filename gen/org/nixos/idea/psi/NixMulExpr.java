@@ -17,9 +17,6 @@ public interface NixMulExpr extends PsiElement {
   PsiElement getDivide();
 
   @Nullable
-  PsiElement getImpl();
-
-  @Nullable
   PsiElement getTimes();
 
 }

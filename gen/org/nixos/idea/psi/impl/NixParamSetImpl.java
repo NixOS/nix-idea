@@ -11,14 +11,14 @@ import static org.nixos.idea.psi.NixTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.nixos.idea.psi.*;
 
-public class NixPathsExprImpl extends ASTWrapperPsiElement implements NixPathsExpr {
+public class NixParamSetImpl extends ASTWrapperPsiElement implements NixParamSet {
 
-  public NixPathsExprImpl(ASTNode node) {
+  public NixParamSetImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NixVisitor visitor) {
-    visitor.visitPathsExpr(this);
+    visitor.visitParamSet(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,20 +28,20 @@ public class NixPathsExprImpl extends ASTWrapperPsiElement implements NixPathsEx
 
   @Override
   @NotNull
-  public List<NixPathStmt> getPathStmtList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixPathStmt.class);
+  public NixParams getParams() {
+    return findNotNullChildByClass(NixParams.class);
   }
 
   @Override
   @NotNull
-  public PsiElement getLbrac() {
-    return findNotNullChildByType(LBRAC);
+  public PsiElement getLcurly() {
+    return findNotNullChildByType(LCURLY);
   }
 
   @Override
   @NotNull
-  public PsiElement getRbrac() {
-    return findNotNullChildByType(RBRAC);
+  public PsiElement getRcurly() {
+    return findNotNullChildByType(RCURLY);
   }
 
 }

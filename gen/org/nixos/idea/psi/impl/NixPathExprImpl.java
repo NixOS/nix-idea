@@ -11,14 +11,14 @@ import static org.nixos.idea.psi.NixTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.nixos.idea.psi.*;
 
-public class NixPureBindImpl extends ASTWrapperPsiElement implements NixPureBind {
+public class NixPathExprImpl extends ASTWrapperPsiElement implements NixPathExpr {
 
-  public NixPureBindImpl(ASTNode node) {
+  public NixPathExprImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NixVisitor visitor) {
-    visitor.visitPureBind(this);
+    visitor.visitPathExpr(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -27,9 +27,27 @@ public class NixPureBindImpl extends ASTWrapperPsiElement implements NixPureBind
   }
 
   @Override
-  @NotNull
-  public List<NixAttrAssign> getAttrAssignList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixAttrAssign.class);
+  @Nullable
+  public NixListExpr getListExpr() {
+    return findChildByClass(NixListExpr.class);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getHpath() {
+    return findChildByType(HPATH);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getPath() {
+    return findChildByType(PATH);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getSpath() {
+    return findChildByType(SPATH);
   }
 
 }

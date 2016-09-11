@@ -11,14 +11,14 @@ import static org.nixos.idea.psi.NixTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.nixos.idea.psi.*;
 
-public class NixFnLambdaImpl extends ASTWrapperPsiElement implements NixFnLambda {
+public class NixBindOrSelectImpl extends ASTWrapperPsiElement implements NixBindOrSelect {
 
-  public NixFnLambdaImpl(ASTNode node) {
+  public NixBindOrSelectImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NixVisitor visitor) {
-    visitor.visitFnLambda(this);
+    visitor.visitBindOrSelect(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,20 +28,14 @@ public class NixFnLambdaImpl extends ASTWrapperPsiElement implements NixFnLambda
 
   @Override
   @NotNull
-  public NixParamSet getParamSet() {
-    return findNotNullChildByClass(NixParamSet.class);
+  public NixBindSet getBindSet() {
+    return findNotNullChildByClass(NixBindSet.class);
   }
 
   @Override
-  @NotNull
-  public PsiElement getId() {
-    return findNotNullChildByType(ID);
-  }
-
-  @Override
-  @NotNull
-  public PsiElement getNamed() {
-    return findNotNullChildByType(NAMED);
+  @Nullable
+  public NixContPath getContPath() {
+    return findChildByClass(NixContPath.class);
   }
 
 }

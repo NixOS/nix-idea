@@ -13,7 +13,7 @@ public interface NixCallArgs extends PsiElement {
   @NotNull
   PsiElement getLcurly();
 
-  @Nullable
+  @NotNull
   PsiElement getRcurly();
 
 }

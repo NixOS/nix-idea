@@ -11,6 +11,9 @@ public interface NixExprOp extends PsiElement {
   NixBoolExpr getBoolExpr();
 
   @Nullable
+  NixExprOp getExprOp();
+
+  @Nullable
   NixLogical getLogical();
 
   @Nullable

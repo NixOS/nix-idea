@@ -11,14 +11,14 @@ import static org.nixos.idea.psi.NixTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.nixos.idea.psi.*;
 
-public class NixLetInImpl extends ASTWrapperPsiElement implements NixLetIn {
+public class NixParamImpl extends ASTWrapperPsiElement implements NixParam {
 
-  public NixLetInImpl(ASTNode node) {
+  public NixParamImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NixVisitor visitor) {
-    visitor.visitLetIn(this);
+    visitor.visitParam(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -27,21 +27,21 @@ public class NixLetInImpl extends ASTWrapperPsiElement implements NixLetIn {
   }
 
   @Override
-  @NotNull
-  public NixPureBind getPureBind() {
-    return findNotNullChildByClass(NixPureBind.class);
+  @Nullable
+  public NixDefval getDefval() {
+    return findChildByClass(NixDefval.class);
   }
 
   @Override
-  @NotNull
-  public PsiElement getIn() {
-    return findNotNullChildByType(IN);
+  @Nullable
+  public PsiElement getEllipsis() {
+    return findChildByType(ELLIPSIS);
   }
 
   @Override
-  @NotNull
-  public PsiElement getLet() {
-    return findNotNullChildByType(LET);
+  @Nullable
+  public PsiElement getId() {
+    return findChildByType(ID);
   }
 
 }

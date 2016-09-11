@@ -5,9 +5,15 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NixPureBind extends PsiElement {
+public interface NixDefval extends PsiElement {
 
   @NotNull
-  List<NixAttrAssign> getAttrAssignList();
+  NixExpr getExpr();
+
+  @NotNull
+  PsiElement getId();
+
+  @NotNull
+  PsiElement getIs();
 
 }

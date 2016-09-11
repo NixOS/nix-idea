@@ -8,13 +8,22 @@ import com.intellij.psi.PsiElement;
 public interface NixExprSimple extends PsiElement {
 
   @Nullable
+  NixAttrPath getAttrPath();
+
+  @Nullable
+  NixBindOrSelect getBindOrSelect();
+
+  @Nullable
   NixBindSet getBindSet();
 
   @Nullable
-  NixEvalExpr getEvalExpr();
+  NixDefval getDefval();
 
   @Nullable
-  NixExprList getExprList();
+  NixEvalOrSelect getEvalOrSelect();
+
+  @Nullable
+  NixExprOp getExprOp();
 
   @Nullable
   NixImportStmt getImportStmt();
@@ -23,25 +32,22 @@ public interface NixExprSimple extends PsiElement {
   NixIndStringParts getIndStringParts();
 
   @Nullable
+  NixList getList();
+
+  @Nullable
   NixLiteral getLiteral();
 
   @Nullable
   NixStringParts getStringParts();
 
   @Nullable
+  NixUnaryOp getUnaryOp();
+
+  @Nullable
   PsiElement getIndStringClose();
 
   @Nullable
   PsiElement getIndStringOpen();
-
-  @Nullable
-  PsiElement getLbrac();
-
-  @Nullable
-  PsiElement getLet();
-
-  @Nullable
-  PsiElement getRbrac();
 
   @Nullable
   PsiElement getRec();

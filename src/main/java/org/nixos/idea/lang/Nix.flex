@@ -60,10 +60,10 @@ SCOMMENT=#[^\r\n]*
 MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
 INT=[0-9]+
 BOOL=(true|false)
-ID=[a-zA-Z][a-zA-Z_0-9'-]*
+ID=[_a-zA-Z][_a-zA-Z_0-9'-]*
 
 STRINLINENIX=\$\{
-STR_CT=([^\$\"\\]|\$[^\{\"])+
+STR_CT=([^\$\"]|\$[^\{\"])+
 IND_STR_CT=([^\$\']|\$[^\{\']|\'[^\'\$])+
 
 PATH=[a-zA-Z0-9\.\_\-\+]*(\/[a-zA-Z0-9\.\_\-\+]+)+
@@ -132,7 +132,6 @@ URI=[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*']+
   "requires"         { return REQUIRES; }
   "import"           { return IMPORT; }
   "imports"          { return IMPORTS; }
-  "OW_KW"            { return OW_KW; }
 
   \'\'(\ *\n)?
     {

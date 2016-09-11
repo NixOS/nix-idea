@@ -28,8 +28,8 @@ public class NixExprListImpl extends ASTWrapperPsiElement implements NixExprList
 
   @Override
   @NotNull
-  public List<NixExprSelect> getExprSelectList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixExprSelect.class);
+  public List<NixListExpr> getListExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixListExpr.class);
   }
 
 }

@@ -34,6 +34,12 @@ public class NixExprOpImpl extends ASTWrapperPsiElement implements NixExprOp {
 
   @Override
   @Nullable
+  public NixExprOp getExprOp() {
+    return findChildByClass(NixExprOp.class);
+  }
+
+  @Override
+  @Nullable
   public NixLogical getLogical() {
     return findChildByClass(NixLogical.class);
   }

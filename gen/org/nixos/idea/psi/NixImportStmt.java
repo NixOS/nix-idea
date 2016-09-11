@@ -11,7 +11,7 @@ public interface NixImportStmt extends PsiElement {
   NixCallArgs getCallArgs();
 
   @NotNull
-  NixPathStmt getPathStmt();
+  NixPathExpr getPathExpr();
 
   @NotNull
   PsiElement getImport();

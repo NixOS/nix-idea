@@ -5,18 +5,18 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NixPathStmt extends PsiElement {
+public interface NixBinding extends PsiElement {
 
   @Nullable
-  NixStringParts getStringParts();
+  NixAttrAssign getAttrAssign();
 
   @Nullable
-  PsiElement getHpath();
+  NixInheritAttrs getInheritAttrs();
 
   @Nullable
-  PsiElement getPath();
+  NixRequireExpr getRequireExpr();
 
-  @Nullable
-  PsiElement getSpath();
+  @NotNull
+  PsiElement getSemi();
 
 }

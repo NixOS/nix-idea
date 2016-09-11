@@ -10,12 +10,10 @@ public interface NixAttrAssign extends PsiElement {
   @NotNull
   NixAttrPath getAttrPath();
 
-  @Nullable
+  @NotNull
   NixExpr getExpr();
 
   @NotNull
   PsiElement getAssign();
-
-  String getAssignedAttr();
 
 }

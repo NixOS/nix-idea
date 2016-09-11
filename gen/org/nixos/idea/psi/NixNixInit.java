@@ -7,13 +7,13 @@ import com.intellij.psi.PsiElement;
 
 public interface NixNixInit extends PsiElement {
 
-  @Nullable
+  @NotNull
   NixExpr getExpr();
 
   @NotNull
   PsiElement getDollarCurly();
 
-  @Nullable
+  @NotNull
   PsiElement getRcurly();
 
 }

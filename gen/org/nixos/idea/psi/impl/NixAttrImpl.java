@@ -38,10 +38,4 @@ public class NixAttrImpl extends ASTWrapperPsiElement implements NixAttr {
     return findChildByType(ID);
   }
 
-  @Override
-  @Nullable
-  public PsiElement getOrKw() {
-    return findChildByType(OR_KW);
-  }
-
 }

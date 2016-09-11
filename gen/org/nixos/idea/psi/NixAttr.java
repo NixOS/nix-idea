@@ -13,7 +13,4 @@ public interface NixAttr extends PsiElement {
   @Nullable
   PsiElement getId();
 
-  @Nullable
-  PsiElement getOrKw();
-
 }

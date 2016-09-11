@@ -17,6 +17,12 @@ public interface NixBoolExpr extends PsiElement {
   PsiElement getAnd();
 
   @Nullable
+  PsiElement getImpl();
+
+  @Nullable
   PsiElement getOr();
+
+  @Nullable
+  PsiElement getOrKw();
 
 }

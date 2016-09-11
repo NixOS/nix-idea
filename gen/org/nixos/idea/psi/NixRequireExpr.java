@@ -8,10 +8,19 @@ import com.intellij.psi.PsiElement;
 public interface NixRequireExpr extends PsiElement {
 
   @NotNull
-  NixPathsAssign getPathsAssign();
+  List<NixPathExpr> getPathExprList();
+
+  @NotNull
+  PsiElement getAssign();
 
   @Nullable
   PsiElement getImports();
+
+  @NotNull
+  PsiElement getLbrac();
+
+  @NotNull
+  PsiElement getRbrac();
 
   @Nullable
   PsiElement getRequire();

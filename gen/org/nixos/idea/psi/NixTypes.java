@@ -13,40 +13,39 @@ public interface NixTypes {
   IElementType ATTRS = new NixElementType("ATTRS");
   IElementType ATTR_ASSIGN = new NixElementType("ATTR_ASSIGN");
   IElementType ATTR_PATH = new NixElementType("ATTR_PATH");
+  IElementType BINDING = new NixElementType("BINDING");
   IElementType BINDS = new NixElementType("BINDS");
+  IElementType BIND_OR_SELECT = new NixElementType("BIND_OR_SELECT");
   IElementType BIND_SET = new NixElementType("BIND_SET");
   IElementType BN_LAMBDA = new NixElementType("BN_LAMBDA");
   IElementType BOOL_EXPR = new NixElementType("BOOL_EXPR");
   IElementType CALL_ARGS = new NixElementType("CALL_ARGS");
+  IElementType CONT_PATH = new NixElementType("CONT_PATH");
+  IElementType DEFVAL = new NixElementType("DEFVAL");
   IElementType EVAL_EXPR = new NixElementType("EVAL_EXPR");
+  IElementType EVAL_OR_SELECT = new NixElementType("EVAL_OR_SELECT");
   IElementType EXPR = new NixElementType("EXPR");
   IElementType EXPR_APP = new NixElementType("EXPR_APP");
-  IElementType EXPR_FUNCTION = new NixElementType("EXPR_FUNCTION");
-  IElementType EXPR_IF = new NixElementType("EXPR_IF");
   IElementType EXPR_LIST = new NixElementType("EXPR_LIST");
   IElementType EXPR_OP = new NixElementType("EXPR_OP");
-  IElementType EXPR_SELECT = new NixElementType("EXPR_SELECT");
   IElementType EXPR_SIMPLE = new NixElementType("EXPR_SIMPLE");
   IElementType FACTOR = new NixElementType("FACTOR");
   IElementType FN_LAMBDA = new NixElementType("FN_LAMBDA");
-  IElementType FORMAL = new NixElementType("FORMAL");
-  IElementType FORMALS = new NixElementType("FORMALS");
-  IElementType FORMAL_SET = new NixElementType("FORMAL_SET");
   IElementType IMPORT_STMT = new NixElementType("IMPORT_STMT");
   IElementType IND_STRING_PARTS = new NixElementType("IND_STRING_PARTS");
   IElementType INHERIT_ATTRS = new NixElementType("INHERIT_ATTRS");
   IElementType LAMBDA = new NixElementType("LAMBDA");
-  IElementType LET_IN = new NixElementType("LET_IN");
+  IElementType LIST = new NixElementType("LIST");
+  IElementType LIST_EXPR = new NixElementType("LIST_EXPR");
   IElementType LITERAL = new NixElementType("LITERAL");
   IElementType LOGICAL = new NixElementType("LOGICAL");
   IElementType MUL_EXPR = new NixElementType("MUL_EXPR");
   IElementType NIX_INIT = new NixElementType("NIX_INIT");
-  IElementType PATHS_ASSIGN = new NixElementType("PATHS_ASSIGN");
-  IElementType PATHS_EXPR = new NixElementType("PATHS_EXPR");
-  IElementType PATH_ASSIGN = new NixElementType("PATH_ASSIGN");
-  IElementType PATH_STMT = new NixElementType("PATH_STMT");
+  IElementType PARAM = new NixElementType("PARAM");
+  IElementType PARAMS = new NixElementType("PARAMS");
+  IElementType PARAM_SET = new NixElementType("PARAM_SET");
+  IElementType PATH_EXPR = new NixElementType("PATH_EXPR");
   IElementType PRIMARY = new NixElementType("PRIMARY");
-  IElementType PURE_BIND = new NixElementType("PURE_BIND");
   IElementType RELATIVE = new NixElementType("RELATIVE");
   IElementType REL_EXPR = new NixElementType("REL_EXPR");
   IElementType REQUIRE_EXPR = new NixElementType("REQUIRE_EXPR");
@@ -97,7 +96,6 @@ public interface NixTypes {
   IElementType NOT = new NixTokenType("!");
   IElementType OR = new NixTokenType("||");
   IElementType OR_KW = new NixTokenType("or");
-  IElementType OW_KW = new NixTokenType("OW_KW");
   IElementType PATH = new NixTokenType("PATH");
   IElementType PLUS = new NixTokenType("+");
   IElementType RBRAC = new NixTokenType("]");
@@ -134,8 +132,14 @@ public interface NixTypes {
       else if (type == ATTR_PATH) {
         return new NixAttrPathImpl(node);
       }
+      else if (type == BINDING) {
+        return new NixBindingImpl(node);
+      }
       else if (type == BINDS) {
         return new NixBindsImpl(node);
+      }
+      else if (type == BIND_OR_SELECT) {
+        return new NixBindOrSelectImpl(node);
       }
       else if (type == BIND_SET) {
         return new NixBindSetImpl(node);
@@ -149,8 +153,17 @@ public interface NixTypes {
       else if (type == CALL_ARGS) {
         return new NixCallArgsImpl(node);
       }
+      else if (type == CONT_PATH) {
+        return new NixContPathImpl(node);
+      }
+      else if (type == DEFVAL) {
+        return new NixDefvalImpl(node);
+      }
       else if (type == EVAL_EXPR) {
         return new NixEvalExprImpl(node);
+      }
+      else if (type == EVAL_OR_SELECT) {
+        return new NixEvalOrSelectImpl(node);
       }
       else if (type == EXPR) {
         return new NixExprImpl(node);
@@ -158,20 +171,11 @@ public interface NixTypes {
       else if (type == EXPR_APP) {
         return new NixExprAppImpl(node);
       }
-      else if (type == EXPR_FUNCTION) {
-        return new NixExprFunctionImpl(node);
-      }
-      else if (type == EXPR_IF) {
-        return new NixExprIfImpl(node);
-      }
       else if (type == EXPR_LIST) {
         return new NixExprListImpl(node);
       }
       else if (type == EXPR_OP) {
         return new NixExprOpImpl(node);
-      }
-      else if (type == EXPR_SELECT) {
-        return new NixExprSelectImpl(node);
       }
       else if (type == EXPR_SIMPLE) {
         return new NixExprSimpleImpl(node);
@@ -181,15 +185,6 @@ public interface NixTypes {
       }
       else if (type == FN_LAMBDA) {
         return new NixFnLambdaImpl(node);
-      }
-      else if (type == FORMAL) {
-        return new NixFormalImpl(node);
-      }
-      else if (type == FORMALS) {
-        return new NixFormalsImpl(node);
-      }
-      else if (type == FORMAL_SET) {
-        return new NixFormalSetImpl(node);
       }
       else if (type == IMPORT_STMT) {
         return new NixImportStmtImpl(node);
@@ -203,8 +198,11 @@ public interface NixTypes {
       else if (type == LAMBDA) {
         return new NixLambdaImpl(node);
       }
-      else if (type == LET_IN) {
-        return new NixLetInImpl(node);
+      else if (type == LIST) {
+        return new NixListImpl(node);
+      }
+      else if (type == LIST_EXPR) {
+        return new NixListExprImpl(node);
       }
       else if (type == LITERAL) {
         return new NixLiteralImpl(node);
@@ -218,23 +216,20 @@ public interface NixTypes {
       else if (type == NIX_INIT) {
         return new NixNixInitImpl(node);
       }
-      else if (type == PATHS_ASSIGN) {
-        return new NixPathsAssignImpl(node);
+      else if (type == PARAM) {
+        return new NixParamImpl(node);
       }
-      else if (type == PATHS_EXPR) {
-        return new NixPathsExprImpl(node);
+      else if (type == PARAMS) {
+        return new NixParamsImpl(node);
       }
-      else if (type == PATH_ASSIGN) {
-        return new NixPathAssignImpl(node);
+      else if (type == PARAM_SET) {
+        return new NixParamSetImpl(node);
       }
-      else if (type == PATH_STMT) {
-        return new NixPathStmtImpl(node);
+      else if (type == PATH_EXPR) {
+        return new NixPathExprImpl(node);
       }
       else if (type == PRIMARY) {
         return new NixPrimaryImpl(node);
-      }
-      else if (type == PURE_BIND) {
-        return new NixPureBindImpl(node);
       }
       else if (type == RELATIVE) {
         return new NixRelativeImpl(node);

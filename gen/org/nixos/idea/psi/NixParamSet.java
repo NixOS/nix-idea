@@ -5,10 +5,10 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NixFormalSet extends PsiElement {
+public interface NixParamSet extends PsiElement {
 
   @NotNull
-  NixFormals getFormals();
+  NixParams getParams();
 
   @NotNull
   PsiElement getLcurly();

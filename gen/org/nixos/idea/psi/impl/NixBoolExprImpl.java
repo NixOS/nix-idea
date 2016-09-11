@@ -46,8 +46,20 @@ public class NixBoolExprImpl extends ASTWrapperPsiElement implements NixBoolExpr
 
   @Override
   @Nullable
+  public PsiElement getImpl() {
+    return findChildByType(IMPL);
+  }
+
+  @Override
+  @Nullable
   public PsiElement getOr() {
     return findChildByType(OR);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getOrKw() {
+    return findChildByType(OR_KW);
   }
 
 }

@@ -11,14 +11,14 @@ import static org.nixos.idea.psi.NixTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.nixos.idea.psi.*;
 
-public class NixFormalImpl extends ASTWrapperPsiElement implements NixFormal {
+public class NixListExprImpl extends ASTWrapperPsiElement implements NixListExpr {
 
-  public NixFormalImpl(ASTNode node) {
+  public NixListExprImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NixVisitor visitor) {
-    visitor.visitFormal(this);
+    visitor.visitListExpr(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,26 +28,26 @@ public class NixFormalImpl extends ASTWrapperPsiElement implements NixFormal {
 
   @Override
   @Nullable
-  public NixExpr getExpr() {
-    return findChildByClass(NixExpr.class);
+  public NixAttrPath getAttrPath() {
+    return findChildByClass(NixAttrPath.class);
   }
 
   @Override
   @Nullable
-  public PsiElement getEllipsis() {
-    return findChildByType(ELLIPSIS);
+  public NixBindOrSelect getBindOrSelect() {
+    return findChildByClass(NixBindOrSelect.class);
   }
 
   @Override
   @Nullable
-  public PsiElement getId() {
-    return findChildByType(ID);
+  public NixEvalOrSelect getEvalOrSelect() {
+    return findChildByClass(NixEvalOrSelect.class);
   }
 
   @Override
   @Nullable
-  public PsiElement getIs() {
-    return findChildByType(IS);
+  public NixStringParts getStringParts() {
+    return findChildByClass(NixStringParts.class);
   }
 
 }

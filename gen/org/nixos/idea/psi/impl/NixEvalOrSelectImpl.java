@@ -11,14 +11,14 @@ import static org.nixos.idea.psi.NixTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.nixos.idea.psi.*;
 
-public class NixPathStmtImpl extends ASTWrapperPsiElement implements NixPathStmt {
+public class NixEvalOrSelectImpl extends ASTWrapperPsiElement implements NixEvalOrSelect {
 
-  public NixPathStmtImpl(ASTNode node) {
+  public NixEvalOrSelectImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NixVisitor visitor) {
-    visitor.visitPathStmt(this);
+    visitor.visitEvalOrSelect(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,26 +28,14 @@ public class NixPathStmtImpl extends ASTWrapperPsiElement implements NixPathStmt
 
   @Override
   @Nullable
-  public NixStringParts getStringParts() {
-    return findChildByClass(NixStringParts.class);
+  public NixContPath getContPath() {
+    return findChildByClass(NixContPath.class);
   }
 
   @Override
-  @Nullable
-  public PsiElement getHpath() {
-    return findChildByType(HPATH);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getPath() {
-    return findChildByType(PATH);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getSpath() {
-    return findChildByType(SPATH);
+  @NotNull
+  public NixEvalExpr getEvalExpr() {
+    return findNotNullChildByClass(NixEvalExpr.class);
   }
 
 }

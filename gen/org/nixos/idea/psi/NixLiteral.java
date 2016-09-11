@@ -14,9 +14,6 @@ public interface NixLiteral extends PsiElement {
   PsiElement getHpath();
 
   @Nullable
-  PsiElement getId();
-
-  @Nullable
   PsiElement getInt();
 
   @Nullable

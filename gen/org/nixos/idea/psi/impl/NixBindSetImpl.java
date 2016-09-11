@@ -27,9 +27,9 @@ public class NixBindSetImpl extends ASTWrapperPsiElement implements NixBindSet {
   }
 
   @Override
-  @NotNull
+  @Nullable
   public NixBinds getBinds() {
-    return findNotNullChildByClass(NixBinds.class);
+    return findChildByClass(NixBinds.class);
   }
 
   @Override

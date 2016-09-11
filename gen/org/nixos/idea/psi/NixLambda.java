@@ -10,10 +10,19 @@ public interface NixLambda extends PsiElement {
   @Nullable
   NixBnLambda getBnLambda();
 
+  @NotNull
+  NixExpr getExpr();
+
   @Nullable
   NixFnLambda getFnLambda();
 
   @Nullable
-  NixFormalSet getFormalSet();
+  NixParamSet getParamSet();
+
+  @NotNull
+  PsiElement getColon();
+
+  @Nullable
+  PsiElement getId();
 
 }

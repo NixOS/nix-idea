@@ -27,9 +27,75 @@ public class NixExprImpl extends ASTWrapperPsiElement implements NixExpr {
   }
 
   @Override
+  @Nullable
+  public NixBinds getBinds() {
+    return findChildByClass(NixBinds.class);
+  }
+
+  @Override
   @NotNull
-  public NixExprFunction getExprFunction() {
-    return findNotNullChildByClass(NixExprFunction.class);
+  public List<NixExpr> getExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixExpr.class);
+  }
+
+  @Override
+  @Nullable
+  public NixExprOp getExprOp() {
+    return findChildByClass(NixExprOp.class);
+  }
+
+  @Override
+  @Nullable
+  public NixLambda getLambda() {
+    return findChildByClass(NixLambda.class);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getAssert() {
+    return findChildByType(ASSERT);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getElse() {
+    return findChildByType(ELSE);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getIf() {
+    return findChildByType(IF);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getIn() {
+    return findChildByType(IN);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getLet() {
+    return findChildByType(LET);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getSemi() {
+    return findChildByType(SEMI);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getThen() {
+    return findChildByType(THEN);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getWith() {
+    return findChildByType(WITH);
   }
 
 }

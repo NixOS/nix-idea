@@ -27,7 +27,15 @@ public class NixVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitBindOrSelect(@NotNull NixBindOrSelect o) {
+    visitPsiElement(o);
+  }
+
   public void visitBindSet(@NotNull NixBindSet o) {
+    visitPsiElement(o);
+  }
+
+  public void visitBinding(@NotNull NixBinding o) {
     visitPsiElement(o);
   }
 
@@ -47,7 +55,19 @@ public class NixVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitContPath(@NotNull NixContPath o) {
+    visitPsiElement(o);
+  }
+
+  public void visitDefval(@NotNull NixDefval o) {
+    visitPsiElement(o);
+  }
+
   public void visitEvalExpr(@NotNull NixEvalExpr o) {
+    visitPsiElement(o);
+  }
+
+  public void visitEvalOrSelect(@NotNull NixEvalOrSelect o) {
     visitPsiElement(o);
   }
 
@@ -59,23 +79,11 @@ public class NixVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitExprFunction(@NotNull NixExprFunction o) {
-    visitPsiElement(o);
-  }
-
-  public void visitExprIf(@NotNull NixExprIf o) {
-    visitPsiElement(o);
-  }
-
   public void visitExprList(@NotNull NixExprList o) {
     visitPsiElement(o);
   }
 
   public void visitExprOp(@NotNull NixExprOp o) {
-    visitPsiElement(o);
-  }
-
-  public void visitExprSelect(@NotNull NixExprSelect o) {
     visitPsiElement(o);
   }
 
@@ -88,18 +96,6 @@ public class NixVisitor extends PsiElementVisitor {
   }
 
   public void visitFnLambda(@NotNull NixFnLambda o) {
-    visitPsiElement(o);
-  }
-
-  public void visitFormal(@NotNull NixFormal o) {
-    visitPsiElement(o);
-  }
-
-  public void visitFormalSet(@NotNull NixFormalSet o) {
-    visitPsiElement(o);
-  }
-
-  public void visitFormals(@NotNull NixFormals o) {
     visitPsiElement(o);
   }
 
@@ -119,7 +115,11 @@ public class NixVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitLetIn(@NotNull NixLetIn o) {
+  public void visitList(@NotNull NixList o) {
+    visitPsiElement(o);
+  }
+
+  public void visitListExpr(@NotNull NixListExpr o) {
     visitPsiElement(o);
   }
 
@@ -139,27 +139,23 @@ public class NixVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitPathAssign(@NotNull NixPathAssign o) {
+  public void visitParam(@NotNull NixParam o) {
     visitPsiElement(o);
   }
 
-  public void visitPathStmt(@NotNull NixPathStmt o) {
+  public void visitParamSet(@NotNull NixParamSet o) {
     visitPsiElement(o);
   }
 
-  public void visitPathsAssign(@NotNull NixPathsAssign o) {
+  public void visitParams(@NotNull NixParams o) {
     visitPsiElement(o);
   }
 
-  public void visitPathsExpr(@NotNull NixPathsExpr o) {
+  public void visitPathExpr(@NotNull NixPathExpr o) {
     visitPsiElement(o);
   }
 
   public void visitPrimary(@NotNull NixPrimary o) {
-    visitPsiElement(o);
-  }
-
-  public void visitPureBind(@NotNull NixPureBind o) {
     visitPsiElement(o);
   }
 

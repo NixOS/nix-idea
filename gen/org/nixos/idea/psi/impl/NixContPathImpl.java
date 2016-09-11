@@ -11,14 +11,14 @@ import static org.nixos.idea.psi.NixTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.nixos.idea.psi.*;
 
-public class NixFormalSetImpl extends ASTWrapperPsiElement implements NixFormalSet {
+public class NixContPathImpl extends ASTWrapperPsiElement implements NixContPath {
 
-  public NixFormalSetImpl(ASTNode node) {
+  public NixContPathImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NixVisitor visitor) {
-    visitor.visitFormalSet(this);
+    visitor.visitContPath(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,20 +28,14 @@ public class NixFormalSetImpl extends ASTWrapperPsiElement implements NixFormalS
 
   @Override
   @NotNull
-  public NixFormals getFormals() {
-    return findNotNullChildByClass(NixFormals.class);
+  public NixAttrPath getAttrPath() {
+    return findNotNullChildByClass(NixAttrPath.class);
   }
 
   @Override
   @NotNull
-  public PsiElement getLcurly() {
-    return findNotNullChildByType(LCURLY);
-  }
-
-  @Override
-  @NotNull
-  public PsiElement getRcurly() {
-    return findNotNullChildByType(RCURLY);
+  public PsiElement getDot() {
+    return findNotNullChildByType(DOT);
   }
 
 }

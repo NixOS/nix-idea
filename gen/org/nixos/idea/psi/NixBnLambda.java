@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement;
 public interface NixBnLambda extends PsiElement {
 
   @NotNull
-  NixFormalSet getFormalSet();
+  NixParamSet getParamSet();
 
   @NotNull
   PsiElement getId();

@@ -28,20 +28,38 @@ public class NixExprSimpleImpl extends ASTWrapperPsiElement implements NixExprSi
 
   @Override
   @Nullable
+  public NixAttrPath getAttrPath() {
+    return findChildByClass(NixAttrPath.class);
+  }
+
+  @Override
+  @Nullable
+  public NixBindOrSelect getBindOrSelect() {
+    return findChildByClass(NixBindOrSelect.class);
+  }
+
+  @Override
+  @Nullable
   public NixBindSet getBindSet() {
     return findChildByClass(NixBindSet.class);
   }
 
   @Override
   @Nullable
-  public NixEvalExpr getEvalExpr() {
-    return findChildByClass(NixEvalExpr.class);
+  public NixDefval getDefval() {
+    return findChildByClass(NixDefval.class);
   }
 
   @Override
   @Nullable
-  public NixExprList getExprList() {
-    return findChildByClass(NixExprList.class);
+  public NixEvalOrSelect getEvalOrSelect() {
+    return findChildByClass(NixEvalOrSelect.class);
+  }
+
+  @Override
+  @Nullable
+  public NixExprOp getExprOp() {
+    return findChildByClass(NixExprOp.class);
   }
 
   @Override
@@ -58,6 +76,12 @@ public class NixExprSimpleImpl extends ASTWrapperPsiElement implements NixExprSi
 
   @Override
   @Nullable
+  public NixList getList() {
+    return findChildByClass(NixList.class);
+  }
+
+  @Override
+  @Nullable
   public NixLiteral getLiteral() {
     return findChildByClass(NixLiteral.class);
   }
@@ -70,6 +94,12 @@ public class NixExprSimpleImpl extends ASTWrapperPsiElement implements NixExprSi
 
   @Override
   @Nullable
+  public NixUnaryOp getUnaryOp() {
+    return findChildByClass(NixUnaryOp.class);
+  }
+
+  @Override
+  @Nullable
   public PsiElement getIndStringClose() {
     return findChildByType(IND_STRING_CLOSE);
   }
@@ -78,24 +108,6 @@ public class NixExprSimpleImpl extends ASTWrapperPsiElement implements NixExprSi
   @Nullable
   public PsiElement getIndStringOpen() {
     return findChildByType(IND_STRING_OPEN);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getLbrac() {
-    return findChildByType(LBRAC);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getLet() {
-    return findChildByType(LET);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getRbrac() {
-    return findChildByType(RBRAC);
   }
 
   @Override

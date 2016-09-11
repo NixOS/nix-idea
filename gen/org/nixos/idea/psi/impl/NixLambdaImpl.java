@@ -33,6 +33,12 @@ public class NixLambdaImpl extends ASTWrapperPsiElement implements NixLambda {
   }
 
   @Override
+  @NotNull
+  public NixExpr getExpr() {
+    return findNotNullChildByClass(NixExpr.class);
+  }
+
+  @Override
   @Nullable
   public NixFnLambda getFnLambda() {
     return findChildByClass(NixFnLambda.class);
@@ -40,8 +46,20 @@ public class NixLambdaImpl extends ASTWrapperPsiElement implements NixLambda {
 
   @Override
   @Nullable
-  public NixFormalSet getFormalSet() {
-    return findChildByClass(NixFormalSet.class);
+  public NixParamSet getParamSet() {
+    return findChildByClass(NixParamSet.class);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getColon() {
+    return findNotNullChildByType(COLON);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getId() {
+    return findChildByType(ID);
   }
 
 }

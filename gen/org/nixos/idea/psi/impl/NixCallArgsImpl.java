@@ -39,9 +39,9 @@ public class NixCallArgsImpl extends ASTWrapperPsiElement implements NixCallArgs
   }
 
   @Override
-  @Nullable
+  @NotNull
   public PsiElement getRcurly() {
-    return findChildByType(RCURLY);
+    return findNotNullChildByType(RCURLY);
   }
 
 }

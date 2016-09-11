@@ -5,24 +5,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NixExprSelect extends PsiElement {
-
-  @Nullable
-  NixAttrPath getAttrPath();
-
-  @Nullable
-  NixExprSelect getExprSelect();
+public interface NixContPath extends PsiElement {
 
   @NotNull
-  NixExprSimple getExprSimple();
+  NixAttrPath getAttrPath();
 
-  @Nullable
+  @NotNull
   PsiElement getDot();
-
-  @Nullable
-  PsiElement getOrKw();
-
-  @Nullable
-  PsiElement getOwKw();
 
 }

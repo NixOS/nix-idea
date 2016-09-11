@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface NixBindSet extends PsiElement {
 
-  @NotNull
+  @Nullable
   NixBinds getBinds();
 
   @NotNull

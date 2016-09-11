@@ -28,8 +28,8 @@ public class NixBnLambdaImpl extends ASTWrapperPsiElement implements NixBnLambda
 
   @Override
   @NotNull
-  public NixFormalSet getFormalSet() {
-    return findNotNullChildByClass(NixFormalSet.class);
+  public NixParamSet getParamSet() {
+    return findNotNullChildByClass(NixParamSet.class);
   }
 
   @Override

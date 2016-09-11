@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface NixExprApp extends PsiElement {
 
   @NotNull
-  List<NixExprSelect> getExprSelectList();
+  List<NixExprSimple> getExprSimpleList();
 
 }

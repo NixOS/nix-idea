@@ -28,14 +28,32 @@ public class NixRequireExprImpl extends ASTWrapperPsiElement implements NixRequi
 
   @Override
   @NotNull
-  public NixPathsAssign getPathsAssign() {
-    return findNotNullChildByClass(NixPathsAssign.class);
+  public List<NixPathExpr> getPathExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixPathExpr.class);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getAssign() {
+    return findNotNullChildByType(ASSIGN);
   }
 
   @Override
   @Nullable
   public PsiElement getImports() {
     return findChildByType(IMPORTS);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getLbrac() {
+    return findNotNullChildByType(LBRAC);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getRbrac() {
+    return findNotNullChildByType(RBRAC);
   }
 
   @Override

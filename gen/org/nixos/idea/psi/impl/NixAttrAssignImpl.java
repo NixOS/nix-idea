@@ -33,19 +33,15 @@ public class NixAttrAssignImpl extends ASTWrapperPsiElement implements NixAttrAs
   }
 
   @Override
-  @Nullable
+  @NotNull
   public NixExpr getExpr() {
-    return findChildByClass(NixExpr.class);
+    return findNotNullChildByClass(NixExpr.class);
   }
 
   @Override
   @NotNull
   public PsiElement getAssign() {
     return findNotNullChildByType(ASSIGN);
-  }
-
-  public String getAssignedAttr() {
-    return NixParserUtil.getAssignedAttr(this);
   }
 
 }

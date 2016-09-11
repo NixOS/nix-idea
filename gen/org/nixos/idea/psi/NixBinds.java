@@ -8,12 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface NixBinds extends PsiElement {
 
   @NotNull
-  List<NixAttrAssign> getAttrAssignList();
-
-  @NotNull
-  List<NixInheritAttrs> getInheritAttrsList();
-
-  @NotNull
-  List<NixRequireExpr> getRequireExprList();
+  List<NixBinding> getBindingList();
 
 }

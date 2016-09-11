@@ -11,14 +11,14 @@ import static org.nixos.idea.psi.NixTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.nixos.idea.psi.*;
 
-public class NixPathsAssignImpl extends ASTWrapperPsiElement implements NixPathsAssign {
+public class NixParamsImpl extends ASTWrapperPsiElement implements NixParams {
 
-  public NixPathsAssignImpl(ASTNode node) {
+  public NixParamsImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NixVisitor visitor) {
-    visitor.visitPathsAssign(this);
+    visitor.visitParams(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,14 +28,8 @@ public class NixPathsAssignImpl extends ASTWrapperPsiElement implements NixPaths
 
   @Override
   @NotNull
-  public NixPathsExpr getPathsExpr() {
-    return findNotNullChildByClass(NixPathsExpr.class);
-  }
-
-  @Override
-  @NotNull
-  public PsiElement getAssign() {
-    return findNotNullChildByType(ASSIGN);
+  public List<NixParam> getParamList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixParam.class);
   }
 
 }

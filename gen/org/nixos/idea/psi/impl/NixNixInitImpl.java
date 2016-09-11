@@ -27,9 +27,9 @@ public class NixNixInitImpl extends ASTWrapperPsiElement implements NixNixInit {
   }
 
   @Override
-  @Nullable
+  @NotNull
   public NixExpr getExpr() {
-    return findChildByClass(NixExpr.class);
+    return findNotNullChildByClass(NixExpr.class);
   }
 
   @Override
@@ -39,9 +39,9 @@ public class NixNixInitImpl extends ASTWrapperPsiElement implements NixNixInit {
   }
 
   @Override
-  @Nullable
+  @NotNull
   public PsiElement getRcurly() {
-    return findChildByType(RCURLY);
+    return findNotNullChildByType(RCURLY);
   }
 
 }

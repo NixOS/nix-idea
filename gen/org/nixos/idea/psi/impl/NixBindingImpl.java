@@ -11,14 +11,14 @@ import static org.nixos.idea.psi.NixTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.nixos.idea.psi.*;
 
-public class NixFormalsImpl extends ASTWrapperPsiElement implements NixFormals {
+public class NixBindingImpl extends ASTWrapperPsiElement implements NixBinding {
 
-  public NixFormalsImpl(ASTNode node) {
+  public NixBindingImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NixVisitor visitor) {
-    visitor.visitFormals(this);
+    visitor.visitBinding(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -27,9 +27,27 @@ public class NixFormalsImpl extends ASTWrapperPsiElement implements NixFormals {
   }
 
   @Override
+  @Nullable
+  public NixAttrAssign getAttrAssign() {
+    return findChildByClass(NixAttrAssign.class);
+  }
+
+  @Override
+  @Nullable
+  public NixInheritAttrs getInheritAttrs() {
+    return findChildByClass(NixInheritAttrs.class);
+  }
+
+  @Override
+  @Nullable
+  public NixRequireExpr getRequireExpr() {
+    return findChildByClass(NixRequireExpr.class);
+  }
+
+  @Override
   @NotNull
-  public List<NixFormal> getFormalList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixFormal.class);
+  public PsiElement getSemi() {
+    return findNotNullChildByType(SEMI);
   }
 
 }

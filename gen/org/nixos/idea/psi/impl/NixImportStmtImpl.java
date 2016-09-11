@@ -34,8 +34,8 @@ public class NixImportStmtImpl extends ASTWrapperPsiElement implements NixImport
 
   @Override
   @NotNull
-  public NixPathStmt getPathStmt() {
-    return findNotNullChildByClass(NixPathStmt.class);
+  public NixPathExpr getPathExpr() {
+    return findNotNullChildByClass(NixPathExpr.class);
   }
 
   @Override

@@ -11,14 +11,14 @@ import static org.nixos.idea.psi.NixTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.nixos.idea.psi.*;
 
-public class NixExprIfImpl extends ASTWrapperPsiElement implements NixExprIf {
+public class NixDefvalImpl extends ASTWrapperPsiElement implements NixDefval {
 
-  public NixExprIfImpl(ASTNode node) {
+  public NixDefvalImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NixVisitor visitor) {
-    visitor.visitExprIf(this);
+    visitor.visitDefval(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,32 +28,20 @@ public class NixExprIfImpl extends ASTWrapperPsiElement implements NixExprIf {
 
   @Override
   @NotNull
-  public List<NixExpr> getExprList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixExpr.class);
+  public NixExpr getExpr() {
+    return findNotNullChildByClass(NixExpr.class);
   }
 
   @Override
-  @Nullable
-  public NixExprOp getExprOp() {
-    return findChildByClass(NixExprOp.class);
+  @NotNull
+  public PsiElement getId() {
+    return findNotNullChildByType(ID);
   }
 
   @Override
-  @Nullable
-  public PsiElement getElse() {
-    return findChildByType(ELSE);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getIf() {
-    return findChildByType(IF);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getThen() {
-    return findChildByType(THEN);
+  @NotNull
+  public PsiElement getIs() {
+    return findNotNullChildByType(IS);
   }
 
 }

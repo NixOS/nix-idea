@@ -5,9 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NixFormals extends PsiElement {
+public interface NixParams extends PsiElement {
 
   @NotNull
-  List<NixFormal> getFormalList();
+  List<NixParam> getParamList();
 
 }

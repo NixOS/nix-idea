@@ -28,20 +28,8 @@ public class NixBindsImpl extends ASTWrapperPsiElement implements NixBinds {
 
   @Override
   @NotNull
-  public List<NixAttrAssign> getAttrAssignList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixAttrAssign.class);
-  }
-
-  @Override
-  @NotNull
-  public List<NixInheritAttrs> getInheritAttrsList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixInheritAttrs.class);
-  }
-
-  @Override
-  @NotNull
-  public List<NixRequireExpr> getRequireExprList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixRequireExpr.class);
+  public List<NixBinding> getBindingList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, NixBinding.class);
   }
 
 }
