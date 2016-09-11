@@ -113,7 +113,7 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
     @Override
     public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
         {
-            if (tokenType == NixTypes.FORMAL) return PARAMETER_KEYS;
+            if (tokenType == NixTypes.PARAM) return PARAMETER_KEYS;
             if (tokenType == NixTypes.LAMBDA) return FUNCTION_KEYS;
             if (tokenType == NixTypes.COMMA) return COMMA_KEYS;
             if (tokenType == NixTypes.SEMI) return SEMI_KEYS;
@@ -154,8 +154,7 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
                     tokenType == NixTypes.IS ||
                     tokenType == NixTypes.NAMED ||
                     tokenType == NixTypes.CONCAT ||
-                    tokenType == NixTypes.DOT ||
-                    tokenType == NixTypes.DOLLAR_CURLY)
+                    tokenType == NixTypes.DOT )
                 return OPERATOR_KEYS;
             if (
                     tokenType == NixTypes.RBRAC ||
@@ -163,6 +162,7 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
                     tokenType == NixTypes.RPAREN ||
                     tokenType == NixTypes.LPAREN ||
                     tokenType == NixTypes.RCURLY ||
+                    tokenType == NixTypes.DOLLAR_CURLY ||
                     tokenType == NixTypes.LCURLY) {
                 return PAREN_KEYS;
             }
@@ -174,6 +174,7 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
                     tokenType == NixTypes.IN ||
                     tokenType == NixTypes.OR_KW ||
                     tokenType == NixTypes.REC ||
+                    tokenType == NixTypes.IF ||
                     tokenType == NixTypes.ELSE ||
                     tokenType == NixTypes.THEN ||
                     tokenType == NixTypes.LET ||
