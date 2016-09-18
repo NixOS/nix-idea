@@ -1,6 +1,8 @@
 language: java
+jdk:
+  - oraclejdk8
 env:
     global:
-        - JDK_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+        - JDK_HOME=/usr/lib/jvm/java-8-oracle
 install: ./get-idea.sh
 script: ./build.sh
