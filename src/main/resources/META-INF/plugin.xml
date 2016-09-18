@@ -48,9 +48,9 @@
     <lang.parserDefinition
             language="Nix"
             implementationClass="org.nixos.idea.lang.NixParserDefinition" />
-    <lang.syntaxHighlighterFactory key="Nix" implementationClass="org.nixos.idea.lang.NixSyntaxHighlighterFactory"/>
-      <projectConfigurable instance="org.nixos.idea.settings.NixIDEASettings"/>
-    <!-- completion.contributor language="Nix" implementationClass="org.nixos.idea.suggestions.NixAttributeCompletionContributor"/-->
+    <lang.syntaxHighlighterFactory language="Nix" implementationClass="org.nixos.idea.lang.NixSyntaxHighlighterFactory"/>
+    <lang.braceMatcher language="Nix" implementationClass="org.nixos.idea.lang.NixBraceMatcher"/>
+    <projectConfigurable groupId="build" displayName="NixIDEA Settings" id="org.nixos.idea.settings.NixIDEASettings" instance="org.nixos.idea.settings.NixIDEASettings"/>
   </extensions>
   <application-components />
   <project-components />
