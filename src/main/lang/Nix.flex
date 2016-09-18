@@ -7,42 +7,44 @@ import static org.nixos.idea.psi.NixTypes.*;
 %%
 
 %{
-  public NixLexer() {
-    this((java.io.Reader)null);
-  }
-
-  enum StrState { IN_STRING, IN_IND_STRING };
-
-  private Stack<StrState> interpol;
+  private Stack<Integer> state;
   public CharSequence yylval_id, yylval_path, yylval_uri, yylval_expr;
-  public void backToString() { yybegin(STRING); }
-  public void backToIndString() { yybegin(IND_STRING); }
+  int yychar, yyline, yycolumn;
 
-  public synchronized void assureInterpol() {
-    if(interpol == null)
-        interpol = new Stack<StrState>();
+  public void yy_push_state(Integer sst) {
+    state.push(sst);
+    yybegin(sst);
   }
-  public synchronized void showState() {
+
+  public Integer yy_pop_state() {
+    Integer sst;
     try {
-      p(peek().toString());
-    } catch (Exception e) {p("OUTSIDE");}
+      sst = state.pop();
+    } catch (Exception e) {
+      sst =  YYINITIAL;
+    }
+    yybegin(sst);
+    return sst;
   }
-  public synchronized void push(StrState sst) {
-    assureInterpol();
-    interpol.push(sst);
+
+  public Integer yy_top_state() {
+    Integer sst;
+    try {
+      sst = state.peek();
+    } catch (Exception e) {
+      sst =  YYINITIAL;
+    }
+    return sst;
   }
-  public synchronized StrState pop() throws Exception {
-    assureInterpol();
-    return interpol.pop();
-  }
-  public synchronized StrState peek() throws Exception {
-    assureInterpol();
-    return interpol.peek();
-  };
-  public void ps(String msg) {p(msg);showState();}
-  public static void p(String msg) { System.out.println(msg);}
 
 %}
+
+%init{
+
+    this.state = new Stack<Integer>();
+
+%init}
+
 
 %public
 %class NixLexer
@@ -50,7 +52,10 @@ import static org.nixos.idea.psi.NixTypes.*;
 %function advance
 %type IElementType
 %unicode
-%state STRING IND_STRING
+%line
+%char
+%column
+%xstate STRING IND_STRING
 
 EOL="\r"|"\n"|"\r\n"
 LINE_WS=[\ \t\f]
@@ -79,17 +84,7 @@ URI=[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*']+
   "("                { return LPAREN; }
   ")"                { return RPAREN; }
   "{"                { return LCURLY; }
-  "}"                {
-    try {
-      StrState st = pop();
-      if(st == StrState.IN_STRING) {
-        backToString();
-      } else if (st == StrState.IN_IND_STRING) {
-        backToIndString();
-      }
-    } catch (Exception e){}
-    return RCURLY;
-                     }
+  "}"                { yy_pop_state(); return RCURLY; }
   "["                { return LBRAC; }
   "]"                { return RBRAC; }
   "${"               { return DOLLAR_CURLY; }
@@ -114,7 +109,7 @@ URI=[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*']+
   "++"               { return CONCAT; }
   "."                { return DOT; }
   ","                { return COMMA; }
-  "\""               { yybegin(STRING);return FNUTT; }
+  "\""               { yy_push_state(STRING);return FNUTT_OPEN; }
   "->"               { return IMPL; }
   "//"               { return UPDATE; }
   "assert"           { return ASSERT; }
@@ -135,7 +130,7 @@ URI=[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*']+
 
   \'\'(\ *\n)?
     {
-        yybegin(IND_STRING);
+        yy_push_state(IND_STRING);
         return IND_STRING_OPEN;
     }
 
@@ -166,13 +161,12 @@ URI=[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*']+
   {STRINLINENIX}
     {
         yybegin(YYINITIAL);
-        push(StrState.IN_STRING);
         return DOLLAR_CURLY;
     }
   "\""
     {
         yybegin(YYINITIAL);
-        return FNUTT;
+        return FNUTT_CLOSE;
     }
   .
     {
@@ -210,7 +204,6 @@ URI=[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*']+
   {STRINLINENIX}
     {
         yybegin(YYINITIAL);
-        push(StrState.IN_IND_STRING);
         return DOLLAR_CURLY;
     }
 

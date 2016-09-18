@@ -49,7 +49,6 @@
     CONCAT = '++'
     DOT = '.'
     COMMA = ','
-    FNUTT = '"'
     IMPL = '->'
     UPDATE = '//'
 
@@ -97,9 +96,9 @@ expr ::= lambda
        | LET binds IN expr
        | expr_op
 
-lambda ::= (fn_lambda | bn_lambda | param_set | ID) COLON expr //{pin=2}
-fn_lambda ::= ID NAMED param_set //{pin=2}
-bn_lambda ::= param_set NAMED ID //{pin=2}
+lambda ::= (fn_lambda | bn_lambda | param_set | ID) COLON expr
+fn_lambda ::= ID NAMED param_set
+bn_lambda ::= param_set NAMED ID
 param_set ::= LCURLY params RCURLY
 
 expr_op ::= logical bool_expr* | unary_op expr_op
@@ -148,7 +147,7 @@ list ::= LBRAC expr_list RBRAC
 expr_list ::= list_expr*;
 list_expr ::= eval_or_select | bind_or_select | attr_path | literal_simple_string
 
-private literal_simple_string ::= FNUTT string_parts FNUTT
+private literal_simple_string ::= FNUTT_OPEN string_parts FNUTT_CLOSE
 private doc_string ::= IND_STRING_OPEN ind_string_parts IND_STRING_CLOSE
 
 literal ::= INT | BOOL | PATH | SPATH | HPATH | URI | STR
@@ -165,11 +164,11 @@ require_expr ::= (REQUIRE|REQUIRES|IMPORTS) ASSIGN LBRAC path_expr* RBRAC
 
 import_stmt ::= IMPORT path_expr call_args?
 
-call_args ::= LCURLY binds? RCURLY //{pin=1}
+call_args ::= LCURLY binds? RCURLY
 
 path_expr ::= PATH | HPATH | SPATH | list_expr
 
-attr_assign ::= attr_path ASSIGN expr //{pin=2}
+attr_assign ::= attr_path ASSIGN expr
 
 inherit_attrs ::= INHERIT (LPAREN expr RPAREN)? attrs
 
@@ -177,7 +176,7 @@ attrs ::= attr*
 
 attr_path ::= attr (DOT attr)*
 
-attr ::= ID | FNUTT string_attr FNUTT
+attr ::= ID | FNUTT_OPEN string_attr FNUTT_CLOSE
 
 string_attr ::= STR
               | nix_init
@@ -188,4 +187,4 @@ param ::= defval
          | ID
          | ELLIPSIS
 
-defval ::= ID IS expr //{pin=2}
+defval ::= ID IS expr
