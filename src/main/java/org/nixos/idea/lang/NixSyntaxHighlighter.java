@@ -106,7 +106,7 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
     @NotNull
     @Override
     public Lexer getHighlightingLexer() {
-        return new FlexAdapter(new NixLexer((Reader) null));
+        return new NixLexerAdapter();
     }
 
     @NotNull

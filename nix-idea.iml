@@ -7,7 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/generated/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/gen" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/gen/java" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/src/generated" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>

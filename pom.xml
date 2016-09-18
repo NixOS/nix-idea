@@ -106,7 +106,7 @@
                         <configuration>
                             <sources>
                                 <source>src/main/java</source>
-                                <source>gen</source>
+                                <source>src/gen/java</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -139,7 +139,7 @@
                                 <path id="sourcepath">
                                     <dirset dir="${project.basedir}">
                                         <include name="src/main/java"/>
-                                        <include name="gen"/>
+                                        <include name="src/gen/java"/>
                                         <include name="src/main/resources"/>
                                     </dirset>
                                 </path>
