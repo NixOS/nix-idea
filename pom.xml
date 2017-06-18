@@ -16,7 +16,7 @@
         <vendor.name>NixOS</vendor.name>
         <idea.group>org.jetbrains</idea.group>
         <idea.artifact>idea-IC</idea.artifact>
-        <idea.version>2016.2.3</idea.version>
+        <idea.version>2017.1.4</idea.version>
         <jdk.home>${env.JDK_HOME}</jdk.home>
         <idea.lib>${project.build.directory}/vendor/${idea.artifact}/lib/</idea.lib>
     </properties>

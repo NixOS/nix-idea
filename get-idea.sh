@@ -4,7 +4,7 @@
 # maven-dependency-plugin cannot strip leading directory from archives.
 
 pname="ideaIC"
-pversion="2016.2.3"
+pversion="2017.1.4"
 name=$pname-$pversion
 tar=$name.tar.gz
 
