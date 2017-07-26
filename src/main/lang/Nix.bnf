@@ -147,7 +147,7 @@ bind_set ::= LCURLY binds? RCURLY
 
 list ::= LBRAC expr_list RBRAC
 expr_list ::= list_expr*;
-list_expr ::= eval_or_select | bind_or_select | attr_path | literal_simple_string
+list_expr ::= eval_or_select | bind_or_select | attr_path | literal_simple_string | literal
 
 private literal_simple_string ::= FNUTT_OPEN string_parts FNUTT_CLOSE
 private doc_string ::= IND_STRING_OPEN ind_string_parts IND_STRING_CLOSE
