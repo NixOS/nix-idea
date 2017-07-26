@@ -84,6 +84,8 @@
     HPATH = "regexp:\~(\/[a-zA-Z0-9\.\_\-\+]+)+"
     /* somewhere else */
     URI = "regexp:[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*\']+"
+
+    SPACE='regexp:\s+'
   ]
 }
 
