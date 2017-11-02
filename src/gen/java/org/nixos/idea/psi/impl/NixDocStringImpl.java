@@ -11,14 +11,14 @@ import static org.nixos.idea.psi.NixTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.nixos.idea.psi.*;
 
-public class NixListExprImpl extends ASTWrapperPsiElement implements NixListExpr {
+public class NixDocStringImpl extends ASTWrapperPsiElement implements NixDocString {
 
-  public NixListExprImpl(ASTNode node) {
+  public NixDocStringImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NixVisitor visitor) {
-    visitor.visitListExpr(this);
+    visitor.visitDocString(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -27,33 +27,21 @@ public class NixListExprImpl extends ASTWrapperPsiElement implements NixListExpr
   }
 
   @Override
-  @Nullable
-  public NixAttrPath getAttrPath() {
-    return findChildByClass(NixAttrPath.class);
+  @NotNull
+  public NixIndStringParts getIndStringParts() {
+    return findNotNullChildByClass(NixIndStringParts.class);
   }
 
   @Override
-  @Nullable
-  public NixBindOrSelect getBindOrSelect() {
-    return findChildByClass(NixBindOrSelect.class);
+  @NotNull
+  public PsiElement getIndStringClose() {
+    return findNotNullChildByType(IND_STRING_CLOSE);
   }
 
   @Override
-  @Nullable
-  public NixEvalOrSelect getEvalOrSelect() {
-    return findChildByClass(NixEvalOrSelect.class);
-  }
-
-  @Override
-  @Nullable
-  public NixLiteral getLiteral() {
-    return findChildByClass(NixLiteral.class);
-  }
-
-  @Override
-  @Nullable
-  public NixLiteralSimpleString getLiteralSimpleString() {
-    return findChildByClass(NixLiteralSimpleString.class);
+  @NotNull
+  public PsiElement getIndStringOpen() {
+    return findNotNullChildByType(IND_STRING_OPEN);
   }
 
 }

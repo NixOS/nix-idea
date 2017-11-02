@@ -22,6 +22,7 @@ public interface NixTypes {
   IElementType CALL_ARGS = new NixElementType("CALL_ARGS");
   IElementType CONT_PATH = new NixElementType("CONT_PATH");
   IElementType DEFVAL = new NixElementType("DEFVAL");
+  IElementType DOC_STRING = new NixElementType("DOC_STRING");
   IElementType EVAL_EXPR = new NixElementType("EVAL_EXPR");
   IElementType EVAL_OR_SELECT = new NixElementType("EVAL_OR_SELECT");
   IElementType EXPR = new NixElementType("EXPR");
@@ -38,6 +39,7 @@ public interface NixTypes {
   IElementType LIST = new NixElementType("LIST");
   IElementType LIST_EXPR = new NixElementType("LIST_EXPR");
   IElementType LITERAL = new NixElementType("LITERAL");
+  IElementType LITERAL_SIMPLE_STRING = new NixElementType("LITERAL_SIMPLE_STRING");
   IElementType LOGICAL = new NixElementType("LOGICAL");
   IElementType MUL_EXPR = new NixElementType("MUL_EXPR");
   IElementType NIX_INIT = new NixElementType("NIX_INIT");
@@ -160,6 +162,9 @@ public interface NixTypes {
       else if (type == DEFVAL) {
         return new NixDefvalImpl(node);
       }
+      else if (type == DOC_STRING) {
+        return new NixDocStringImpl(node);
+      }
       else if (type == EVAL_EXPR) {
         return new NixEvalExprImpl(node);
       }
@@ -207,6 +212,9 @@ public interface NixTypes {
       }
       else if (type == LITERAL) {
         return new NixLiteralImpl(node);
+      }
+      else if (type == LITERAL_SIMPLE_STRING) {
+        return new NixLiteralSimpleStringImpl(node);
       }
       else if (type == LOGICAL) {
         return new NixLogicalImpl(node);

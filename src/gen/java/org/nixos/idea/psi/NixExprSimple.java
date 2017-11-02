@@ -20,6 +20,9 @@ public interface NixExprSimple extends PsiElement {
   NixDefval getDefval();
 
   @Nullable
+  NixDocString getDocString();
+
+  @Nullable
   NixEvalOrSelect getEvalOrSelect();
 
   @Nullable
@@ -29,31 +32,16 @@ public interface NixExprSimple extends PsiElement {
   NixImportStmt getImportStmt();
 
   @Nullable
-  NixIndStringParts getIndStringParts();
-
-  @Nullable
   NixList getList();
 
   @Nullable
   NixLiteral getLiteral();
 
   @Nullable
-  NixStringParts getStringParts();
+  NixLiteralSimpleString getLiteralSimpleString();
 
   @Nullable
   NixUnaryOp getUnaryOp();
-
-  @Nullable
-  PsiElement getFnuttClose();
-
-  @Nullable
-  PsiElement getFnuttOpen();
-
-  @Nullable
-  PsiElement getIndStringClose();
-
-  @Nullable
-  PsiElement getIndStringOpen();
 
   @Nullable
   PsiElement getRec();

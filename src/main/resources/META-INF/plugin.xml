@@ -1,4 +1,4 @@
-<idea-plugin version="2">
+<idea-plugin>
   <id>${project.artifactId}</id>
   <name>${project.name}</name>
   <version>${project.version}</version>
@@ -40,7 +40,7 @@
     ]]>
   </change-notes>
 
-  <idea-version since-build="131"/>
+  <idea-version since-build="172"/>
 
   <depends>com.intellij.modules.lang</depends>
   <extensions defaultExtensionNs="com.intellij">

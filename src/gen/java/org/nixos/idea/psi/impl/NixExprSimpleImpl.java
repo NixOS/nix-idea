@@ -52,6 +52,12 @@ public class NixExprSimpleImpl extends ASTWrapperPsiElement implements NixExprSi
 
   @Override
   @Nullable
+  public NixDocString getDocString() {
+    return findChildByClass(NixDocString.class);
+  }
+
+  @Override
+  @Nullable
   public NixEvalOrSelect getEvalOrSelect() {
     return findChildByClass(NixEvalOrSelect.class);
   }
@@ -70,12 +76,6 @@ public class NixExprSimpleImpl extends ASTWrapperPsiElement implements NixExprSi
 
   @Override
   @Nullable
-  public NixIndStringParts getIndStringParts() {
-    return findChildByClass(NixIndStringParts.class);
-  }
-
-  @Override
-  @Nullable
   public NixList getList() {
     return findChildByClass(NixList.class);
   }
@@ -88,38 +88,14 @@ public class NixExprSimpleImpl extends ASTWrapperPsiElement implements NixExprSi
 
   @Override
   @Nullable
-  public NixStringParts getStringParts() {
-    return findChildByClass(NixStringParts.class);
+  public NixLiteralSimpleString getLiteralSimpleString() {
+    return findChildByClass(NixLiteralSimpleString.class);
   }
 
   @Override
   @Nullable
   public NixUnaryOp getUnaryOp() {
     return findChildByClass(NixUnaryOp.class);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getFnuttClose() {
-    return findChildByType(FNUTT_CLOSE);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getFnuttOpen() {
-    return findChildByType(FNUTT_OPEN);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getIndStringClose() {
-    return findChildByType(IND_STRING_CLOSE);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getIndStringOpen() {
-    return findChildByType(IND_STRING_OPEN);
   }
 
   @Override
