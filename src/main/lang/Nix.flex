@@ -23,7 +23,7 @@ import static org.nixos.idea.psi.NixTypes.*;
     } catch (Exception e) {
       sst =  YYINITIAL;
     }
-    yybegin(sst);
+    yybegin(yy_top_state());
     return sst;
   }
 
@@ -83,7 +83,7 @@ URI=[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*']+
   "="                { return ASSIGN; }
   "("                { return LPAREN; }
   ")"                { return RPAREN; }
-  "{"                { return LCURLY; }
+  "{"                { yy_push_state(YYINITIAL); return LCURLY; }
   "}"                { yy_pop_state(); return RCURLY; }
   "["                { return LBRAC; }
   "]"                { return RBRAC; }
@@ -109,7 +109,7 @@ URI=[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*']+
   "++"               { return CONCAT; }
   "."                { return DOT; }
   ","                { return COMMA; }
-  "\""               { yy_push_state(STRING);return FNUTT_OPEN; }
+  "\""               { yy_push_state(STRING); return FNUTT_OPEN; }
   "->"               { return IMPL; }
   "//"               { return UPDATE; }
   "assert"           { return ASSERT; }
@@ -160,12 +160,12 @@ URI=[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*']+
     }
   {STRINLINENIX}
     {
-        yybegin(YYINITIAL);
+        yy_push_state(YYINITIAL);
         return DOLLAR_CURLY;
     }
   "\""
     {
-        yybegin(YYINITIAL);
+        yy_pop_state();
         return FNUTT_CLOSE;
     }
   .
@@ -203,13 +203,13 @@ URI=[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*']+
 
   {STRINLINENIX}
     {
-        yybegin(YYINITIAL);
+        yy_push_state(YYINITIAL);
         return DOLLAR_CURLY;
     }
 
   "''"
     {
-        yybegin(YYINITIAL);
+        yy_pop_state();
         return IND_STRING_CLOSE;
     }
 

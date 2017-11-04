@@ -17,12 +17,9 @@ public interface NixListExpr extends PsiElement {
   NixEvalOrSelect getEvalOrSelect();
 
   @Nullable
-  NixStringParts getStringParts();
+  NixLiteral getLiteral();
 
   @Nullable
-  PsiElement getFnuttClose();
-
-  @Nullable
-  PsiElement getFnuttOpen();
+  NixLiteralSimpleString getLiteralSimpleString();
 
 }

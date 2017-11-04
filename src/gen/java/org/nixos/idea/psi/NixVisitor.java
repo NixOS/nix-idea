@@ -63,6 +63,10 @@ public class NixVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitDocString(@NotNull NixDocString o) {
+    visitPsiElement(o);
+  }
+
   public void visitEvalExpr(@NotNull NixEvalExpr o) {
     visitPsiElement(o);
   }
@@ -124,6 +128,10 @@ public class NixVisitor extends PsiElementVisitor {
   }
 
   public void visitLiteral(@NotNull NixLiteral o) {
+    visitPsiElement(o);
+  }
+
+  public void visitLiteralSimpleString(@NotNull NixLiteralSimpleString o) {
     visitPsiElement(o);
   }
 

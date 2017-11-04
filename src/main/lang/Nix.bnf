@@ -1,6 +1,6 @@
 {
   parserClass="org.nixos.idea.lang.NixParser"
-  parserUtilClass="org,nixos.lang.psi.NixParserUtil"
+  parserUtilClass="org.nixos.idea.psi.NixParserUtil"
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
   extendedPin=false
   psiClassPrefix="Nix"
@@ -149,8 +149,8 @@ list ::= LBRAC expr_list RBRAC
 expr_list ::= list_expr*;
 list_expr ::= eval_or_select | bind_or_select | attr_path | literal_simple_string | literal
 
-private literal_simple_string ::= FNUTT_OPEN string_parts FNUTT_CLOSE
-private doc_string ::= IND_STRING_OPEN ind_string_parts IND_STRING_CLOSE
+literal_simple_string ::= FNUTT_OPEN string_parts FNUTT_CLOSE
+doc_string ::= IND_STRING_OPEN ind_string_parts IND_STRING_CLOSE
 
 literal ::= INT | BOOL | PATH | SPATH | HPATH | URI | STR
 nix_init ::= DOLLAR_CURLY expr RCURLY

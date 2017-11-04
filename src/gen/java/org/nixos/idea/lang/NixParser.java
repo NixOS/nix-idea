@@ -4,6 +4,7 @@ package org.nixos.idea.lang;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import static org.nixos.idea.psi.NixTypes.*;
+import static org.nixos.idea.psi.NixParserUtil.*;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
@@ -65,6 +66,9 @@ public class NixParser implements PsiParser, LightPsiParser {
     else if (t == DEFVAL) {
       r = defval(b, 0);
     }
+    else if (t == DOC_STRING) {
+      r = doc_string(b, 0);
+    }
     else if (t == EVAL_EXPR) {
       r = eval_expr(b, 0);
     }
@@ -112,6 +116,9 @@ public class NixParser implements PsiParser, LightPsiParser {
     }
     else if (t == LITERAL) {
       r = literal(b, 0);
+    }
+    else if (t == LITERAL_SIMPLE_STRING) {
+      r = literal_simple_string(b, 0);
     }
     else if (t == LOGICAL) {
       r = logical(b, 0);
@@ -451,7 +458,7 @@ public class NixParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // IND_STRING_OPEN ind_string_parts IND_STRING_CLOSE
-  static boolean doc_string(PsiBuilder b, int l) {
+  public static boolean doc_string(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "doc_string")) return false;
     if (!nextTokenIs(b, IND_STRING_OPEN)) return false;
     boolean r;
@@ -459,7 +466,7 @@ public class NixParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, IND_STRING_OPEN);
     r = r && ind_string_parts(b, l + 1);
     r = r && consumeToken(b, IND_STRING_CLOSE);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, DOC_STRING, r);
     return r;
   }
 
@@ -862,7 +869,7 @@ public class NixParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // eval_or_select | bind_or_select | attr_path | literal_simple_string
+  // eval_or_select | bind_or_select | attr_path | literal_simple_string | literal
   public static boolean list_expr(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "list_expr")) return false;
     boolean r;
@@ -871,6 +878,7 @@ public class NixParser implements PsiParser, LightPsiParser {
     if (!r) r = bind_or_select(b, l + 1);
     if (!r) r = attr_path(b, l + 1);
     if (!r) r = literal_simple_string(b, l + 1);
+    if (!r) r = literal(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
@@ -894,7 +902,7 @@ public class NixParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // FNUTT_OPEN string_parts FNUTT_CLOSE
-  static boolean literal_simple_string(PsiBuilder b, int l) {
+  public static boolean literal_simple_string(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "literal_simple_string")) return false;
     if (!nextTokenIs(b, FNUTT_OPEN)) return false;
     boolean r;
@@ -902,7 +910,7 @@ public class NixParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, FNUTT_OPEN);
     r = r && string_parts(b, l + 1);
     r = r && consumeToken(b, FNUTT_CLOSE);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, LITERAL_SIMPLE_STRING, r);
     return r;
   }
 

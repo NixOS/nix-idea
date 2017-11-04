@@ -23,7 +23,7 @@ import java.io.Reader;
 public class NixParserDefinition implements ParserDefinition {
     public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
     public static final TokenSet COMMENTS = TokenSet.create(NixTypes.SCOMMENT,NixTypes.MCOMMENT);
-    public static final TokenSet STRING_LITERALS = TokenSet.create(NixTypes.STR,NixTypes.IND_STR);
+    public static final TokenSet STRING_LITERALS = TokenSet.create(NixTypes.LITERAL_SIMPLE_STRING, NixTypes.DOC_STRING);
 
     public static final IFileElementType FILE = new IFileElementType(Language.<NixLanguage>findInstance(NixLanguage.class));
 
@@ -46,7 +46,6 @@ public class NixParserDefinition implements ParserDefinition {
 
     @NotNull
     public TokenSet getStringLiteralElements() {
-        /* this isn't correct but let's pretend that it is */
         return STRING_LITERALS;
     }
 
