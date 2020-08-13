@@ -54,6 +54,8 @@ grammarKit {
 tasks {
 
     task<GenerateLexer>("generateNixLexer") {
+        println("Generating lexer")
+
         source = "src/main/lang/Nix.flex"
         targetDir = "src/gen/java/org/nixos/idea/lang"
         targetClass = "NixLexer"
@@ -61,6 +63,8 @@ tasks {
     }
 
     task<GenerateParser>("generateNixParser") {
+        println("Generating parser")
+
         source = "src/main/lang/Nix.bnf"
         targetRoot = "src/gen/java"
         pathToParser = "/org/nixos/idea/lang/NixParser"

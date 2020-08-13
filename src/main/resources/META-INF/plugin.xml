@@ -1,7 +1,7 @@
 <idea-plugin>
 
-    <id>org.nixos.idea.nixos-idea</id>
-    <name>NixOS-Idea</name>
+    <id>org.nixos.idea</id>
+    <name>NixIDEA</name>
     <vendor>NixOS</vendor>
 
     <idea-version since-build="202" />

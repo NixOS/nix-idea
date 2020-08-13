@@ -1,1 +1,1 @@
-rootProject.name = "nix-idea"
+rootProject.name = "NixIDEA"

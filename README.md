@@ -28,7 +28,7 @@ Using the gradle wrapper is easy:
 
     ./gradlew build
 
-You should then find the plugin in `build/distributions/nix-idea-<version>.zip`.
+You should then find the plugin in `build/distributions/NixIDEA-<version>.zip`.
 
 ### Import it
 
@@ -39,7 +39,7 @@ In `Settings -> Plugin -> <little wheel icon> -> from local disk...`
 ### Jetbrains marketplace
 
 The plugin can be found at the Jetbrains plugin repository as
-[Nix-IDEA](https://plugins.jetbrains.com/plugin/8607).
+[NixIDEA](https://plugins.jetbrains.com/plugin/8607).
 
 ### Prebuild release
 
