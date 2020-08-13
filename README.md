@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/NixOS/nix-idea.svg?branch=master)](https://travis-ci.org/NixOS/nix-idea)
 
+<!-- Plugin description -->
+
 This plugin has the goal of being generally useful when working with nixpkgs/NixOS/nixops, it aims
 to provide the following:
 
@@ -13,6 +15,8 @@ to provide the following:
     * Builtins
     * Filesystem paths
 * Templates for common usage patterns
+
+<!-- Plugin description end -->
 
 # Install
 

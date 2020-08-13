@@ -69,21 +69,21 @@
     IMPORTS = 'imports'
 
     SCOMMENT = 'regexp:#[^\r\n]*'
-    MCOMMENT = 'regexp:\/\*([^*]|\*[^\/])*\*\/'
+    MCOMMENT = 'regexp:/\*([^*]|\*[^/])*\*/'
 
     INT = "regexp:[0-9]+"
     BOOL = "regexp:(true|false)"
     ID = "regexp:[a-zA-Z][a-zA-Z_0-9'-]*"
 
     /* filesystem, relative or absolute */
-    PATH = "regexp:[a-zA-Z0-9\.\_\-\+]*(\/[a-zA-Z0-9\.\_\-\+]+)+"
+    PATH = "regexp:[a-zA-Z0-9._\-+]*(/[a-zA-Z0-9._\-+]+)+"
     /* search path, resolve first segment against NIX_PATH */
-    SPATH = "regexp:\<[a-zA-Z0-9\.\_\-\+]+(\/[a-zA-Z0-9\.\_\-\+]+)*\>"
+    SPATH = "regexp:<[a-zA-Z0-9._\-+]+(/[a-zA-Z0-9._\-+]+)*>"
 
     /* home path, resolve to relative users home */
-    HPATH = "regexp:\~(\/[a-zA-Z0-9\.\_\-\+]+)+"
+    HPATH = "regexp:~(/[a-zA-Z0-9._\-+]+)+"
     /* somewhere else */
-    URI = "regexp:[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*\']+"
+    URI = "regexp:[a-zA-Z][a-zA-Z0-9+\-.]*:[a-zA-Z0-9%/?:@&=+$,\-_.!~*']+"
 
     SPACE='regexp:\s+'
   ]

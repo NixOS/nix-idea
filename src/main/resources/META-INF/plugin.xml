@@ -1,10 +1,10 @@
 <idea-plugin>
-  <id>${project.artifactId}</id>
-  <name>${project.name}</name>
-  <version>${project.version}</version>
-  <vendor email="${vendor.email}" url="${vendor.url}">${vendor.name}</vendor>
+    <id>${project.artifactId}</id>
+    <name>${pluginName}</name>
+    <version>${project.version}</version>
+    <vendor email="${vendor.email}" url="${vendor.url}">${vendor.name}</vendor>
 
-  <description><![CDATA[
+    <description><![CDATA[
 
     <h1>${project.name}</h1>
     <br />
@@ -20,7 +20,7 @@
     </ul>
   ]]></description>
 
-  <change-notes><![CDATA[
+    <change-notes><![CDATA[
     <p>
         If you encounter any issues, please
         <a href="https://github.com/NixOS/nix-idea/issues">report them</a>.
@@ -38,21 +38,22 @@
       </ul>
     </p>
     ]]>
-  </change-notes>
+    </change-notes>
 
-  <idea-version since-build="172"/>
+    <idea-version since-build="202" />
 
-  <depends>com.intellij.modules.lang</depends>
-  <extensions defaultExtensionNs="com.intellij">
-    <fileTypeFactory implementation="org.nixos.idea.file.NixFileTypeFactory"/>
-    <lang.parserDefinition
-            language="Nix"
-            implementationClass="org.nixos.idea.lang.NixParserDefinition" />
-    <lang.syntaxHighlighterFactory language="Nix" implementationClass="org.nixos.idea.lang.NixSyntaxHighlighterFactory"/>
-    <lang.braceMatcher language="Nix" implementationClass="org.nixos.idea.lang.NixBraceMatcher"/>
-    <projectConfigurable groupId="build" displayName="NixIDEA Settings" id="org.nixos.idea.settings.NixIDEASettings" instance="org.nixos.idea.settings.NixIDEASettings"/>
-  </extensions>
-  <application-components />
-  <project-components />
-  <actions />
+    <depends>com.intellij.modules.lang</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <fileTypeFactory implementation="org.nixos.idea.file.NixFileTypeFactory" />
+        <lang.parserDefinition
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixParserDefinition" />
+        <lang.syntaxHighlighterFactory language="Nix" implementationClass="org.nixos.idea.lang.NixSyntaxHighlighterFactory" />
+        <lang.braceMatcher language="Nix" implementationClass="org.nixos.idea.lang.NixBraceMatcher" />
+        <projectConfigurable groupId="build" displayName="NixIDEA Settings" id="org.nixos.idea.settings.NixIDEASettings"
+                             instance="org.nixos.idea.settings.NixIDEASettings" />
+    </extensions>
+    <application-components />
+    <project-components />
+    <actions />
 </idea-plugin>
