@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/NixOS/nix-idea.svg?branch=master)](https://travis-ci.org/NixOS/nix-idea)
 
+<!-- Plugin description -->
+
 This plugin has the goal of being generally useful when working with nixpkgs/NixOS/nixops, it aims
 to provide the following:
 
@@ -14,8 +16,31 @@ to provide the following:
     * Filesystem paths
 * Templates for common usage patterns
 
+<!-- Plugin description end -->
+
 # Install
 
-Preferably from within IDEA, or use the releases tab to download it and install
-from file. The plugin can be found at the Jetbrains plugin repository as
+## Manually from local sources
+
+### Build it
+
+Using the gradle wrapper is easy:
+
+    ./gradlew build
+
+You should then find the plugin in `build/distributions/NixIDEA-<version>.zip`.
+
+### Import it
+
+In `Settings -> Plugin -> <little wheel icon> -> from local disk...`
+
+## From a packaged release
+
+### Jetbrains marketplace
+
+The plugin can be found at the Jetbrains plugin repository as
 [NixIDEA](https://plugins.jetbrains.com/plugin/8607).
+
+### Prebuild release
+
+Same process as locally to import it, just skip the build part of it.
