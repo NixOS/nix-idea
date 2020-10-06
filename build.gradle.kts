@@ -113,14 +113,13 @@ tasks {
         // Get the latest available change notes from the changelog file
         changeNotes(
                 closure {
-                    changelog.getLatest().toHTML()
+                    changelog.getUnreleased().toHTML()
                 }
         )
     }
 
     publishPlugin {
-        dependsOn("patchChangelog")
-        token(System.getenv("PUBLISH_TOKEN"))
+        token(System.getenv("JETBRAINS_TOKEN"))
         channels(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first())
     }
 
