@@ -53,6 +53,15 @@ grammarKit {
 
 tasks {
 
+    task("writeMetadataFiles") {
+        outputs.upToDateWhen { false }
+        doLast {
+            project.buildDir.resolve("version.txt").writeText(pluginVersion)
+            project.buildDir.resolve("zipfile.txt").writeText(buildPlugin.get().archiveFile.get().toString())
+            project.buildDir.resolve("latest_changelog.md").writeText(changelog.getLatest().toText())
+        }
+    }
+
     task<GenerateLexer>("generateNixLexer") {
         source = "src/main/lang/Nix.flex"
         targetDir = "src/gen/java/org/nixos/idea/lang"
@@ -113,7 +122,7 @@ tasks {
         // Get the latest available change notes from the changelog file
         changeNotes(
                 closure {
-                    changelog.getUnreleased().toHTML()
+                    changelog.getLatest().toHTML()
                 }
         )
     }
