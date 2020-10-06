@@ -3,6 +3,8 @@ name: Publish release
 on:
   push:
     tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs: {}
 
 jobs:
   build:
@@ -44,6 +46,7 @@ jobs:
         echo "::set-output name=zipfile::$(cat build/zipfile.txt)"
         echo "::set-output name=zipname::$(basename "$(cat build/zipfile.txt)")"
     - name: Check consistency between tag name and version
+      if: success() && github.event_name == 'push'
       env:
         tag: ${{ github.ref }}
         version: ${{ steps.get-metadata.outputs.version }}
@@ -59,8 +62,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: ${{ github.ref }}
+        tag_name: v${{ steps.get-metadata.outputs.version }}
+        release_name: v${{ steps.get-metadata.outputs.version }}
         body_path: ./build/latest_changelog.md
     - name: Upload asset for GitHub release
       uses: actions/upload-release-asset@v1
