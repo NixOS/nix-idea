@@ -53,9 +53,16 @@ grammarKit {
 
 tasks {
 
-    task<GenerateLexer>("generateNixLexer") {
-        println("Generating lexer")
+    task("writeMetadataFiles") {
+        outputs.upToDateWhen { false }
+        doLast {
+            project.buildDir.resolve("version.txt").writeText(pluginVersion)
+            project.buildDir.resolve("zipfile.txt").writeText(buildPlugin.get().archiveFile.get().toString())
+            project.buildDir.resolve("latest_changelog.md").writeText(changelog.getLatest().toText())
+        }
+    }
 
+    task<GenerateLexer>("generateNixLexer") {
         source = "src/main/lang/Nix.flex"
         targetDir = "src/gen/java/org/nixos/idea/lang"
         targetClass = "NixLexer"
@@ -63,8 +70,6 @@ tasks {
     }
 
     task<GenerateParser>("generateNixParser") {
-        println("Generating parser")
-
         source = "src/main/lang/Nix.bnf"
         targetRoot = "src/gen/java"
         pathToParser = "/org/nixos/idea/lang/NixParser"
@@ -123,8 +128,7 @@ tasks {
     }
 
     publishPlugin {
-        dependsOn("patchChangelog")
-        token(System.getenv("PUBLISH_TOKEN"))
+        token(System.getenv("JETBRAINS_TOKEN"))
         channels(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first())
     }
 
