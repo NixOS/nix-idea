@@ -34,7 +34,7 @@ jobs:
     # Build
     - name: Build plugin
       id: gradle-build
-      run: ./gradlew verifyPlugin build writeMetadataFiles
+      run: ./gradlew --stacktrace verifyPlugin build writeMetadataFiles
     # Upload artifacts
     - name: Upload build reports
       if: steps.gradle-build.outcome == 'success' || steps.gradle-build.outcome == 'failure'
@@ -89,4 +89,4 @@ jobs:
     - name: Upload to JetBrains Marketplace
       env:
         JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_TOKEN }}
-      run: ./gradlew publishPlugin
+      run: ./gradlew --stacktrace publishPlugin
