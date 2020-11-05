@@ -1,4 +1,4 @@
-name: Publish release
+name: Prepare Release
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 jobs:
   build:
 
-    name: Publish release
+    name: Create draft for GitHub release
     runs-on: ubuntu-latest
 
     steps:
@@ -66,8 +66,8 @@ jobs:
           echo "Tag '$tag' does not match version '$version'." >&2
           exit 1
         fi
-    # Create GitHub release
-    - name: Create GitHub release
+    # Create GitHub release draft
+    - name: Create GitHub release draft
       uses: actions/create-release@v1
       id: create-release
       env:
@@ -76,6 +76,7 @@ jobs:
         tag_name: v${{ steps.get-metadata.outputs.version }}
         release_name: v${{ steps.get-metadata.outputs.version }}
         body_path: ./build/latest_changelog.md
+        draft: true
     - name: Upload asset for GitHub release
       uses: actions/upload-release-asset@v1
       env:
@@ -85,8 +86,3 @@ jobs:
         asset_path: ${{ steps.get-metadata.outputs.zipfile }}
         asset_name: ${{ steps.get-metadata.outputs.zipname }}
         asset_content_type: application/zip
-    # Upload to JetBrains Marketplace
-    - name: Upload to JetBrains Marketplace
-      env:
-        JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_TOKEN }}
-      run: ./gradlew --stacktrace publishPlugin

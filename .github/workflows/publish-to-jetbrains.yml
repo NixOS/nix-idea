@@ -1,0 +1,47 @@
+name: Publish to JetBrains Marketplace
+
+on:
+  release:
+    types: [ published ]
+  workflow_dispatch:
+    inputs: {}
+
+jobs:
+  publish:
+
+    name: Publish release
+    runs-on: ubuntu-latest
+
+    steps:
+    # Setup environment
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    # Setup cache
+    - name: Setup cache for Gradle and dependencies
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: "gradle-\
+          ${{runner.os}}-\
+          ${{hashFiles('gradle/wrapper/gradle-wrapper.properties')}}-\
+          ${{hashFiles('**/*.gradle.kts')}}"
+    # Build and publish
+    - name: Build and publish plugin
+      id: gradle-build
+      env:
+        JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_TOKEN }}
+      run: ./gradlew --stacktrace publishPlugin
+    # Upload artifacts
+    - name: Upload build reports
+      if: steps.gradle-build.outcome == 'success' || steps.gradle-build.outcome == 'failure'
+      uses: actions/upload-artifact@v2
+      with:
+        name: build-reports
+        path: build/reports/
+        if-no-files-found: ignore
