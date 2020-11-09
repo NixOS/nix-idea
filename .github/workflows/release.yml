@@ -14,16 +14,17 @@ jobs:
 
     steps:
     # Remove old release drafts
-    # Copied from https://github.com/JetBrains/intellij-platform-plugin-template
     - name: Remove old release drafts
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        curl -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$GITHUB_REPOSITORY/releases \
-          | tr '\r\n' ' ' \
-          | jq '.[] | select(.draft == true) | .id' \
-          | xargs -I '{}' \
-        curl -X DELETE -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$GITHUB_REPOSITORY/releases/{}
+      uses: actions/github-script@v3
+      with:
+        script: |
+          const owner = context.repo.owner;
+          const repo = context.repo.repo;
+          const response = await github.repos.listReleases({owner, repo});
+          for (const draft of response.data.filter(r => r.draft)) {
+            core.info(`Delete draft for '${draft.name}' (${draft.id})`);
+            await github.repos.deleteRelease({owner, repo, release_id: draft.id});
+          }
     # Setup environment
     - name: Checkout repository
       uses: actions/checkout@v2
