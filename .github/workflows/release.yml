@@ -2,17 +2,28 @@ name: Prepare Release
 
 on:
   push:
-    tags: [ 'v*' ]
+    branches: [ 'master' ]
   workflow_dispatch:
     inputs: {}
 
 jobs:
   build:
 
-    name: Create draft for GitHub release
+    name: Update drafts for a GitHub release
     runs-on: ubuntu-latest
 
     steps:
+    # Remove old release drafts
+    # Copied from https://github.com/JetBrains/intellij-platform-plugin-template
+    - name: Remove old release drafts
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        curl -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$GITHUB_REPOSITORY/releases \
+          | tr '\r\n' ' ' \
+          | jq '.[] | select(.draft == true) | .id' \
+          | xargs -I '{}' \
+        curl -X DELETE -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$GITHUB_REPOSITORY/releases/{}
     # Setup environment
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -56,14 +67,17 @@ jobs:
         echo "::set-output name=version::$(cat build/version.txt)"
         echo "::set-output name=zipfile::$(cat build/zipfile.txt)"
         echo "::set-output name=zipname::$(basename "$(cat build/zipfile.txt)")"
-    - name: Check consistency between tag name and version
-      if: success() && github.event_name == 'push'
+    # Fail job if the release tag already exists and points to a different commit
+    - name: Check release tag
       env:
-        tag: ${{ github.ref }}
-        version: ${{ steps.get-metadata.outputs.version }}
+        TAG_NAME: v${{ steps.get-metadata.outputs.version }}
+        COMMITISH: ${{ github.sha }}
       run: |
-        if [ "$tag" != "v$version" -a "$tag" != "refs/tags/v$version" ]; then
-          echo "Tag '$tag' does not match version '$version'." >&2
+        if \
+          git fetch --depth=1 origin tag "$TAG_NAME" && \
+          [ "$(git rev-parse "$TAG_NAME")" != "$(git rev-parse "$COMMITISH")" ]
+        then
+          echo "::error::Tag '$TAG_NAME' already exists but points to a different commit"
           exit 1
         fi
     # Create GitHub release draft
