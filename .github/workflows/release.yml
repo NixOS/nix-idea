@@ -1,18 +1,30 @@
-name: Publish release
+name: Prepare Release
 
 on:
   push:
-    tags: [ 'v*' ]
+    branches: [ 'master' ]
   workflow_dispatch:
     inputs: {}
 
 jobs:
   build:
 
-    name: Publish release
+    name: Update drafts for a GitHub release
     runs-on: ubuntu-latest
 
     steps:
+    # Remove old release drafts
+    - name: Remove old release drafts
+      uses: actions/github-script@v3
+      with:
+        script: |
+          const owner = context.repo.owner;
+          const repo = context.repo.repo;
+          const response = await github.repos.listReleases({owner, repo});
+          for (const draft of response.data.filter(r => r.draft)) {
+            core.info(`Delete draft for '${draft.name}' (${draft.id})`);
+            await github.repos.deleteRelease({owner, repo, release_id: draft.id});
+          }
     # Setup environment
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -56,18 +68,21 @@ jobs:
         echo "::set-output name=version::$(cat build/version.txt)"
         echo "::set-output name=zipfile::$(cat build/zipfile.txt)"
         echo "::set-output name=zipname::$(basename "$(cat build/zipfile.txt)")"
-    - name: Check consistency between tag name and version
-      if: success() && github.event_name == 'push'
+    # Fail job if the release tag already exists and points to a different commit
+    - name: Check release tag
       env:
-        tag: ${{ github.ref }}
-        version: ${{ steps.get-metadata.outputs.version }}
+        TAG_NAME: v${{ steps.get-metadata.outputs.version }}
+        COMMITISH: ${{ github.sha }}
       run: |
-        if [ "$tag" != "v$version" -a "$tag" != "refs/tags/v$version" ]; then
-          echo "Tag '$tag' does not match version '$version'." >&2
+        if \
+          git fetch --depth=1 origin tag "$TAG_NAME" && \
+          [ "$(git rev-parse "$TAG_NAME")" != "$(git rev-parse "$COMMITISH")" ]
+        then
+          echo "::error::Tag '$TAG_NAME' already exists but points to a different commit"
           exit 1
         fi
-    # Create GitHub release
-    - name: Create GitHub release
+    # Create GitHub release draft
+    - name: Create GitHub release draft
       uses: actions/create-release@v1
       id: create-release
       env:
@@ -76,6 +91,7 @@ jobs:
         tag_name: v${{ steps.get-metadata.outputs.version }}
         release_name: v${{ steps.get-metadata.outputs.version }}
         body_path: ./build/latest_changelog.md
+        draft: true
     - name: Upload asset for GitHub release
       uses: actions/upload-release-asset@v1
       env:
@@ -85,8 +101,3 @@ jobs:
         asset_path: ${{ steps.get-metadata.outputs.zipfile }}
         asset_name: ${{ steps.get-metadata.outputs.zipname }}
         asset_content_type: application/zip
-    # Upload to JetBrains Marketplace
-    - name: Upload to JetBrains Marketplace
-      env:
-        JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_TOKEN }}
-      run: ./gradlew --stacktrace publishPlugin
