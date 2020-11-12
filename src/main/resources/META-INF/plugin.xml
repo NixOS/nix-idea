@@ -1,6 +1,6 @@
 <idea-plugin>
 
-    <id>org.nixos.idea</id>
+    <id>nix-idea</id>
     <name>NixIDEA</name>
     <vendor>NixOS</vendor>
 
