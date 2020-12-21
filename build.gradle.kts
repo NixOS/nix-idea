@@ -7,11 +7,11 @@ plugins {
     // Java support
     id("java")
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij") version "0.4.21"
+    id("org.jetbrains.intellij") version "0.6.5"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
-    id("org.jetbrains.changelog") version "0.4.0"
+    id("org.jetbrains.changelog") version "0.6.2"
     // grammarkit - read more: https://github.com/JetBrains/gradle-grammar-kit-plugin
-    id("org.jetbrains.grammarkit") version "2020.1"
+    id("org.jetbrains.grammarkit") version "2020.3.2"
 }
 
 // Import variables from gradle.properties file
@@ -41,6 +41,10 @@ intellij {
     type = platformType
     downloadSources = platformDownloadSources.toBoolean()
     updateSinceUntilBuild = true
+}
+
+changelog {
+    headerParserRegex = "^[-._+0-9a-zA-Z]+\$"
 }
 
 grammarKit {
