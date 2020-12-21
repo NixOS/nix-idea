@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Support for IDEA 2020.3
+### Removed
+- Support for IDEA 2019.3
+## [0.3.0.3]
 ### Fixed
 - Change ID of plugin back from `org.nixos.idea` in version 0.3.0.0 to
   `nix-idea` from earlier versions. The different ID of version 0.3.0.0
