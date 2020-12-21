@@ -1,17 +1,14 @@
 package org.nixos.idea.lang;
 
-import org.nixos.idea.psi.NixTypes;
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
-import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
-
-import com.intellij.lexer.FlexAdapter;
 import com.intellij.lexer.Lexer;
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
+import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
+import org.nixos.idea.psi.NixTypes;
 
-import java.io.Reader;
-
+import static com.intellij.openapi.editor.colors.TextAttributesKey.EMPTY_ARRAY;
 import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
 
 public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
@@ -187,7 +184,7 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
                     tokenType == NixTypes.REQUIRES) {
                 return KEYWORD_KEYS;
             }
-            return EMPTY;
+            return EMPTY_ARRAY;
         }
     }
 }
