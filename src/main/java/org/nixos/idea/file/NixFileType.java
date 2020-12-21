@@ -11,14 +11,6 @@ import javax.swing.*;
 public class NixFileType extends LanguageFileType {
 
     public static final NixFileType INSTANCE = new NixFileType();
-    public static final NixFileType SHELL = new NixFileType();
-    public static final NixFileType RELEASE = new NixFileType();
-    public static final NixFileType NIXOS_MODULE = new NixFileType();
-    public static final NixFileType SIMPLE_STDENV_PKG = new NixFileType();
-    public static final NixFileType NIXOPS_INFRA = new NixFileType();
-    public static final NixFileType DISNIX_SERVICE_MAPPING = new NixFileType();
-    public static final NixFileType DISNIX_INFRA = new NixFileType();
-    public static final NixFileType DISNIX_DEPLOY = new NixFileType();
 
     private NixFileType() {
         super(NixLanguage.INSTANCE);
