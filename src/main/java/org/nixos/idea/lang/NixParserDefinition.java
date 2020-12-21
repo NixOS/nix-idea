@@ -1,6 +1,5 @@
 package org.nixos.idea.lang;
 
-import org.nixos.idea.file.NixFile;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.Language;
 import com.intellij.lang.ParserDefinition;
@@ -14,9 +13,9 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
-import org.nixos.idea.lang.NixParser;
-import org.nixos.idea.psi.NixTypes;
 import org.jetbrains.annotations.NotNull;
+import org.nixos.idea.file.NixFile;
+import org.nixos.idea.psi.NixTypes;
 
 import java.io.Reader;
 
@@ -35,21 +34,25 @@ public class NixParserDefinition implements ParserDefinition {
     }
 
     @NotNull
+    @Override
     public TokenSet getWhitespaceTokens() {
         return WHITE_SPACES;
     }
 
     @NotNull
+    @Override
     public TokenSet getCommentTokens() {
         return COMMENTS;
     }
 
     @NotNull
+    @Override
     public TokenSet getStringLiteralElements() {
         return STRING_LITERALS;
     }
 
     @NotNull
+    @Override
     public PsiParser createParser(final Project project) {
         return new NixParser();
     }
@@ -59,15 +62,18 @@ public class NixParserDefinition implements ParserDefinition {
         return FILE;
     }
 
+    @Override
     public PsiFile createFile(FileViewProvider viewProvider) {
         return new NixFile(viewProvider);
     }
 
-    public SpaceRequirements spaceExistanceTypeBetweenTokens(ASTNode left, ASTNode right) {
+    @Override
+    public SpaceRequirements spaceExistenceTypeBetweenTokens(ASTNode left, ASTNode right) {
         return SpaceRequirements.MAY;
     }
 
     @NotNull
+    @Override
     public PsiElement createElement(ASTNode node) {
         return NixTypes.Factory.createElement(node);
     }
