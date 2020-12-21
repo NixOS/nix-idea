@@ -4,8 +4,6 @@
     <name>NixIDEA</name>
     <vendor>NixOS</vendor>
 
-    <idea-version since-build="202" />
-
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
