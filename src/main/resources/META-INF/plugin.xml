@@ -4,14 +4,16 @@
     <name>NixIDEA</name>
     <vendor>NixOS</vendor>
 
-    <idea-version since-build="202" />
-
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
 
-        <fileTypeFactory
-                implementation="org.nixos.idea.file.NixFileTypeFactory" />
+        <fileType
+                name="Nix file"
+                implementationClass="org.nixos.idea.file.NixFileType"
+                fieldName="INSTANCE"
+                language="Nix"
+                extensions="nix" />
 
         <lang.parserDefinition
                 language="Nix"
