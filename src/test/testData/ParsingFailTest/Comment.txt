@@ -1,0 +1,6 @@
+Nix File(0,37)
+  PsiErrorElement:<expr> expected(0,0)
+    <empty list>
+  PsiComment(NixTokenType.SCOMMENT)('# single-line')(0,13)
+  PsiWhiteSpace('\n')(13,14)
+  PsiComment(NixTokenType.MCOMMENT)('/* inline/multi-line */')(14,37)
