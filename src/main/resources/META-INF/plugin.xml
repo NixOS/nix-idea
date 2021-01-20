@@ -27,6 +27,10 @@
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixBraceMatcher" />
 
+        <lang.commenter
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixCommenter"/>
+
         <projectConfigurable
                 groupId="build"
                 displayName="NixIDEA Settings"
