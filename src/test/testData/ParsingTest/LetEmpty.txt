@@ -1,0 +1,7 @@
+Nix File(0,8)
+  PsiElement(NixTokenType.let)('let')(0,3)
+  PsiWhiteSpace(' ')(3,4)
+  PsiErrorElement:<binding> expected, got 'in'(4,6)
+    PsiElement(NixTokenType.in)('in')(4,6)
+  PsiWhiteSpace(' ')(6,7)
+  PsiElement(NixTokenType.ID)('x')(7,8)

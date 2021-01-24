@@ -13,6 +13,7 @@ public final class ParsingFailTest extends ParsingTestCase {
   // References for the syntax of the Nix Expression Language:
   //  https://nixos.org/guides/nix-pills/basics-of-language.html
   //  https://nixos.org/manual/nix/stable/#ch-expression-language
+  //  https://github.com/NixOS/nix/blob/master/src/libexpr/parser.y
 
   public void testComment() {
     doTest(true);

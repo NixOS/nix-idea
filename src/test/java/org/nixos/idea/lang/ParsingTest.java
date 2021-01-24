@@ -13,6 +13,7 @@ public final class ParsingTest extends ParsingTestCase {
   // References for the syntax of the Nix Expression Language:
   //  https://nixos.org/guides/nix-pills/basics-of-language.html
   //  https://nixos.org/manual/nix/stable/#ch-expression-language
+  //  https://github.com/NixOS/nix/blob/master/src/libexpr/parser.y
 
   public void testAssertion() {
     doTest(true);
@@ -34,7 +35,39 @@ public final class ParsingTest extends ParsingTestCase {
     doTest(true);
   }
 
+  public void testLegacyLet() {
+    // See https://github.com/NixOS/nix/issues/867
+    doTest(true);
+  }
+
+  public void testLegacyLetInList() {
+    // See https://github.com/NixOS/nix/issues/867
+    doTest(true);
+  }
+
+  public void testLegacyOrAsArgument() {
+    // See https://github.com/NixOS/nix/issues/975 and
+    // https://github.com/NixOS/nix/pull/1369.
+    doTest(true);
+  }
+
+  public void testLegacyOrAsAttribute() {
+    // See https://github.com/NixOS/nix/issues/975 and
+    // https://github.com/NixOS/nix/pull/1369.
+    doTest(true);
+  }
+
+  public void testLegacyOrInList() {
+    // See https://github.com/NixOS/nix/issues/975 and
+    // https://github.com/NixOS/nix/pull/1369.
+    doTest(true);
+  }
+
   public void testLet() {
+    doTest(true);
+  }
+
+  public void testLetEmpty() {
     doTest(true);
   }
 
