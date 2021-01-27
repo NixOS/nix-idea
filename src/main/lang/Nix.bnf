@@ -1,7 +1,7 @@
 {
   parserClass="org.nixos.idea.lang.NixParser"
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
-  extendedPin=false
+
   psiClassPrefix="Nix"
   psiImplClassSuffix="Impl"
   psiPackage="org.nixos.idea.psi"
@@ -11,13 +11,27 @@
   elementTypeClass="org.nixos.idea.psi.NixElementType"
   tokenTypeClass="org.nixos.idea.psi.NixTokenType"
 
-  parserImports=[
-    "static com.intellij.lang.parser.GeneratedParserUtilBase.*"
-  ]
-
-  generate=[tokenAccessors="yes"]
   tokens = [
+    // This list does not contain all tokens. This list only defines the debug
+    // names for tokens which have a distinct text representation. Other tokens
+    // are implicitly declared through their usage.
+    IF = 'if'
+    THEN = 'then'
+    ELSE = 'else'
+    ASSERT = 'assert'
+    WITH = 'with'
+    LET = 'let'
+    IN = 'in'
+    REC = 'rec'
+    INHERIT = 'inherit'
+    OR_KW = 'or'
+    ELLIPSIS = '...'
+
     ASSIGN = '='
+    COLON = ':'
+    SEMI = ';'
+    COMMA = ','
+    AT = '@'
     LPAREN = '('
     RPAREN = ')'
     LCURLY = '{'
@@ -25,165 +39,141 @@
     LBRAC = '['
     RBRAC = ']'
     DOLLAR_CURLY = '${'
-    DOLLAR = '$'
-    IS = '?'
-    NAMED = '@'
-    COLON = ':'
-    SEMI = ';'
-    AND = '&&'
-    OR = '||'
+
+    DOT = '.'
+    HAS = '?'
     NOT = '!'
-    EQ = '=='
-    NEQ = '!='
-    LEQ = '<='
-    GEQ = '>='
-    LT = '<'
-    GT = '>'
+    TIMES = '*'
+    DIVIDE = '/'
     PLUS = '+'
     MINUS = '-'
-    DIVIDE = '/'
-    TIMES = '*'
+    LT = '<'
+    GT = '>'
     CONCAT = '++'
-    DOT = '.'
-    COMMA = ','
-    IMPL = '->'
     UPDATE = '//'
+    LEQ = '<='
+    GEQ = '>='
+    EQ = '=='
+    NEQ = '!='
+    AND = '&&'
+    OR = '||'
+    IMPL = '->'
 
-    ASSERT = 'assert'
-    IF = 'if'
-    ELSE = 'else'
-    THEN = 'then'
-    WITH = 'with'
-    LET = 'let'
-    IN = 'in'
-    REC = 'rec'
-    OR_KW = 'or'
-    ELLIPSIS = '...'
-    INHERIT = 'inherit'
-    REQUIRE = 'require'
-    REQUIRES = 'requires'
-    IMPORT = 'import'
-    IMPORTS = 'imports'
-
-    SCOMMENT = 'regexp:#[^\r\n]*'
-    MCOMMENT = 'regexp:/\*([^*]|\*[^/])*\*/'
-
-    INT = "regexp:[0-9]+"
-    BOOL = "regexp:(true|false)"
-    ID = "regexp:[a-zA-Z][a-zA-Z_0-9'-]*"
-
-    /* filesystem, relative or absolute */
-    PATH = "regexp:[a-zA-Z0-9._\-+]*(/[a-zA-Z0-9._\-+]+)+"
-    /* search path, resolve first segment against NIX_PATH */
-    SPATH = "regexp:<[a-zA-Z0-9._\-+]+(/[a-zA-Z0-9._\-+]+)*>"
-
-    /* home path, resolve to relative users home */
-    HPATH = "regexp:~(/[a-zA-Z0-9._\-+]+)+"
-    /* somewhere else */
-    URI = "regexp:[a-zA-Z][a-zA-Z0-9+\-.]*:[a-zA-Z0-9%/?:@&=+$,\-_.!~*']+"
-
-    SPACE='regexp:\s+'
+    // This two tokens must be declared here because they are not used by the
+    // parser and therefore not declared anywhere else in the file.
+    SCOMMENT = 'SCOMMENT'
+    MCOMMENT = 'MCOMMENT'
   ]
 }
 
 nixFile ::= expr
 
-expr ::= lambda
-       | IF expr THEN expr ELSE expr
-       | WITH expr SEMI expr
-       | ASSERT expr_op SEMI expr
-       | LET binds IN expr
-       | expr_op
+;{ extends("expr_.*")=expr }
+expr ::=
+    expr_assert
+  | expr_if
+  | expr_let
+  | expr_with
+  | expr_lambda
+  | expr_op
 
-lambda ::= (fn_lambda | bn_lambda | param_set | ID) COLON expr
-fn_lambda ::= ID NAMED param_set
-bn_lambda ::= param_set NAMED ID
-param_set ::= LCURLY params RCURLY
+expr_assert ::= ASSERT expr SEMI expr
+expr_if ::= IF expr THEN expr ELSE expr
+expr_let ::= LET bind* IN expr
+expr_with ::= WITH expr SEMI expr
 
-expr_op ::= logical bool_expr* | unary_op expr_op
+expr_lambda ::= lambda_params COLON expr
+private lambda_params ::= ID [ AT param_set ] | param_set [ AT ID ]
+param_set ::= LCURLY [ ( param COMMA )* ( ELLIPSIS | param ) ] RCURLY
+param ::= ID [ HAS expr ]
 
-left bool_expr ::= bool_op logical
-private bool_op ::= AND | OR | IMPL | OR_KW
-logical ::= relative rel_expr*
+// Note that the rules for expr_op.* use a special case of Grammar-Kit. Left
+// recursion would not be possible otherwise.
+// https://github.com/JetBrains/Grammar-Kit/blob/master/HOWTO.md#24-compact-expression-parsing-with-priorities
+// https://intellij-support.jetbrains.com/hc/en-us/community/posts/360001258300-What-s-the-alternative-to-left-recursion-in-GrammarKit-#community_comment_360000201199
+;{ extends("expr_op_.*")=expr_op }
+expr_op ::=
+    expr_op_implication
+  | expr_op_or
+  | expr_op_and
+  | group_eq
+  | group_cmp
+  | expr_op_update
+  | expr_op_not
+  | group_add
+  | group_mul
+  | expr_op_concat
+  | expr_op_has
+  | expr_op_neg
+  | expr_op_base
+private group_eq ::= expr_op_eq | expr_op_ne
+private group_cmp ::= expr_op_lt | expr_op_le | expr_op_gt | expr_op_ge
+private group_add ::= expr_op_plus | expr_op_minus
+private group_mul ::= expr_op_mul | expr_op_div
 
-left rel_expr ::= rel_op relative
-private rel_op ::= EQ | NEQ | LEQ | GEQ | GT | LT
-relative ::= factor add_expr*
+expr_op_implication ::= expr_op IMPL expr_op
+expr_op_or ::= expr_op OR expr_op
+expr_op_and ::= expr_op AND expr_op
+expr_op_eq ::= expr_op EQ expr_op
+expr_op_ne ::= expr_op NEQ expr_op
+expr_op_lt ::= expr_op LT expr_op
+expr_op_le ::= expr_op LEQ expr_op
+expr_op_gt ::= expr_op GT expr_op
+expr_op_ge ::= expr_op GEQ expr_op
+expr_op_update ::= expr_op UPDATE expr_op { rightAssociative=true }
+expr_op_not ::= NOT expr_op
+expr_op_plus ::= expr_op PLUS expr_op
+expr_op_minus ::= expr_op MINUS expr_op
+expr_op_mul ::= expr_op TIMES expr_op
+expr_op_div ::= expr_op DIVIDE expr_op
+expr_op_concat ::= expr_op CONCAT expr_op { rightAssociative=true }
+expr_op_has ::= expr_op HAS attr_path
+expr_op_neg ::= MINUS expr_op
+expr_op_base ::= expr_app | expr_select_or_legacy
 
-left add_expr ::= add_op factor
-private add_op ::= PLUS | MINUS | CONCAT | UPDATE
-factor ::= primary mul_expr*
+// Grammar-Kit cannot handle "expr_app ::= expr_app expr_select_or_legacy" or
+// equivalent rules. As a workaround, we use this rule which will only create
+// one AST node for a series of function calls.
+expr_app ::= expr_select_or_legacy expr_select_or_legacy +
 
-left mul_expr ::= mul_op primary
-private mul_op ::= TIMES | DIVIDE
-primary ::= expr_app
+;{ extends("expr_select|legacy_app_or")=expr_select_or_legacy }
+expr_select_or_legacy ::= legacy_app_or | expr_select
+expr_select ::= expr_simple [ DOT attr_path [ OR_KW expr_select_or_legacy ]]
+legacy_app_or ::= expr_simple OR_KW
 
-unary_op ::= NOT | MINUS
-
-expr_app ::= expr_simple+
+;{ extends("identifier|literal|string|parens|set|list|legacy_let")=expr_simple }
 expr_simple ::=
-                literal_simple_string
-              | doc_string
-              | REC bind_set
-              | list
-              | import_stmt
-              | literal
-              | bind_or_select
-              | eval_or_select
-              | defval
-              | attr_path
-              | unary_op expr_op
+    identifier
+  | literal
+  | string
+  | parens
+  | set
+  | list
+  | legacy_let
+identifier ::= ID
+literal ::= INT | FLOAT | PATH | HPATH | SPATH | URI
+parens ::= LPAREN expr RPAREN
+set ::= [ REC ] LCURLY bind* RCURLY
+list ::= LBRAC expr_select_or_legacy* RBRAC
+legacy_let ::= LET LCURLY bind* RCURLY
 
-cont_path ::= DOT attr_path
+;{ extends(".*_string")="string" }
+string ::= std_string | ind_string
+std_string ::= STRING_OPEN string_part* STRING_CLOSE
+ind_string ::= IND_STRING_OPEN string_part* IND_STRING_CLOSE
+;{ extends("string_text|antiquotation")=string_part }
+string_part ::= string_text | antiquotation
+string_text ::= STR | IND_STR
+antiquotation ::= DOLLAR_CURLY expr RCURLY
 
-eval_or_select ::= eval_expr cont_path?
-eval_expr ::= LPAREN expr RPAREN
+;{ extends("bind_.*")=bind }
+bind ::= bind_attr | bind_inherit
+bind_attr ::= attr_path ASSIGN expr SEMI
+bind_inherit ::= INHERIT [ LPAREN expr RPAREN ] attr* SEMI
 
-bind_or_select ::= bind_set cont_path?
-bind_set ::= LCURLY binds? RCURLY
+;{ extends(".*_attr")=attr }
+attr ::= std_attr | string_attr
+std_attr ::= ID | OR_KW
+string_attr ::= std_string | antiquotation
 
-list ::= LBRAC expr_list RBRAC
-expr_list ::= list_expr*;
-list_expr ::= eval_or_select | bind_or_select | attr_path | literal_simple_string | literal
-
-literal_simple_string ::= FNUTT_OPEN string_parts FNUTT_CLOSE
-doc_string ::= IND_STRING_OPEN ind_string_parts IND_STRING_CLOSE
-
-literal ::= INT | BOOL | PATH | SPATH | HPATH | URI | STR
-nix_init ::= DOLLAR_CURLY expr RCURLY
-
-string_parts ::= (STR | nix_init)*
-
-ind_string_parts ::= (IND_STR | nix_init)*
-
-binds ::= binding+
-binding ::= (require_expr | inherit_attrs | attr_assign) SEMI
-
-require_expr ::= (REQUIRE|REQUIRES|IMPORTS) ASSIGN LBRAC path_expr* RBRAC
-
-import_stmt ::= IMPORT path_expr call_args?
-
-call_args ::= LCURLY binds? RCURLY
-
-path_expr ::= PATH | HPATH | SPATH | list_expr
-
-attr_assign ::= attr_path ASSIGN expr
-
-inherit_attrs ::= INHERIT (LPAREN expr RPAREN)? attrs
-
-attrs ::= attr*
-
-attr_path ::= attr (DOT attr)*
-
-attr ::= ID | FNUTT_OPEN string_attr FNUTT_CLOSE
-
-string_attr ::= STR
-              | nix_init
-
-params ::= param (COMMA param)*
-
-param ::= defval
-         | ID
-         | ELLIPSIS
-
-defval ::= ID IS expr
+attr_path ::= attr ( DOT attr )*

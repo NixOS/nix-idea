@@ -15,7 +15,7 @@ public class NixBraceMatcher implements PairedBraceMatcher {
       new BracePair(NixTypes.LCURLY,NixTypes.RCURLY,false),
       new BracePair(NixTypes.DOLLAR_CURLY,NixTypes.RCURLY,true),
       new BracePair(NixTypes.IND_STRING_OPEN,NixTypes.IND_STRING_CLOSE,true),
-      new BracePair(NixTypes.FNUTT_OPEN,NixTypes.FNUTT_CLOSE,false)
+      new BracePair(NixTypes.STRING_OPEN,NixTypes.STRING_CLOSE,false)
     };
 
     @Override

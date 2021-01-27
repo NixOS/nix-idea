@@ -1,50 +1,33 @@
 package org.nixos.idea.lang;
-import com.intellij.lexer.*;
+
+import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 import static org.nixos.idea.psi.NixTypes.*;
 
 %%
 
 %{
-  private Stack<Integer> state;
-  public CharSequence yylval_id, yylval_path, yylval_uri, yylval_expr;
-  int yychar, yyline, yycolumn;
+  private final Deque<Integer> state = new ArrayDeque<>();
 
-  public void yy_push_state(Integer sst) {
+  private void pushState(int sst) {
     state.push(sst);
     yybegin(sst);
   }
 
-  public Integer yy_pop_state() {
-    Integer sst;
-    try {
+  private int popState() {
+    int sst;
+    if (state.isEmpty()) {
+      sst = YYINITIAL;
+    } else {
       sst = state.pop();
-    } catch (Exception e) {
-      sst =  YYINITIAL;
     }
-    yybegin(yy_top_state());
+    yybegin(state.isEmpty() ? YYINITIAL : state.peek());
     return sst;
   }
-
-  public Integer yy_top_state() {
-    Integer sst;
-    try {
-      sst = state.peek();
-    } catch (Exception e) {
-      sst =  YYINITIAL;
-    }
-    return sst;
-  }
-
 %}
-
-%init{
-
-    this.state = new Stack<Integer>();
-
-%init}
-
 
 %public
 %class NixLexer
@@ -52,175 +35,102 @@ import static org.nixos.idea.psi.NixTypes.*;
 %function advance
 %type IElementType
 %unicode
-%line
-%char
-%column
 %xstate STRING IND_STRING
 
-EOL="\r"|"\n"|"\r\n"
-LINE_WS=[\ \t\f]
-WHITE_SPACE=({LINE_WS}|{EOL})+
+ANY=[^]
+ID=[a-zA-Z_][a-zA-Z0-9_'-]*
+INT=[0-9]+
+FLOAT=(([1-9][0-9]*\.[0-9]*)|(0?\.[0-9]+))([Ee][+-]?[0-9]+)?
+PATH=[a-zA-Z0-9._+-]*(\/[a-zA-Z0-9._+-]+)+\/?
+HPATH=\~(\/[a-zA-Z0-9._+-]+)+\/?
+SPATH=\<[a-zA-Z0-9._+-]+(\/[a-zA-Z0-9._+-]+)*\>
+URI=[a-zA-Z][a-zA-Z0-9.+-]*\:[a-zA-Z0-9%/?:@&=+$,\-_.!~*']+
 
+WHITE_SPACE=[\ \t\r\n]+
 SCOMMENT=#[^\r\n]*
 MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
-INT=[0-9]+
-BOOL=(true|false)
-ID=[_a-zA-Z][_a-zA-Z_0-9'-]*
-
-STRINLINENIX=\$\{
-STR_CT=([^\$\"]|\$[^\{\"])+
-IND_STR_CT=([^\$\']|\$[^\{\']|\'[^\'\$])+
-
-PATH=[a-zA-Z0-9\.\_\-\+]*(\/[a-zA-Z0-9\.\_\-\+]+)+
-SPATH=\<[a-zA-Z0-9\.\_\-\+]+(\/[a-zA-Z0-9\.\_\-\+]+)*\>
-HPATH=\~(\/[a-zA-Z0-9\.\_\-\+]+)+
-URI=[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*']+
 
 %%
+
 <YYINITIAL> {
-  {WHITE_SPACE}      { return com.intellij.psi.TokenType.WHITE_SPACE; }
+  "if"                  { return IF; }
+  "then"                { return THEN; }
+  "else"                { return ELSE; }
+  "assert"              { return ASSERT; }
+  "with"                { return WITH; }
+  "let"                 { return LET; }
+  "in"                  { return IN; }
+  "rec"                 { return REC; }
+  "inherit"             { return INHERIT; }
+  "or"                  { return OR_KW; }
+  "..."                 { return ELLIPSIS; }
 
-  "="                { return ASSIGN; }
-  "("                { return LPAREN; }
-  ")"                { return RPAREN; }
-  "{"                { yy_push_state(YYINITIAL); return LCURLY; }
-  "}"                { yy_pop_state(); return RCURLY; }
-  "["                { return LBRAC; }
-  "]"                { return RBRAC; }
-  "${"               { return DOLLAR_CURLY; }
-  "$"                { return DOLLAR; }
-  "?"                { return IS; }
-  "@"                { return NAMED; }
-  ":"                { return COLON; }
-  ";"                { return SEMI; }
-  "&&"               { return AND; }
-  "||"               { return OR; }
-  "!"                { return NOT; }
-  "=="               { return EQ; }
-  "!="               { return NEQ; }
-  "<="               { return LEQ; }
-  ">="               { return GEQ; }
-  "<"                { return LT; }
-  ">"                { return GT; }
-  "+"                { return PLUS; }
-  "-"                { return MINUS; }
-  "/"                { return DIVIDE; }
-  "*"                { return TIMES; }
-  "++"               { return CONCAT; }
-  "."                { return DOT; }
-  ","                { return COMMA; }
-  "\""               { yy_push_state(STRING); return FNUTT_OPEN; }
-  "->"               { return IMPL; }
-  "//"               { return UPDATE; }
-  "assert"           { return ASSERT; }
-  "if"               { return IF; }
-  "else"             { return ELSE; }
-  "then"             { return THEN; }
-  "with"             { return WITH; }
-  "let"              { return LET; }
-  "in"               { return IN; }
-  "rec"              { return REC; }
-  "or"               { return OR_KW; }
-  "..."              { return ELLIPSIS; }
-  "inherit"          { return INHERIT; }
-  "require"          { return REQUIRE; }
-  "requires"         { return REQUIRES; }
-  "import"           { return IMPORT; }
-  "imports"          { return IMPORTS; }
+  "="                   { return ASSIGN; }
+  ":"                   { return COLON; }
+  ";"                   { return SEMI; }
+  ","                   { return COMMA; }
+  "@"                   { return AT; }
+  "("                   { return LPAREN; }
+  ")"                   { return RPAREN; }
+  "{"                   { pushState(YYINITIAL); return LCURLY; }
+  "}"                   { popState(); return RCURLY; }
+  "["                   { return LBRAC; }
+  "]"                   { return RBRAC; }
+  "${"                  { pushState(YYINITIAL); return DOLLAR_CURLY; }
 
-  \'\'(\ *\n)?
-    {
-        yy_push_state(IND_STRING);
-        return IND_STRING_OPEN;
-    }
+  "."                   { return DOT; }
+  "?"                   { return HAS; }
+  "!"                   { return NOT; }
+  "*"                   { return TIMES; }
+  "/"                   { return DIVIDE; }
+  "+"                   { return PLUS; }
+  "-"                   { return MINUS; }
+  "<"                   { return LT; }
+  ">"                   { return GT; }
+  "++"                  { return CONCAT; }
+  "//"                  { return UPDATE; }
+  "<="                  { return LEQ; }
+  ">="                  { return GEQ; }
+  "=="                  { return EQ; }
+  "!="                  { return NEQ; }
+  "&&"                  { return AND; }
+  "||"                  { return OR; }
+  "->"                  { return IMPL; }
 
-  {SCOMMENT}         { return SCOMMENT; }
-  {MCOMMENT}         { return MCOMMENT; }
-  {INT}              { return INT; }
-  {BOOL}             { return BOOL; }
-  {ID}               { yylval_id=yytext();return ID; }
-  {PATH}             { yylval_path=yytext();return PATH; }
-  {SPATH}            { yylval_path=yytext();return SPATH; }
-  {HPATH}            { yylval_path=yytext();return HPATH; }
-  {URI}              { yylval_uri=yytext();return URI; }
+  \"                    { pushState(STRING); return STRING_OPEN; }
+  \'\'                  { pushState(IND_STRING); return IND_STRING_OPEN; }
 
-  [^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }
+  // Note that `true`, `false` and `null` are built-in variables but not
+  // keywords. Therefore, they are not listed here.
+  {ID}                  { return ID; }
+  {INT}                 { return INT; }
+  {FLOAT}               { return FLOAT; }
+  {PATH}                { return PATH; }
+  {HPATH}               { return HPATH; }
+  {SPATH}               { return SPATH; }
+  {URI}                 { return URI; }
 
-  .
-    {
-        zzBufferL=yytext();
-    }
+  {SCOMMENT}            { return SCOMMENT; }
+  {MCOMMENT}            { return MCOMMENT; }
+  {WHITE_SPACE}         { return com.intellij.psi.TokenType.WHITE_SPACE; }
+  [^]                   { return com.intellij.psi.TokenType.BAD_CHARACTER; }
 }
 
 <STRING> {
-  {STR_CT}
-    {
-        yylval_expr=yytext();
-        return STR;
-    }
-  {STRINLINENIX}
-    {
-        yy_push_state(YYINITIAL);
-        return DOLLAR_CURLY;
-    }
-  "\""
-    {
-        yy_pop_state();
-        return FNUTT_CLOSE;
-    }
-  .
-    {
-        zzBufferL=yytext();
-    }
+  ([^\$\"\\]|\$[^\{\"\\]|\\{ANY}|\$\\{ANY})*\$/\" { return STR; }
+  ([^\$\"\\]|\$[^\{\"\\]|\\{ANY}|\$\\{ANY})+ |
+  \$|\\|\$\\            { return STR; }
+  "${"                  { pushState(YYINITIAL); return DOLLAR_CURLY; }
+  \"                    { popState(); return STRING_CLOSE; }
 }
 
 <IND_STRING> {
-  {IND_STR_CT}
-    {
-        yylval_expr = yytext();
-        return IND_STR;
-    }
-
-  "''$"
-    {
-        yylval_expr = "$";
-        return IND_STR;
-
-    }
-
-  "'''"
-    {
-        yylval_expr = "''";
-        return IND_STR;
-
-    }
-
-  "''\."
-    {
-        yylval_expr = yytext();
-        return IND_STR;
-    }
-
-  {STRINLINENIX}
-    {
-        yy_push_state(YYINITIAL);
-        return DOLLAR_CURLY;
-    }
-
-  "''"
-    {
-        yy_pop_state();
-        return IND_STRING_CLOSE;
-    }
-
-  "'"
-    {
-        yylval_expr = "'";
-        return IND_STR;
-    }
-
-  .
-    {
-        zzBufferL=yytext();
-    }
+  ([^\$\']|\$[^\{\']|\'[^\'\$])+ |
+  "''$" |
+  \$ |
+  "'''" |
+  "''"\\{ANY}           { return IND_STR; }
+  "${"                  { pushState(YYINITIAL); return DOLLAR_CURLY; }
+  "''"                  { popState(); return IND_STRING_CLOSE; }
+  "'"                   { return IND_STR; }
 }

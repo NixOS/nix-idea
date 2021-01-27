@@ -28,7 +28,6 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
 
     public static final TextAttributesKey ID = createTextAttributesKey("ID", DefaultLanguageHighlighterColors.IDENTIFIER);
     public static final TextAttributesKey INT = createTextAttributesKey("INT", DefaultLanguageHighlighterColors.NUMBER);
-    public static final TextAttributesKey BOOL = createTextAttributesKey("BOOL", DefaultLanguageHighlighterColors.PREDEFINED_SYMBOL);
 
     public static final TextAttributesKey ASSERT = createTextAttributesKey("ASSERT", DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey IF = createTextAttributesKey("IF", DefaultLanguageHighlighterColors.KEYWORD);
@@ -40,10 +39,6 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey WITH = createTextAttributesKey("WITH", DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey INHERIT = createTextAttributesKey("INHERIT", DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey OR_KW = createTextAttributesKey("OR_KW", DefaultLanguageHighlighterColors.KEYWORD);
-    public static final TextAttributesKey IMPORT = createTextAttributesKey("IMPORT", DefaultLanguageHighlighterColors.KEYWORD);
-    public static final TextAttributesKey IMPORTS = createTextAttributesKey("IMPORTS", DefaultLanguageHighlighterColors.KEYWORD);
-    public static final TextAttributesKey REQUIRE = createTextAttributesKey("REQUIRE", DefaultLanguageHighlighterColors.KEYWORD);
-    public static final TextAttributesKey REQUIRES = createTextAttributesKey("REQUIRES", DefaultLanguageHighlighterColors.KEYWORD);
 
     public static final TextAttributesKey GT = createTextAttributesKey("GT", DefaultLanguageHighlighterColors.OPERATION_SIGN);
     public static final TextAttributesKey LT = createTextAttributesKey("LT", DefaultLanguageHighlighterColors.OPERATION_SIGN);
@@ -91,7 +86,6 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey[] COLON_KEYS = new TextAttributesKey[]{COLON};
     public static final TextAttributesKey[] ID_KEYS = new TextAttributesKey[]{ID};
     public static final TextAttributesKey[] NUMBER_KEYS = new TextAttributesKey[]{INT};
-    public static final TextAttributesKey[] PREDEFINED_KEYS = new TextAttributesKey[]{BOOL};
     public static final TextAttributesKey[] OPERATOR_KEYS = new TextAttributesKey[]{
             GT,LT,LEQ,GEQ,NEQ,EQ,PLUS,MINUS,DIVIDE,TIMES,NOT,AND,OR,IMPL,UPDATE,IS,NAMED,CONCAT,DOT,DOLLAR_CURLY
     };
@@ -100,18 +94,16 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey[] FUNCTION_KEYS = new TextAttributesKey[]{LAMBDA};
     public static final TextAttributesKey[] PARAMETER_KEYS = new TextAttributesKey[]{FORMAL};
 
-    @NotNull
     @Override
-    public Lexer getHighlightingLexer() {
+    public @NotNull Lexer getHighlightingLexer() {
         return new NixLexerAdapter();
     }
 
-    @NotNull
     @Override
-    public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
+    public TextAttributesKey @NotNull [] getTokenHighlights(IElementType tokenType) {
         {
             if (tokenType == NixTypes.PARAM) return PARAMETER_KEYS;
-            if (tokenType == NixTypes.LAMBDA) return FUNCTION_KEYS;
+            if (tokenType == NixTypes.EXPR_LAMBDA) return FUNCTION_KEYS;
             if (tokenType == NixTypes.COMMA) return COMMA_KEYS;
             if (tokenType == NixTypes.SEMI) return SEMI_KEYS;
             if (tokenType == NixTypes.COLON) {
@@ -125,9 +117,6 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
             }
             if (tokenType == NixTypes.ID) {
                 return ID_KEYS;
-            }
-            if (tokenType == NixTypes.BOOL) {
-                return PREDEFINED_KEYS;
             }
             if (tokenType == NixTypes.INT) {
                 return NUMBER_KEYS;
@@ -148,8 +137,8 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
                     tokenType == NixTypes.OR ||
                     tokenType == NixTypes.IMPL ||
                     tokenType == NixTypes.UPDATE ||
-                    tokenType == NixTypes.IS ||
-                    tokenType == NixTypes.NAMED ||
+                    tokenType == NixTypes.HAS ||
+                    tokenType == NixTypes.AT ||
                     tokenType == NixTypes.CONCAT ||
                     tokenType == NixTypes.DOT )
                 return OPERATOR_KEYS;
@@ -167,21 +156,16 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
                 return STRING_KEYS;
             }
             if (
-                    tokenType == NixTypes.ASSERT ||
-                    tokenType == NixTypes.IN ||
-                    tokenType == NixTypes.OR_KW ||
-                    tokenType == NixTypes.REC ||
                     tokenType == NixTypes.IF ||
-                    tokenType == NixTypes.ELSE ||
                     tokenType == NixTypes.THEN ||
-                    tokenType == NixTypes.LET ||
+                    tokenType == NixTypes.ELSE ||
+                    tokenType == NixTypes.ASSERT ||
                     tokenType == NixTypes.WITH ||
+                    tokenType == NixTypes.LET ||
                     tokenType == NixTypes.IN ||
+                    tokenType == NixTypes.REC ||
                     tokenType == NixTypes.INHERIT ||
-                    tokenType == NixTypes.IMPORT ||
-                    tokenType == NixTypes.IMPORTS ||
-                    tokenType == NixTypes.REQUIRE ||
-                    tokenType == NixTypes.REQUIRES) {
+                    tokenType == NixTypes.OR_KW) {
                 return KEYWORD_KEYS;
             }
             return EMPTY_ARRAY;
