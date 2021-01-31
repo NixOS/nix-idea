@@ -2,35 +2,55 @@ package org.nixos.idea.lang;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import gnu.trove.TLongArrayList;
+import gnu.trove.TLongIntHashMap;
 
 import static org.nixos.idea.psi.NixTypes.*;
 
 %%
 
 %{
-  private final Deque<Integer> state = new ArrayDeque<>();
+  private final TLongArrayList states = new TLongArrayList();
+  private final TLongIntHashMap stateIndexMap = new TLongIntHashMap();
 
-  private void pushState(int sst) {
-    state.push(sst);
-    yybegin(sst);
+  {
+    states.add(YYINITIAL);
+    stateIndexMap.put(YYINITIAL, 0);
   }
 
-  private int popState() {
-    int sst;
-    if (state.isEmpty()) {
-      sst = YYINITIAL;
-    } else {
-      sst = state.pop();
+  private int currentStateIndex = 0;
+  private int parentStateIndex = 0;
+
+  public int getStateIndex() {
+    return currentStateIndex;
+  }
+
+  public void restoreState(int stateIndex) {
+    long state = states.get(stateIndex);
+    currentStateIndex = stateIndex;
+    parentStateIndex = (int) (state >> 32);
+    yybegin((int) state);
+  }
+
+  private void pushState(int yystate) {
+    long state = ((long) currentStateIndex << 32) | ((long) yystate & 0x0FFFFFFFFL);
+    int stateIndex = stateIndexMap.get(state); // Returns 0 if not found
+    if (stateIndex == 0 && state != YYINITIAL) {
+      stateIndex = states.size();
+      states.add(state);
+      stateIndexMap.put(state, stateIndex);
     }
-    yybegin(state.isEmpty() ? YYINITIAL : state.peek());
-    return sst;
+    parentStateIndex = currentStateIndex;
+    currentStateIndex = stateIndex;
+    yybegin(yystate);
+  }
+
+  private void popState() {
+    restoreState(parentStateIndex);
   }
 %}
 
-%public
-%class NixLexer
+%class _NixLexer
 %implements FlexLexer
 %function advance
 %type IElementType

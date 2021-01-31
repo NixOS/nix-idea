@@ -4,7 +4,6 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.Language;
 import com.intellij.lang.ParserDefinition;
 import com.intellij.lang.PsiParser;
-import com.intellij.lexer.FlexAdapter;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.FileViewProvider;
@@ -17,8 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.nixos.idea.file.NixFile;
 import org.nixos.idea.psi.NixTypes;
 
-import java.io.Reader;
-
 public class NixParserDefinition implements ParserDefinition {
     public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
     public static final TokenSet COMMENTS = TokenSet.create(NixTypes.SCOMMENT,NixTypes.MCOMMENT);
@@ -29,8 +26,7 @@ public class NixParserDefinition implements ParserDefinition {
     @NotNull
     @Override
     public Lexer createLexer(Project project) {
-        NixLexer lxr = new NixLexer((Reader) null);
-        return new FlexAdapter(lxr);
+        return new NixLexer();
     }
 
     @NotNull

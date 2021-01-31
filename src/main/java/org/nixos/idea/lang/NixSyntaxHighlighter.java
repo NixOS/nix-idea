@@ -96,7 +96,7 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
 
     @Override
     public @NotNull Lexer getHighlightingLexer() {
-        return new NixLexerAdapter();
+        return new NixLexer();
     }
 
     @Override
