@@ -1,5 +1,6 @@
 {
   parserClass="org.nixos.idea.lang.NixParser"
+  parserUtilClass="org.nixos.idea.psi.impl.NixParserUtil"
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
   psiClassPrefix="Nix"
@@ -10,6 +11,12 @@
   elementTypeHolderClass="org.nixos.idea.psi.NixTypes"
   elementTypeClass="org.nixos.idea.psi.NixElementType"
   tokenTypeClass="org.nixos.idea.psi.NixTokenType"
+
+  // do not record error reporting information in recover rules and missing_semi
+  consumeTokenMethod(".*_recover|missing_semi")="consumeTokenFast"
+  // do not record error reporting information in expression parsing,
+  // no one really needs to know that + - * / are expected at any offset
+  consumeTokenMethod("expr_op.*")="consumeTokenFast"
 
   tokens = [
     // This list does not contain all tokens. This list only defines the debug
@@ -69,7 +76,8 @@
 nixFile ::= expr
 
 ;{ extends("expr_.*")=expr }
-expr ::=
+expr ::= <<parseNonBindValue expr0>>
+private expr0 ::=
     expr_assert
   | expr_if
   | expr_let
@@ -77,18 +85,26 @@ expr ::=
   | expr_lambda
   | expr_op
 
-expr_assert ::= ASSERT expr SEMI expr
-expr_if ::= IF expr THEN expr ELSE expr
-expr_let ::= LET bind* IN expr
-expr_with ::= WITH expr SEMI expr
+expr_assert ::= ASSERT expr recover_control SEMI expr { pin=1 }
+expr_if ::= IF expr recover_control then else { pin=1 }
+private then ::= THEN expr recover_control { pin=1 }
+private else ::= ELSE expr { pin=1 }
+expr_let ::= LET !LCURLY recover_let (bind recover_let)* IN expr { pin=2 }
+expr_with ::= WITH expr recover_control SEMI expr { pin=1 }
+private recover_control ::= { recoverWhile=control_recover }
+private recover_let ::= { recoverWhile=let_recover }
+private control_recover ::= braces_recover !(ASSERT | SEMI | IF | THEN | ELSE | LET | IN | WITH)
+private let_recover ::= control_recover !bind
 
-expr_lambda ::= lambda_params COLON expr
-private lambda_params ::= ID [ AT param_set ] | param_set [ AT ID ]
-param_set ::= LCURLY [ ( param COMMA )* ( ELLIPSIS | param ) ] RCURLY
-param ::= ID [ HAS expr ]
+expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 }
+private lambda_params ::= ID [ !missing_semi AT param_set ] | param_set [ !missing_semi AT ID ]
+param_set ::= LCURLY [ ( param COMMA )* ( ELLIPSIS | param ) ] recover_curly RCURLY { pin=1 }
+param ::= ID [ param_has ] { pin=2 recoverWhile=param_recover }
+private param_has ::= HAS expr { pin=1 }
+private param_recover ::= curly_recover !COMMA
 
-// Note that the rules for expr_op.* use a special case of Grammar-Kit. Left
-// recursion would not be possible otherwise.
+// Note that the rules for expr_op.* use a special processing mode of
+// Grammar-Kit. Left recursion would not be possible otherwise.
 // https://github.com/JetBrains/Grammar-Kit/blob/master/HOWTO.md#24-compact-expression-parsing-with-priorities
 // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360001258300-What-s-the-alternative-to-left-recursion-in-GrammarKit-#community_comment_360000201199
 ;{ extends("expr_op_.*")=expr_op }
@@ -134,12 +150,12 @@ expr_op_base ::= expr_app | expr_select_or_legacy
 // Grammar-Kit cannot handle "expr_app ::= expr_app expr_select_or_legacy" or
 // equivalent rules. As a workaround, we use this rule which will only create
 // one AST node for a series of function calls.
-expr_app ::= expr_select_or_legacy expr_select_or_legacy +
+expr_app ::= expr_select_or_legacy ( !missing_semi expr_select_or_legacy ) +
 
 ;{ extends("expr_select|legacy_app_or")=expr_select_or_legacy }
 expr_select_or_legacy ::= legacy_app_or | expr_select
-expr_select ::= expr_simple [ DOT attr_path [ OR_KW expr_select_or_legacy ]]
-legacy_app_or ::= expr_simple OR_KW
+expr_select ::= expr_simple [ !missing_semi DOT attr_path [ OR_KW expr_select_or_legacy ]]
+legacy_app_or ::= expr_simple !missing_semi OR_KW
 
 ;{ extends("identifier|literal|string|parens|set|list|legacy_let")=expr_simple }
 expr_simple ::=
@@ -152,24 +168,34 @@ expr_simple ::=
   | legacy_let
 identifier ::= ID
 literal ::= INT | FLOAT | PATH | HPATH | SPATH | URI
-parens ::= LPAREN expr RPAREN
-set ::= [ REC ] LCURLY bind* RCURLY
-list ::= LBRAC expr_select_or_legacy* RBRAC
-legacy_let ::= LET LCURLY bind* RCURLY
+parens ::= LPAREN expr recover_parens RPAREN { pin=1 }
+set ::= [ REC ] LCURLY recover_set (bind recover_set)* RCURLY { pin=2 }
+list ::= LBRAC recover_list (expr_select_or_legacy recover_list)* RBRAC { pin=1 }
+legacy_let ::= LET LCURLY recover_set (bind recover_set)* RCURLY { pin=2 }
+private recover_parens ::= { recoverWhile=paren_recover }
+private recover_set ::= { recoverWhile=set_recover }
+private recover_list ::= { recoverWhile=list_recover }
+private set_recover ::= curly_recover !bind
+private list_recover ::= brac_recover !expr_select_or_legacy
 
 ;{ extends(".*_string")="string" }
 string ::= std_string | ind_string
-std_string ::= STRING_OPEN string_part* STRING_CLOSE
-ind_string ::= IND_STRING_OPEN string_part* IND_STRING_CLOSE
+std_string ::= STRING_OPEN string_part* STRING_CLOSE { pin=1 }
+ind_string ::= IND_STRING_OPEN string_part* IND_STRING_CLOSE { pin=1 }
 ;{ extends("string_text|antiquotation")=string_part }
-string_part ::= string_text | antiquotation
+string_part ::= string_text | antiquotation { recoverWhile=string_part_recover }
 string_text ::= STR | IND_STR
-antiquotation ::= DOLLAR_CURLY expr RCURLY
+antiquotation ::= DOLLAR_CURLY expr recover_curly RCURLY { pin=1 }
+private string_part_recover ::= !(STR | IND_STR | DOLLAR_CURLY | STRING_CLOSE | IND_STRING_CLOSE)
 
-;{ extends("bind_.*")=bind }
+;{ extends("bind_attr|bind_inherit")=bind }
 bind ::= bind_attr | bind_inherit
-bind_attr ::= attr_path ASSIGN expr SEMI
-bind_inherit ::= INHERIT [ LPAREN expr RPAREN ] attr* SEMI
+bind_attr ::= attr_path ASSIGN bind_value SEMI { pin=2 }
+bind_value ::= <<parseBindValue expr0>> { elementType=expr }
+bind_inherit ::= INHERIT [ LPAREN expr RPAREN ] attr* SEMI { pin=1 }
+// Is used in various rules just to provide a better error message when a
+// semicolon is missing. Must always be used with `!`.
+private missing_semi ::= <<parseIsBindValue>> ( RCURLY | IN | bind )
 
 ;{ extends(".*_attr")=attr }
 attr ::= std_attr | string_attr
@@ -177,3 +203,11 @@ std_attr ::= ID | OR_KW
 string_attr ::= std_string | antiquotation
 
 attr_path ::= attr ( DOT attr )*
+
+
+private braces_recover ::= !(RPAREN | RCURLY | RBRAC)
+private paren_recover ::= !RPAREN
+private curly_recover ::= !RCURLY
+private brac_recover ::= !RBRAC
+
+private recover_curly ::= { recoverWhile=curly_recover }

@@ -23,6 +23,58 @@ public final class ParsingFailTest extends ParsingTestCase {
     doTest(true);
   }
 
+  public void testIncompleteExpressionsInBraces() {
+    doTest(true);
+  }
+
+  public void testMissingSemicolon() {
+    doTest(true);
+  }
+
+  public void testMissingSemicolonTrap() {
+    doTest(true);
+  }
+
+  public void testRecoverFromAssertCondition() {
+    doTest(true);
+  }
+
+  public void testRecoverFromIfCondition() {
+    doTest(true);
+  }
+
+  public void testRecoverFromIfThenExpression() {
+    doTest(true);
+  }
+
+  public void testRecoverFromLetBinding() {
+    doTest(true);
+  }
+
+  public void testRecoverFromListItem() {
+    doTest(true);
+  }
+
+  public void testRecoverFromParensExprPart() {
+    doTest(true);
+  }
+
+  public void testRecoverFromSetBinding() {
+    doTest(true);
+  }
+
+  public void testRecoverFromString() {
+    doTest(true);
+  }
+
+  public void testRecoverFromWith() {
+    doTest(true);
+  }
+
+  public void testRecWithoutSet() {
+    doTest(true);
+  }
+
   @Override
   protected String getTestDataPath() {
     return "src/test/testData";
