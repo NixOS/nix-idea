@@ -145,17 +145,19 @@ expr_op_div ::= expr_op DIVIDE expr_op
 expr_op_concat ::= expr_op CONCAT expr_op { rightAssociative=true }
 expr_op_has ::= expr_op HAS attr_path
 expr_op_neg ::= MINUS expr_op
-expr_op_base ::= expr_app | expr_select_or_legacy
+expr_op_base ::= expr_app
 
 // Grammar-Kit cannot handle "expr_app ::= expr_app expr_select_or_legacy" or
 // equivalent rules. As a workaround, we use this rule which will only create
 // one AST node for a series of function calls.
-expr_app ::= expr_select_or_legacy ( !missing_semi expr_select_or_legacy ) +
+expr_app ::= expr_select ( !missing_semi expr_select ) *
 
-;{ extends("expr_select|legacy_app_or")=expr_select_or_legacy }
-expr_select_or_legacy ::= legacy_app_or | expr_select
-expr_select ::= expr_simple [ !missing_semi DOT attr_path [ OR_KW expr_select_or_legacy ]]
-legacy_app_or ::= expr_simple !missing_semi OR_KW
+expr_select ::= expr_simple [ !missing_semi ( select_attr | legacy_app_or )]
+private select_attr ::= DOT attr_path [ select_default ] { pin=1 }
+private select_default ::= OR_KW expr_select { pin=1 }
+// Uses 'upper' instead of a choice with '|' as workaround for
+//  https://github.com/JetBrains/Grammar-Kit/issues/257
+upper legacy_app_or ::= OR_KW { extends=expr_app }
 
 ;{ extends("identifier|literal|string|parens|set|list|legacy_let")=expr_simple }
 expr_simple ::=
@@ -170,13 +172,13 @@ identifier ::= ID
 literal ::= INT | FLOAT | PATH | HPATH | SPATH | URI
 parens ::= LPAREN expr recover_parens RPAREN { pin=1 }
 set ::= [ REC ] LCURLY recover_set (bind recover_set)* RCURLY { pin=2 }
-list ::= LBRAC recover_list (expr_select_or_legacy recover_list)* RBRAC { pin=1 }
+list ::= LBRAC recover_list (expr_select recover_list)* RBRAC { pin=1 }
 legacy_let ::= LET LCURLY recover_set (bind recover_set)* RCURLY { pin=2 }
 private recover_parens ::= { recoverWhile=paren_recover }
 private recover_set ::= { recoverWhile=set_recover }
 private recover_list ::= { recoverWhile=list_recover }
 private set_recover ::= curly_recover !bind
-private list_recover ::= brac_recover !expr_select_or_legacy
+private list_recover ::= brac_recover !expr_select
 
 ;{ extends(".*_string")="string" }
 string ::= std_string | ind_string
