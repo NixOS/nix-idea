@@ -35,6 +35,10 @@ public final class ParsingFailTest extends ParsingTestCase {
     doTest(true);
   }
 
+  public void testRecoverFromAntiquotation() {
+    doTest(true);
+  }
+
   public void testRecoverFromAssertCondition() {
     doTest(true);
   }
@@ -55,7 +59,11 @@ public final class ParsingFailTest extends ParsingTestCase {
     doTest(true);
   }
 
-  public void testRecoverFromParensExprPart() {
+  public void testRecoverFromParens() {
+    doTest(true);
+  }
+
+  public void testRecoverFromParensWithValidSubexpressions() {
     doTest(true);
   }
 

@@ -85,23 +85,22 @@ private expr0 ::=
   | expr_lambda
   | expr_op
 
-expr_assert ::= ASSERT expr recover_control SEMI expr { pin=1 }
-expr_if ::= IF expr recover_control then else { pin=1 }
-private then ::= THEN expr recover_control { pin=1 }
+expr_assert ::= ASSERT expr SEMI expr { pin=1 }
+expr_if ::= IF expr then else { pin=1 }
+private then ::= THEN expr { pin=1 }
 private else ::= ELSE expr { pin=1 }
 expr_let ::= LET !LCURLY recover_let (bind recover_let)* IN expr { pin=2 }
-expr_with ::= WITH expr recover_control SEMI expr { pin=1 }
-private recover_control ::= { recoverWhile=control_recover }
+expr_with ::= WITH expr SEMI expr { pin=1 }
 private recover_let ::= { recoverWhile=let_recover }
-private control_recover ::= braces_recover !(ASSERT | SEMI | IF | THEN | ELSE | LET | IN | WITH)
-private let_recover ::= control_recover !bind
+private let_recover ::= braces_recover !(ASSERT | SEMI | IF | THEN | ELSE | LET | IN | WITH) !bind
 
 expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 }
 private lambda_params ::= ID [ !missing_semi AT param_set ] | param_set [ !missing_semi AT ID ]
-param_set ::= LCURLY [ ( param COMMA )* ( ELLIPSIS | param ) ] recover_curly RCURLY { pin=1 }
+param_set ::= LCURLY [ ( param COMMA )* ( ELLIPSIS | param ) ] recover_param_set RCURLY { pin=1 }
 param ::= ID [ param_has ] { pin=2 recoverWhile=param_recover }
 private param_has ::= HAS expr { pin=1 }
 private param_recover ::= curly_recover !COMMA
+private recover_param_set ::= { recoverWhile=curly_recover }
 
 // Note that the rules for expr_op.* use a special processing mode of
 // Grammar-Kit. Left recursion would not be possible otherwise.
@@ -187,7 +186,8 @@ ind_string ::= IND_STRING_OPEN string_part* IND_STRING_CLOSE { pin=1 }
 ;{ extends("string_text|antiquotation")=string_part }
 string_part ::= string_text | antiquotation { recoverWhile=string_part_recover }
 string_text ::= STR | IND_STR
-antiquotation ::= DOLLAR_CURLY expr recover_curly RCURLY { pin=1 }
+antiquotation ::= DOLLAR_CURLY expr recover_antiquotation RCURLY { pin=1 }
+private recover_antiquotation ::= { recoverWhile=curly_recover }
 private string_part_recover ::= !(STR | IND_STR | DOLLAR_CURLY | STRING_CLOSE | IND_STRING_CLOSE)
 
 ;{ extends("bind_attr|bind_inherit")=bind }
@@ -211,5 +211,3 @@ private braces_recover ::= !(RPAREN | RCURLY | RBRAC)
 private paren_recover ::= !RPAREN
 private curly_recover ::= !RCURLY
 private brac_recover ::= !RBRAC
-
-private recover_curly ::= { recoverWhile=curly_recover }

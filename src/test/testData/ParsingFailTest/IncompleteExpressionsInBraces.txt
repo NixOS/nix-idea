@@ -57,6 +57,6 @@ Nix File(0,117)
         PsiWhiteSpace(' ')(114,115)
         NixIdentifierImpl(IDENTIFIER)(115,116)
           PsiElement(NixTokenType.ID)('d')(115,116)
-        PsiErrorElement:NixTokenType.; expected, got ')'(116,116)
+        PsiErrorElement:<expr simple>, NixTokenType.., NixTokenType.:, NixTokenType.;, NixTokenType.@ or NixTokenType.or expected, got ')'(116,116)
           <empty list>
       PsiElement(NixTokenType.))(')')(116,117)
