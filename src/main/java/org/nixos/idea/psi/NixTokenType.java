@@ -13,16 +13,14 @@ public class NixTokenType extends IElementType {
 
     @Override
     public String toString() {
-        String debugName = super.toString();
-        int firstCodePoint = debugName.codePointAt(0);
-        if (Character.isUnicodeIdentifierStart(firstCodePoint) && Character.isLowerCase(firstCodePoint)) {
+        if (NixTypeUtil.KEYWORDS.contains(this)) {
             // The character U+2060 (Word Joiner) is used as a workaround to
             // make Grammar-Kit put quotation marks around keywords. See
             // https://github.com/JetBrains/Grammar-Kit/issues/262
-            return "\u2060" + debugName;
+            return "\u2060" + super.toString();
         }
         else {
-            return debugName;
+            return super.toString();
         }
     }
 }

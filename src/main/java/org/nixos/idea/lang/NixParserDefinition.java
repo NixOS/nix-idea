@@ -12,8 +12,11 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
+import org.fest.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.nixos.idea.file.NixFile;
+import org.nixos.idea.psi.NixTokenType;
+import org.nixos.idea.psi.NixTypeUtil;
 import org.nixos.idea.psi.NixTypes;
 
 public class NixParserDefinition implements ParserDefinition {
@@ -65,7 +68,21 @@ public class NixParserDefinition implements ParserDefinition {
 
     @Override
     public SpaceRequirements spaceExistenceTypeBetweenTokens(ASTNode left, ASTNode right) {
-        return SpaceRequirements.MAY;
+        NixTokenType leftType = Objects.castIfBelongsToType(left.getElementType(), NixTokenType.class);
+        NixTokenType rightType = Objects.castIfBelongsToType(right.getElementType(), NixTokenType.class);
+        if (leftType == NixTypes.SCOMMENT) {
+            return SpaceRequirements.MUST_LINE_BREAK;
+        }
+        if (leftType == NixTypes.DOLLAR && rightType == NixTypes.LCURLY) {
+            return SpaceRequirements.MUST_NOT;
+        }
+        else if (NixTypeUtil.MIGHT_COLLAPSE_WITH_ID.contains(leftType) &&
+                 NixTypeUtil.MIGHT_COLLAPSE_WITH_ID.contains(rightType)) {
+            return SpaceRequirements.MUST;
+        }
+        else {
+            return SpaceRequirements.MAY;
+        }
     }
 
     @NotNull
