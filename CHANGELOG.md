@@ -1,6 +1,40 @@
 # Changelog
 
 ## [Unreleased]
+
+This release features a complete rewrite of the parser and lexer within
+the plugin.
+
+### Added
+
+- Support for the full syntax of Nix 2.3
+
+### Changed
+
+- Error detection and recovery has been overhauled.
+- The following words are no longer treated as keywords to make the
+  implementation consistent with Nix 2.3:
+
+  - `import`
+  - `imports`
+  - `require`
+  - `requires`
+  - `true`
+  - `false`
+
+  As a result, these words are no longer highlighted. We might bring
+  back the special highlighting in a future release by using a different
+  implementation for the highlighter.
+- Messages for syntax errors no longer contain the *“NixTokenType.”*
+  prefix for every expected token. This should make the messages much
+  easier to read.
+
+### Fixed
+
+- Various parsing errors (including but not limited to #8 and #13)
+- Incorrect reset of parser state when modifying a file
+
+## [0.3.0.5]
 ### Added
 - Support line comment and block comment IDEA actions
 ## [0.3.0.4]
