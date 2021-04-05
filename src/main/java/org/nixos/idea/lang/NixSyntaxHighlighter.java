@@ -148,7 +148,7 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
                     tokenType == NixTypes.RPAREN ||
                     tokenType == NixTypes.LPAREN ||
                     tokenType == NixTypes.RCURLY ||
-                    tokenType == NixTypes.DOLLAR_CURLY ||
+                    tokenType == NixTypes.DOLLAR ||
                     tokenType == NixTypes.LCURLY) {
                 return PAREN_KEYS;
             }

@@ -55,7 +55,7 @@ import static org.nixos.idea.psi.NixTypes.*;
 %function advance
 %type IElementType
 %unicode
-%xstate STRING IND_STRING
+%xstate STRING IND_STRING ANTIQUOTATION_START
 
 ANY=[^]
 ID=[a-zA-Z_][a-zA-Z0-9_'-]*
@@ -96,7 +96,9 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   "}"                   { popState(); return RCURLY; }
   "["                   { return LBRAC; }
   "]"                   { return RBRAC; }
-  "${"                  { pushState(YYINITIAL); return DOLLAR_CURLY; }
+  // '$' and '{' must be two separate tokens to make NixBraceMatcher work
+  // correctly with Grammar-Kit.
+  "$"/"{"               { return DOLLAR; }
 
   "."                   { return DOT; }
   "?"                   { return HAS; }
@@ -140,7 +142,7 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   ([^\$\"\\]|\$[^\{\"\\]|\\{ANY}|\$\\{ANY})*\$/\" { return STR; }
   ([^\$\"\\]|\$[^\{\"\\]|\\{ANY}|\$\\{ANY})+ |
   \$|\\|\$\\            { return STR; }
-  "${"                  { pushState(YYINITIAL); return DOLLAR_CURLY; }
+  "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
   \"                    { popState(); return STRING_CLOSE; }
 }
 
@@ -150,7 +152,13 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   \$ |
   "'''" |
   "''"\\{ANY}           { return IND_STR; }
-  "${"                  { pushState(YYINITIAL); return DOLLAR_CURLY; }
+  "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
   "''"                  { popState(); return IND_STRING_CLOSE; }
   "'"                   { return IND_STR; }
+}
+
+<ANTIQUOTATION_START> {
+  // '$' and '{' must be two separate tokens to make NixBraceMatcher work
+  // correctly with Grammar-Kit.
+  "{"                   { popState(); pushState(YYINITIAL); return LCURLY; }
 }

@@ -45,7 +45,7 @@
     RCURLY = '}'
     LBRAC = '['
     RBRAC = ']'
-    DOLLAR_CURLY = '${'
+    DOLLAR = '$'
 
     DOT = '.'
     HAS = '?'
@@ -186,9 +186,9 @@ ind_string ::= IND_STRING_OPEN string_part* IND_STRING_CLOSE { pin=1 }
 ;{ extends("string_text|antiquotation")=string_part }
 string_part ::= string_text | antiquotation { recoverWhile=string_part_recover }
 string_text ::= STR | IND_STR
-antiquotation ::= DOLLAR_CURLY expr recover_antiquotation RCURLY { pin=1 }
+antiquotation ::= DOLLAR LCURLY expr recover_antiquotation RCURLY { pin=1 }
 private recover_antiquotation ::= { recoverWhile=curly_recover }
-private string_part_recover ::= !(STR | IND_STR | DOLLAR_CURLY | STRING_CLOSE | IND_STRING_CLOSE)
+private string_part_recover ::= !(STR | IND_STR | DOLLAR | STRING_CLOSE | IND_STRING_CLOSE)
 
 ;{ extends("bind_attr|bind_inherit")=bind }
 bind ::= bind_attr | bind_inherit
@@ -207,7 +207,11 @@ string_attr ::= std_string | antiquotation
 attr_path ::= attr ( DOT attr )*
 
 
+// The lexer uses curly braces to determine its state. To avoid inconsistencies
+// between the parser and lexer (i.e. the lexer sees a string where the parser
+// wants to read an expression), the error recovery for curly braces is very
+// strict while no other error recovery will consume curly braces.
 private braces_recover ::= !(RPAREN | RCURLY | RBRAC)
-private paren_recover ::= !RPAREN
+private paren_recover ::= !(RPAREN | RCURLY)
 private curly_recover ::= !RCURLY
-private brac_recover ::= !RBRAC
+private brac_recover ::= !(RBRAC | RCURLY)

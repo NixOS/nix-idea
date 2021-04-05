@@ -1,8 +1,8 @@
 package org.nixos.idea.lang;
 
+import com.intellij.lang.LanguageBraceMatching;
 import com.intellij.testFramework.ParsingTestCase;
 import com.intellij.testFramework.TestDataPath;
-import org.nixos.idea.lang.NixParserDefinition;
 
 @TestDataPath("$PROJECT_ROOT/src/test/testData/ParsingFailTest")
 public final class ParsingFailTest extends ParsingTestCase {
@@ -14,6 +14,16 @@ public final class ParsingFailTest extends ParsingTestCase {
   //  https://nixos.org/guides/nix-pills/basics-of-language.html
   //  https://nixos.org/manual/nix/stable/#ch-expression-language
   //  https://github.com/NixOS/nix/blob/master/src/libexpr/parser.y
+
+  public void testAntiquotationStateSynchronization1() {
+    // See https://intellij-support.jetbrains.com/hc/en-us/community/posts/360010379000
+    doTest(true);
+  }
+
+  public void testAntiquotationStateSynchronization2() {
+    // See https://intellij-support.jetbrains.com/hc/en-us/community/posts/360010379000
+    doTest(true);
+  }
 
   public void testComment() {
     doTest(true);
@@ -71,16 +81,20 @@ public final class ParsingFailTest extends ParsingTestCase {
     doTest(true);
   }
 
-  public void testRecoverFromString() {
-    doTest(true);
-  }
-
   public void testRecoverFromWith() {
     doTest(true);
   }
 
   public void testRecWithoutSet() {
     doTest(true);
+  }
+
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    // Test environment of ParsingTestCase does not detect the brace matcher on its own. The brace matcher effects the
+    // error recovery of Grammar-Kit and must therefore be registered to get correct test results.
+    addExplicitExtension(LanguageBraceMatching.INSTANCE, NixLanguage.INSTANCE, new NixBraceMatcher());
   }
 
   @Override
