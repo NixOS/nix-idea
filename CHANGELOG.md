@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 ### Added
+- Support for IDEA 2021.1
+### Removed
+- Support for IDEA 2020.1
+## [0.3.0.5]
+### Added
 - Support line comment and block comment IDEA actions
 ## [0.3.0.4]
 ### Added
