@@ -34,6 +34,11 @@ the plugin.
 - Various parsing errors (including but not limited to #8 and #13)
 - Incorrect reset of parser state when modifying a file
 
+## [0.3.0.6]
+### Added
+- Support for IDEA 2021.1
+### Removed
+- Support for IDEA 2020.1
 ## [0.3.0.5]
 ### Added
 - Support line comment and block comment IDEA actions

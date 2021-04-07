@@ -10,10 +10,11 @@ import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.TokenType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
-import org.fest.util.Objects;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.file.NixFile;
 import org.nixos.idea.psi.NixTokenType;
 import org.nixos.idea.psi.NixTypeUtil;
@@ -68,8 +69,8 @@ public class NixParserDefinition implements ParserDefinition {
 
     @Override
     public SpaceRequirements spaceExistenceTypeBetweenTokens(ASTNode left, ASTNode right) {
-        NixTokenType leftType = Objects.castIfBelongsToType(left.getElementType(), NixTokenType.class);
-        NixTokenType rightType = Objects.castIfBelongsToType(right.getElementType(), NixTokenType.class);
+        NixTokenType leftType = asNixTokenType(left.getElementType());
+        NixTokenType rightType = asNixTokenType(right.getElementType());
         if (leftType == NixTypes.SCOMMENT) {
             return SpaceRequirements.MUST_LINE_BREAK;
         }
@@ -89,6 +90,10 @@ public class NixParserDefinition implements ParserDefinition {
     @Override
     public PsiElement createElement(ASTNode node) {
         return NixTypes.Factory.createElement(node);
+    }
+
+    private static @Nullable NixTokenType asNixTokenType(IElementType elementType) {
+        return elementType instanceof NixTokenType ? (NixTokenType) elementType : null;
     }
 }
 
