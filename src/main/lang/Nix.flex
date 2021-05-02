@@ -1,226 +1,164 @@
 package org.nixos.idea.lang;
-import com.intellij.lexer.*;
+
+import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import java.util.Stack;
+import gnu.trove.TLongArrayList;
+import gnu.trove.TLongIntHashMap;
+
 import static org.nixos.idea.psi.NixTypes.*;
 
 %%
 
 %{
-  private Stack<Integer> state;
-  public CharSequence yylval_id, yylval_path, yylval_uri, yylval_expr;
-  int yychar, yyline, yycolumn;
+  private final TLongArrayList states = new TLongArrayList();
+  private final TLongIntHashMap stateIndexMap = new TLongIntHashMap();
 
-  public void yy_push_state(Integer sst) {
-    state.push(sst);
-    yybegin(sst);
+  {
+    states.add(YYINITIAL);
+    stateIndexMap.put(YYINITIAL, 0);
   }
 
-  public Integer yy_pop_state() {
-    Integer sst;
-    try {
-      sst = state.pop();
-    } catch (Exception e) {
-      sst =  YYINITIAL;
+  private int currentStateIndex = 0;
+  private int parentStateIndex = 0;
+
+  public int getStateIndex() {
+    return currentStateIndex;
+  }
+
+  public void restoreState(int stateIndex) {
+    long state = states.get(stateIndex);
+    currentStateIndex = stateIndex;
+    parentStateIndex = (int) (state >> 32);
+    yybegin((int) state);
+  }
+
+  private void pushState(int yystate) {
+    long state = ((long) currentStateIndex << 32) | ((long) yystate & 0x0FFFFFFFFL);
+    int stateIndex = stateIndexMap.get(state); // Returns 0 if not found
+    if (stateIndex == 0 && state != YYINITIAL) {
+      stateIndex = states.size();
+      states.add(state);
+      stateIndexMap.put(state, stateIndex);
     }
-    yybegin(yy_top_state());
-    return sst;
+    parentStateIndex = currentStateIndex;
+    currentStateIndex = stateIndex;
+    yybegin(yystate);
   }
 
-  public Integer yy_top_state() {
-    Integer sst;
-    try {
-      sst = state.peek();
-    } catch (Exception e) {
-      sst =  YYINITIAL;
-    }
-    return sst;
+  private void popState() {
+    restoreState(parentStateIndex);
   }
-
 %}
 
-%init{
-
-    this.state = new Stack<Integer>();
-
-%init}
-
-
-%public
-%class NixLexer
+%class _NixLexer
 %implements FlexLexer
 %function advance
 %type IElementType
 %unicode
-%line
-%char
-%column
-%xstate STRING IND_STRING
+%xstate STRING IND_STRING ANTIQUOTATION_START
 
-EOL="\r"|"\n"|"\r\n"
-LINE_WS=[\ \t\f]
-WHITE_SPACE=({LINE_WS}|{EOL})+
+ANY=[^]
+ID=[a-zA-Z_][a-zA-Z0-9_'-]*
+INT=[0-9]+
+FLOAT=(([1-9][0-9]*\.[0-9]*)|(0?\.[0-9]+))([Ee][+-]?[0-9]+)?
+PATH=[a-zA-Z0-9._+-]*(\/[a-zA-Z0-9._+-]+)+\/?
+HPATH=\~(\/[a-zA-Z0-9._+-]+)+\/?
+SPATH=\<[a-zA-Z0-9._+-]+(\/[a-zA-Z0-9._+-]+)*\>
+URI=[a-zA-Z][a-zA-Z0-9.+-]*\:[a-zA-Z0-9%/?:@&=+$,\-_.!~*']+
 
+WHITE_SPACE=[\ \t\r\n]+
 SCOMMENT=#[^\r\n]*
 MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
-INT=[0-9]+
-BOOL=(true|false)
-ID=[_a-zA-Z][_a-zA-Z_0-9'-]*
-
-STRINLINENIX=\$\{
-STR_CT=([^\$\"]|\$[^\{\"])+
-IND_STR_CT=([^\$\']|\$[^\{\']|\'[^\'\$])+
-
-PATH=[a-zA-Z0-9\.\_\-\+]*(\/[a-zA-Z0-9\.\_\-\+]+)+
-SPATH=\<[a-zA-Z0-9\.\_\-\+]+(\/[a-zA-Z0-9\.\_\-\+]+)*\>
-HPATH=\~(\/[a-zA-Z0-9\.\_\-\+]+)+
-URI=[a-zA-Z][a-zA-Z0-9\+\-\.]*\:[a-zA-Z0-9\%\/\?\:\@\&\=\+\$\,\-\_\.\!\~\*']+
 
 %%
+
 <YYINITIAL> {
-  {WHITE_SPACE}      { return com.intellij.psi.TokenType.WHITE_SPACE; }
+  "if"                  { return IF; }
+  "then"                { return THEN; }
+  "else"                { return ELSE; }
+  "assert"              { return ASSERT; }
+  "with"                { return WITH; }
+  "let"                 { return LET; }
+  "in"                  { return IN; }
+  "rec"                 { return REC; }
+  "inherit"             { return INHERIT; }
+  "or"                  { return OR_KW; }
+  "..."                 { return ELLIPSIS; }
 
-  "="                { return ASSIGN; }
-  "("                { return LPAREN; }
-  ")"                { return RPAREN; }
-  "{"                { yy_push_state(YYINITIAL); return LCURLY; }
-  "}"                { yy_pop_state(); return RCURLY; }
-  "["                { return LBRAC; }
-  "]"                { return RBRAC; }
-  "${"               { return DOLLAR_CURLY; }
-  "$"                { return DOLLAR; }
-  "?"                { return IS; }
-  "@"                { return NAMED; }
-  ":"                { return COLON; }
-  ";"                { return SEMI; }
-  "&&"               { return AND; }
-  "||"               { return OR; }
-  "!"                { return NOT; }
-  "=="               { return EQ; }
-  "!="               { return NEQ; }
-  "<="               { return LEQ; }
-  ">="               { return GEQ; }
-  "<"                { return LT; }
-  ">"                { return GT; }
-  "+"                { return PLUS; }
-  "-"                { return MINUS; }
-  "/"                { return DIVIDE; }
-  "*"                { return TIMES; }
-  "++"               { return CONCAT; }
-  "."                { return DOT; }
-  ","                { return COMMA; }
-  "\""               { yy_push_state(STRING); return FNUTT_OPEN; }
-  "->"               { return IMPL; }
-  "//"               { return UPDATE; }
-  "assert"           { return ASSERT; }
-  "if"               { return IF; }
-  "else"             { return ELSE; }
-  "then"             { return THEN; }
-  "with"             { return WITH; }
-  "let"              { return LET; }
-  "in"               { return IN; }
-  "rec"              { return REC; }
-  "or"               { return OR_KW; }
-  "..."              { return ELLIPSIS; }
-  "inherit"          { return INHERIT; }
-  "require"          { return REQUIRE; }
-  "requires"         { return REQUIRES; }
-  "import"           { return IMPORT; }
-  "imports"          { return IMPORTS; }
+  "="                   { return ASSIGN; }
+  ":"                   { return COLON; }
+  ";"                   { return SEMI; }
+  ","                   { return COMMA; }
+  "@"                   { return AT; }
+  "("                   { return LPAREN; }
+  ")"                   { return RPAREN; }
+  "{"                   { pushState(YYINITIAL); return LCURLY; }
+  "}"                   { popState(); return RCURLY; }
+  "["                   { return LBRAC; }
+  "]"                   { return RBRAC; }
+  // '$' and '{' must be two separate tokens to make NixBraceMatcher work
+  // correctly with Grammar-Kit.
+  "$"/"{"               { return DOLLAR; }
 
-  \'\'(\ *\n)?
-    {
-        yy_push_state(IND_STRING);
-        return IND_STRING_OPEN;
-    }
+  "."                   { return DOT; }
+  "?"                   { return HAS; }
+  "!"                   { return NOT; }
+  "*"                   { return TIMES; }
+  "/"                   { return DIVIDE; }
+  "+"                   { return PLUS; }
+  "-"                   { return MINUS; }
+  "<"                   { return LT; }
+  ">"                   { return GT; }
+  "++"                  { return CONCAT; }
+  "//"                  { return UPDATE; }
+  "<="                  { return LEQ; }
+  ">="                  { return GEQ; }
+  "=="                  { return EQ; }
+  "!="                  { return NEQ; }
+  "&&"                  { return AND; }
+  "||"                  { return OR; }
+  "->"                  { return IMPL; }
 
-  {SCOMMENT}         { return SCOMMENT; }
-  {MCOMMENT}         { return MCOMMENT; }
-  {INT}              { return INT; }
-  {BOOL}             { return BOOL; }
-  {ID}               { yylval_id=yytext();return ID; }
-  {PATH}             { yylval_path=yytext();return PATH; }
-  {SPATH}            { yylval_path=yytext();return SPATH; }
-  {HPATH}            { yylval_path=yytext();return HPATH; }
-  {URI}              { yylval_uri=yytext();return URI; }
+  \"                    { pushState(STRING); return STRING_OPEN; }
+  \'\'                  { pushState(IND_STRING); return IND_STRING_OPEN; }
 
-  [^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }
+  // Note that `true`, `false` and `null` are built-in variables but not
+  // keywords. Therefore, they are not listed here.
+  {ID}                  { return ID; }
+  {INT}                 { return INT; }
+  {FLOAT}               { return FLOAT; }
+  {PATH}                { return PATH; }
+  {HPATH}               { return HPATH; }
+  {SPATH}               { return SPATH; }
+  {URI}                 { return URI; }
 
-  .
-    {
-        zzBufferL=yytext();
-    }
+  {SCOMMENT}            { return SCOMMENT; }
+  {MCOMMENT}            { return MCOMMENT; }
+  {WHITE_SPACE}         { return com.intellij.psi.TokenType.WHITE_SPACE; }
+  [^]                   { return com.intellij.psi.TokenType.BAD_CHARACTER; }
 }
 
 <STRING> {
-  {STR_CT}
-    {
-        yylval_expr=yytext();
-        return STR;
-    }
-  {STRINLINENIX}
-    {
-        yy_push_state(YYINITIAL);
-        return DOLLAR_CURLY;
-    }
-  "\""
-    {
-        yy_pop_state();
-        return FNUTT_CLOSE;
-    }
-  .
-    {
-        zzBufferL=yytext();
-    }
+  ([^\$\"\\]|\$[^\{\"\\]|\\{ANY}|\$\\{ANY})*\$/\" { return STR; }
+  ([^\$\"\\]|\$[^\{\"\\]|\\{ANY}|\$\\{ANY})+ |
+  \$|\\|\$\\            { return STR; }
+  "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
+  \"                    { popState(); return STRING_CLOSE; }
 }
 
 <IND_STRING> {
-  {IND_STR_CT}
-    {
-        yylval_expr = yytext();
-        return IND_STR;
-    }
+  ([^\$\']|\$[^\{\']|\'[^\'\$])+ |
+  "''$" |
+  \$ |
+  "'''" |
+  "''"\\{ANY}           { return IND_STR; }
+  "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
+  "''"                  { popState(); return IND_STRING_CLOSE; }
+  "'"                   { return IND_STR; }
+}
 
-  "''$"
-    {
-        yylval_expr = "$";
-        return IND_STR;
-
-    }
-
-  "'''"
-    {
-        yylval_expr = "''";
-        return IND_STR;
-
-    }
-
-  "''\."
-    {
-        yylval_expr = yytext();
-        return IND_STR;
-    }
-
-  {STRINLINENIX}
-    {
-        yy_push_state(YYINITIAL);
-        return DOLLAR_CURLY;
-    }
-
-  "''"
-    {
-        yy_pop_state();
-        return IND_STRING_CLOSE;
-    }
-
-  "'"
-    {
-        yylval_expr = "'";
-        return IND_STR;
-    }
-
-  .
-    {
-        zzBufferL=yytext();
-    }
+<ANTIQUOTATION_START> {
+  // '$' and '{' must be two separate tokens to make NixBraceMatcher work
+  // correctly with Grammar-Kit.
+  "{"                   { popState(); pushState(YYINITIAL); return LCURLY; }
 }

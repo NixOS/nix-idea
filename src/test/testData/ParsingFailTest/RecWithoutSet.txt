@@ -1,0 +1,6 @@
+Nix File(0,6)
+  PsiElement(⁠rec)('rec')(0,3)
+  PsiWhiteSpace(' ')(3,4)
+  PsiErrorElement:'{' expected, got '\'(4,5)
+    PsiElement(BAD_CHARACTER)('\')(4,5)
+  PsiElement(BAD_CHARACTER)('\')(5,6)

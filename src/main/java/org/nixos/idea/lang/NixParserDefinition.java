@@ -4,33 +4,33 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.Language;
 import com.intellij.lang.ParserDefinition;
 import com.intellij.lang.PsiParser;
-import com.intellij.lexer.FlexAdapter;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.TokenType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.file.NixFile;
+import org.nixos.idea.psi.NixTokenType;
+import org.nixos.idea.psi.NixTypeUtil;
 import org.nixos.idea.psi.NixTypes;
-
-import java.io.Reader;
 
 public class NixParserDefinition implements ParserDefinition {
     public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
     public static final TokenSet COMMENTS = TokenSet.create(NixTypes.SCOMMENT,NixTypes.MCOMMENT);
-    public static final TokenSet STRING_LITERALS = TokenSet.create(NixTypes.LITERAL_SIMPLE_STRING, NixTypes.DOC_STRING);
+    public static final TokenSet STRING_LITERALS = TokenSet.create(NixTypes.STD_STRING, NixTypes.IND_STRING);
 
     public static final IFileElementType FILE = new IFileElementType(Language.<NixLanguage>findInstance(NixLanguage.class));
 
     @NotNull
     @Override
     public Lexer createLexer(Project project) {
-        NixLexer lxr = new NixLexer((Reader) null);
-        return new FlexAdapter(lxr);
+        return new NixLexer();
     }
 
     @NotNull
@@ -69,13 +69,31 @@ public class NixParserDefinition implements ParserDefinition {
 
     @Override
     public SpaceRequirements spaceExistenceTypeBetweenTokens(ASTNode left, ASTNode right) {
-        return SpaceRequirements.MAY;
+        NixTokenType leftType = asNixTokenType(left.getElementType());
+        NixTokenType rightType = asNixTokenType(right.getElementType());
+        if (leftType == NixTypes.SCOMMENT) {
+            return SpaceRequirements.MUST_LINE_BREAK;
+        }
+        if (leftType == NixTypes.DOLLAR && rightType == NixTypes.LCURLY) {
+            return SpaceRequirements.MUST_NOT;
+        }
+        else if (NixTypeUtil.MIGHT_COLLAPSE_WITH_ID.contains(leftType) &&
+                 NixTypeUtil.MIGHT_COLLAPSE_WITH_ID.contains(rightType)) {
+            return SpaceRequirements.MUST;
+        }
+        else {
+            return SpaceRequirements.MAY;
+        }
     }
 
     @NotNull
     @Override
     public PsiElement createElement(ASTNode node) {
         return NixTypes.Factory.createElement(node);
+    }
+
+    private static @Nullable NixTokenType asNixTokenType(IElementType elementType) {
+        return elementType instanceof NixTokenType ? (NixTokenType) elementType : null;
     }
 }
 

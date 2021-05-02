@@ -1,0 +1,13 @@
+Nix File(0,14)
+  NixExprAssertImpl(EXPR_ASSERT)(0,6)
+    PsiElement(⁠assert)('assert')(0,6)
+    PsiErrorElement:<expr> expected, got '\'(6,6)
+      <empty list>
+  PsiWhiteSpace(' ')(6,7)
+  PsiElement(BAD_CHARACTER)('\')(7,8)
+  PsiElement(BAD_CHARACTER)('\')(8,9)
+  PsiWhiteSpace(' ')(9,10)
+  PsiElement(ID)('a')(10,11)
+  PsiElement(;)(';')(11,12)
+  PsiWhiteSpace(' ')(12,13)
+  PsiElement(ID)('b')(13,14)

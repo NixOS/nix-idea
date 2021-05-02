@@ -1,0 +1,3 @@
+Nix File(0,30)
+  NixLiteralImpl(LITERAL)(0,30)
+    PsiElement(URI)('http://example.org/foo.tar.bz2')(0,30)

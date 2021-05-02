@@ -1,0 +1,6 @@
+Nix File(0,4)
+  NixLegacyAppOrImpl(LEGACY_APP_OR)(0,4)
+    NixIdentifierImpl(IDENTIFIER)(0,1)
+      PsiElement(ID)('f')(0,1)
+    PsiWhiteSpace(' ')(1,2)
+    PsiElement(⁠or)('or')(2,4)

@@ -34,6 +34,12 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    testImplementation(platform("org.junit:junit-bom:5.7.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+}
+
 // Configure gradle-intellij-plugin plugin.
 // Read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
@@ -70,7 +76,7 @@ tasks {
     task<GenerateLexer>("generateNixLexer") {
         source = "src/main/lang/Nix.flex"
         targetDir = "src/gen/java/org/nixos/idea/lang"
-        targetClass = "NixLexer"
+        targetClass = "_NixLexer"
         purgeOldFiles = true
     }
 
@@ -101,7 +107,10 @@ tasks {
                 }
             }
         }
+    }
 
+    test {
+        useJUnitPlatform()
     }
 
     patchPluginXml {
