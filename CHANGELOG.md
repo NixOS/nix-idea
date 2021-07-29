@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- Support for IDEA 2021.2
+
+### Removed
+
+- Support for IDEA 2020.2
+
+## [0.4.0.0]
+
 This release features a complete rewrite of the parser and lexer within
 the plugin.
 
