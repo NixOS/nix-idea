@@ -30,7 +30,7 @@ jobs:
         key: "gradle-\
           ${{runner.os}}-\
           ${{hashFiles('gradle/wrapper/gradle-wrapper.properties')}}-\
-          ${{hashFiles('**/*.gradle.kts')}}"
+          ${{hashFiles('gradle.properties', '**/*.gradle.kts')}}"
     # Build and publish
     - name: Build and publish plugin
       id: gradle-build
