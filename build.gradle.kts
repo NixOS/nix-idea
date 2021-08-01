@@ -86,6 +86,7 @@ tasks {
             dir.resolve("version.txt").writeText(pluginVersion)
             dir.resolve("zipfile.txt").writeText(buildPlugin.get().archiveFile.get().toString())
             dir.resolve("latest_changelog.md").writeText(changelog.getLatest().toText())
+            dir.resolve("pluginVerifierIdeVersions.txt").writeText(pluginVerifierIdeVersions)
         }
     }
 
