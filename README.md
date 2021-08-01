@@ -1,6 +1,7 @@
 # NixIDEA - A Nix language plugin for Intellij IDEA.
 
-[![Build Status](https://travis-ci.org/NixOS/nix-idea.svg?branch=master)](https://travis-ci.org/NixOS/nix-idea)
+[![Build Status](https://github.com/NixOS/nix-idea/actions/workflows/build.yml/badge.svg?branch=master)][build-status]
+[![Version](https://img.shields.io/jetbrains/plugin/v/nix-idea)][marketplace]
 
 <!-- Plugin description -->
 
@@ -39,8 +40,16 @@ In `Settings -> Plugin -> <little wheel icon> -> from local disk...`
 ### Jetbrains marketplace
 
 The plugin can be found at the Jetbrains plugin repository as
-[NixIDEA](https://plugins.jetbrains.com/plugin/8607).
+[NixIDEA][marketplace].
 
 ### Prebuild release
 
 Same process as locally to import it, just skip the build part of it.
+
+
+[build-status]:
+<https://github.com/NixOS/nix-idea/actions/workflows/build.yml?query=branch%3Amaster>
+"Latest builds at GitHub Actions"
+[marketplace]:
+<https://plugins.jetbrains.com/plugin/8607-nixidea/>
+"NixIDEA on JetBrains Marketplace"
