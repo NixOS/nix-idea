@@ -24,7 +24,6 @@ val pluginVerifierIdeVersions: String by project
 
 val platformType: String by project
 val platformVersion: String by project
-val platformDownloadSources: String by project
 
 group = pluginGroup
 version = pluginVersion
@@ -51,7 +50,6 @@ intellij {
     pluginName = pluginName
     version = platformVersion
     type = platformType
-    downloadSources = platformDownloadSources.toBoolean()
     updateSinceUntilBuild = true
 }
 
