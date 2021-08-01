@@ -24,10 +24,14 @@ val pluginVerifierIdeVersions: String by project
 
 val platformType: String by project
 val platformVersion: String by project
-val platformDownloadSources: String by project
 
 group = pluginGroup
 version = pluginVersion
+
+// Set the compatibility versions to 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+}
 
 // Configure project's dependencies
 repositories {
@@ -46,7 +50,6 @@ intellij {
     pluginName = pluginName
     version = platformVersion
     type = platformType
-    downloadSources = platformDownloadSources.toBoolean()
     updateSinceUntilBuild = true
 }
 
@@ -62,25 +65,37 @@ grammarKit {
     grammarKitRelease = "2020.1"
 }
 
+sourceSets {
+    main {
+        java {
+            srcDir("src/gen/java")
+            srcDir("src/main/java")
+        }
+    }
+}
+
 tasks {
 
-    task("writeMetadataFiles") {
+    task("metadata") {
         outputs.upToDateWhen { false }
         doLast {
-            project.buildDir.resolve("version.txt").writeText(pluginVersion)
-            project.buildDir.resolve("zipfile.txt").writeText(buildPlugin.get().archiveFile.get().toString())
-            project.buildDir.resolve("latest_changelog.md").writeText(changelog.getLatest().toText())
+            val dir = project.buildDir.resolve("metadata")
+            dir.mkdirs()
+            dir.resolve("version.txt").writeText(pluginVersion)
+            dir.resolve("zipfile.txt").writeText(buildPlugin.get().archiveFile.get().toString())
+            dir.resolve("latest_changelog.md").writeText(changelog.getLatest().toText())
+            dir.resolve("pluginVerifierIdeVersions.txt").writeText(pluginVerifierIdeVersions)
         }
     }
 
-    task<GenerateLexer>("generateNixLexer") {
+    val generateNixLexer by registering(GenerateLexer::class) {
         source = "src/main/lang/Nix.flex"
         targetDir = "src/gen/java/org/nixos/idea/lang"
         targetClass = "_NixLexer"
         purgeOldFiles = true
     }
 
-    task<GenerateParser>("generateNixParser") {
+    val generateNixParser by registering(GenerateParser::class) {
         source = "src/main/lang/Nix.bnf"
         targetRoot = "src/gen/java"
         pathToParser = "/org/nixos/idea/lang/NixParser"
@@ -88,25 +103,8 @@ tasks {
         purgeOldFiles = true
     }
 
-    // Set the compatibility versions to 1.8
-    withType<JavaCompile> {
-        dependsOn(
-                "generateNixLexer",
-                "generateNixParser"
-        )
-
-        sourceCompatibility = "1.8"
-        targetCompatibility = "1.8"
-
-        sourceSets {
-            // srcDir "path" appends to the default src/main/java (etc), as opposed to main.java.srcDir = xyz which would override the defaults
-            main {
-                java {
-                    srcDir("src/gen/java")
-                    srcDir("src/main/java")
-                }
-            }
-        }
+    compileJava {
+        dependsOn(generateNixLexer, generateNixParser)
     }
 
     test {
@@ -143,6 +141,7 @@ tasks {
 
     runPluginVerifier {
         ideVersions(pluginVerifierIdeVersions)
+        failureLevel(org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel.ALL)
     }
 
     publishPlugin {
