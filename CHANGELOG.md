@@ -3,15 +3,12 @@
 ## [Unreleased]
 ### Added
 
-### Changed
-
-### Deprecated
+- Support for IDEA 2021.3
 
 ### Removed
 
-### Fixed
+- Support for IDEA 2020.3
 
-### Security
 ## [0.4.0.1]
 
 ### Added
