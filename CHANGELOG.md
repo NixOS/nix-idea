@@ -3,6 +3,18 @@
 ## [Unreleased]
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+## [0.4.0.2]
+### Added
+
 - Support for IDEA 2021.3
 
 ### Removed
