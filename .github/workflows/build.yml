@@ -53,7 +53,7 @@ jobs:
           ${{hashFiles('gradle/wrapper/gradle-wrapper.properties')}}-\
           ${{hashFiles('gradle.properties', '**/*.gradle.kts')}}"
     - name: Collect metadata for upcoming steps and jobs
-      run: ./gradlew --stacktrace metadata
+      run: ./gradlew --stacktrace metadata listProductsReleases
     - name: Setup cache for IntelliJ Plugin Verifier
       uses: actions/cache@v2
       with:
@@ -61,7 +61,7 @@ jobs:
           ~/.pluginVerifier/ides
         key: "pluginVerifier-\
           ${{runner.os}}-\
-          ${{hashFiles('build/metadata/pluginVerifierIdeVersions.txt')}}"
+          ${{hashFiles('build/listProductsReleases.txt')}}"
     # Build and test
     - name: Build project
       run: ./gradlew --stacktrace assemble

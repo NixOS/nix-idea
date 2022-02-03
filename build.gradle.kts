@@ -19,7 +19,6 @@ val pluginName: String by project
 val pluginVersion: String by project
 val pluginSinceBuild: String by project
 val pluginUntilBuild: String by project
-val pluginVerifierIdeVersions: String by project
 
 val platformType: String by project
 val platformVersion: String by project
@@ -82,7 +81,6 @@ tasks {
             dir.resolve("version.txt").writeText(pluginVersion)
             dir.resolve("zipfile.txt").writeText(buildPlugin.get().archiveFile.get().toString())
             dir.resolve("latest_changelog.md").writeText(changelog.getLatest().toText())
-            dir.resolve("pluginVerifierIdeVersions.txt").writeText(pluginVerifierIdeVersions)
         }
     }
 
@@ -132,7 +130,6 @@ tasks {
     }
 
     runPluginVerifier {
-        ideVersions.set(pluginVerifierIdeVersions.split(',').map(String::trim).filter(String::isNotEmpty))
         failureLevel.set(org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel.ALL)
     }
 
