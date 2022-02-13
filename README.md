@@ -1,4 +1,4 @@
-# NixIDEA - A Nix language plugin for Intellij IDEA.
+# NixIDEA - A Nix language plugin for IntelliJ IDEA
 
 [![Build Status](https://github.com/NixOS/nix-idea/actions/workflows/build.yml/badge.svg?branch=master)][build-status]
 [![Version](https://img.shields.io/jetbrains/plugin/v/nix-idea)][marketplace]
@@ -19,32 +19,52 @@ to provide the following:
 
 <!-- Plugin description end -->
 
-# Install
+## Install
 
-## Manually from local sources
-
-### Build it
-
-Using the gradle wrapper is easy:
-
-    ./gradlew build
-
-You should then find the plugin in `build/distributions/NixIDEA-<version>.zip`.
-
-### Import it
-
-In `Settings -> Plugin -> <little wheel icon> -> from local disk...`
-
-## From a packaged release
-
-### Jetbrains marketplace
+### From JetBrains marketplace
 
 The plugin can be found at the Jetbrains plugin repository as
 [NixIDEA][marketplace].
 
-### Prebuild release
+* Goto **File > Settings > Plugins > Marketplace**
+* Type **NixIDEA** into the search bar
+* Click **Install**
 
-Same process as locally to import it, just skip the build part of it.
+### From ZIP file
+
+You can also install the plugin from a ZIP file.
+
+* Goto **File > Settings > Plugins**
+* Click onto the **wheel icon** on the top
+* Choose **Install Plugin from Disk**
+
+You can find corresponding ZIP files [on GitHub][releases] or build them
+yourself as described below.
+
+## Build
+
+### Build preparation
+
+Follow the following steps before you build the project the first time.
+
+* Clone the repository
+* Ensure that you have a JDK for Java 11 or higher on your PATH
+* Only on NixOS: Setup JetBrains Runtime (JBR) from `<nixpkgs>`
+  ```sh
+  nix-build '<nixpkgs>' -A jetbrains.jdk -o jbr
+  ```
+
+### Build execution
+
+After you have completed the preparation, you can build the plugin by
+running the `build` task in Gradle.
+
+```sh
+./gradlew build
+```
+
+You should then find the plugin at
+`build/distributions/NixIDEA-<version>.zip`.
 
 
 [build-status]:
@@ -53,3 +73,6 @@ Same process as locally to import it, just skip the build part of it.
 [marketplace]:
 <https://plugins.jetbrains.com/plugin/8607-nixidea/>
 "NixIDEA on JetBrains Marketplace"
+[releases]:
+<https://github.com/NixOS/nix-idea/releases>
+"Releases · NixOS/nix-idea"

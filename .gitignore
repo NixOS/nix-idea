@@ -1,5 +1,8 @@
 *.class
 
+# Symlink to jetbrains.jdk derivation of nixpkgs (created by :jbr task)
+/jbr
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
