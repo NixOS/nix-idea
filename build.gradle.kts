@@ -71,7 +71,43 @@ sourceSets {
     }
 }
 
+val tasksUsingDownloadedJbr = mutableListOf<Task>()
+gradle.buildFinished {
+    val regex = Regex("""\.gradle/.*/jbr/.*/java\b""")
+    for (task in tasksUsingDownloadedJbr) {
+        if (task.state.failure?.cause?.message?.contains(regex) == true) {
+            logger.error("""
+                |
+                |! Info for users on NixOS:
+                |!
+                |! The JetBrains Runtime (JBR) downloaded by Gradle is not compatible with NixOS.
+                |! You may run the ‘:jbr’ task to configure the runtime of <nixpkgs> instead.
+                |! Alternatively, you may run the following command within the project directory.
+                |!
+                |!   nix-build '<nixpkgs>' -A jetbrains.jdk -o jbr
+                |!
+                |! This will create a symlink to the package jetbrains.jdk of nixpkgs at
+                |! ${'$'}projectDir/jbr, which is automatically detected by future builds.
+                """.trimMargin())
+            break
+        }
+    }
+}
+
 tasks {
+
+    task<Exec>("jbr") {
+        description = "Create a symlink to package jetbrains.jdk"
+        group = "build setup"
+        commandLine("nix-build", "<nixpkgs>", "-A", "jetbrains.jdk", "-o", "jbr")
+    }
+
+    withType<org.jetbrains.intellij.tasks.RunIdeBase> {
+        project.file("jbr/bin/java")
+            .takeIf { it.exists() }
+            ?.let { projectExecutable.set(it.toString()) }
+            ?: tasksUsingDownloadedJbr.add(this)
+    }
 
     task("metadata") {
         outputs.upToDateWhen { false }
