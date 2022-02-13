@@ -1,0 +1,7 @@
+# Keep Gradle wrapper distribution as is
+/gradlew                            binary
+/gradlew.bat                        binary
+/gradle/wrapper/gradle-wrapper.jar  binary
+
+# Source file configuration
+*.java diff=java
