@@ -3,15 +3,8 @@
 ## [Unreleased]
 ### Added
 
-### Changed
+- Support for IDEA 2022.1
 
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
 ## [0.4.0.2]
 ### Added
 
