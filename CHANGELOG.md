@@ -5,6 +5,8 @@
 
 - Support for IDEA 2022.1
 
+- Support for IDEA 2022.2 EAP
+
 ## [0.4.0.2]
 ### Added
 
