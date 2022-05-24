@@ -3,9 +3,16 @@
 ## [Unreleased]
 ### Added
 
-- Support for IDEA 2022.1
-
 - Support for IDEA 2022.2 EAP
+
+### Removed
+
+- Support for IDEA 2021.1
+
+## [0.4.0.3]
+### Added
+
+- Support for IDEA 2022.1
 
 ## [0.4.0.2]
 ### Added
