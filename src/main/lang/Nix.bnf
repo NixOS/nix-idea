@@ -169,6 +169,9 @@ expr_simple ::=
   | legacy_let
 identifier ::= ID
 literal ::= INT | FLOAT | PATH | HPATH | SPATH | URI
+{
+  mixin="org.nixos.idea.psi.impl.NixLiteralReferencingElementImpl"
+}
 parens ::= LPAREN expr recover_parens RPAREN { pin=1 }
 set ::= [ REC ] LCURLY recover_set (bind recover_set)* RCURLY { pin=2 }
 list ::= LBRAC recover_list (expr_select recover_list)* RBRAC { pin=1 }
@@ -186,6 +189,9 @@ ind_string ::= IND_STRING_OPEN string_part* IND_STRING_CLOSE { pin=1 }
 ;{ extends("string_text|antiquotation")=string_part }
 string_part ::= string_text | antiquotation { recoverWhile=string_part_recover }
 string_text ::= STR | IND_STR
+{
+  mixin="org.nixos.idea.psi.impl.NixStringReferencingElementImpl"
+}
 antiquotation ::= DOLLAR LCURLY expr recover_antiquotation RCURLY { pin=1 }
 private recover_antiquotation ::= { recoverWhile=curly_recover }
 private string_part_recover ::= !(STR | IND_STR | DOLLAR | STRING_CLOSE | IND_STRING_CLOSE)

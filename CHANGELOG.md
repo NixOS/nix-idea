@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 ### Added
+- Navigation (Ctrl-B/Cmd-B) for Nix paths and path-like strings.
+    - Directories containing a `default.nix` file offer that file as an optional destination.
+- Find usages for files and directories in project view referenced by Nix paths.
+- Completion of files and subdirectories for Nix paths.
 
 ### Changed
 
