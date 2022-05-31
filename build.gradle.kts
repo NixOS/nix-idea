@@ -175,3 +175,5 @@ tasks {
     }
 
 }
+
+apply(from = "gradle/bumpVersion.gradle.kts")
