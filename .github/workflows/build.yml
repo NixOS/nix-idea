@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Validate Gradle Wrapper
       uses: gradle/wrapper-validation-action@v1
 
@@ -35,15 +35,15 @@ jobs:
     steps:
     # Setup environment
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up JDK
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
         java-version: ${{ matrix.jdk }}
         distribution: adopt
     # Setup caches and collect metadata
     - name: Setup cache for Gradle and dependencies
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ~/.gradle/caches
@@ -55,7 +55,7 @@ jobs:
     - name: Collect metadata for upcoming steps and jobs
       run: ./gradlew --stacktrace metadata listProductsReleases
     - name: Setup cache for IntelliJ Plugin Verifier
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ~/.pluginVerifier/ides
@@ -74,21 +74,21 @@ jobs:
     # Upload artifacts
     - name: Upload build reports
       if: always()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: reports-jdk${{matrix.jdk}}
         path: build/reports/
         if-no-files-found: ignore
     - name: Upload build result
       if: ${{ matrix.primary }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: build-result
         path: build/distributions/
         if-no-files-found: error
     - name: Upload metadata
       if: ${{ matrix.primary }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: metadata
         path: build/metadata/
@@ -104,24 +104,24 @@ jobs:
     steps:
     # Remove old release drafts
     - name: Remove old release drafts
-      uses: actions/github-script@v4
+      uses: actions/github-script@v6
       with:
         script: |
           const owner = context.repo.owner;
           const repo = context.repo.repo;
-          const response = await github.repos.listReleases({owner, repo});
+          const response = await github.rest.repos.listReleases({owner, repo});
           for (const draft of response.data.filter(r => r.draft)) {
             core.info(`Delete draft for '${draft.name}' (${draft.id})`);
-            await github.repos.deleteRelease({owner, repo, release_id: draft.id});
+            await github.rest.repos.deleteRelease({owner, repo, release_id: draft.id});
           }
     # Download build artifacts
     - name: Download build result
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: build-result
         path: build/distributions/
     - name: Download metadata
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: metadata
         path: build/metadata/
@@ -134,7 +134,7 @@ jobs:
         echo "::set-output name=zipname::$(basename "$(cat build/metadata/zipfile.txt)")"
     # Fail job if the release tag already exists and points to a different commit
     - name: Check release tag
-      uses: actions/github-script@v4
+      uses: actions/github-script@v6
       env:
         TAG_NAME: v${{ steps.metadata.outputs.version }}
       with:
@@ -144,9 +144,9 @@ jobs:
           const tagname = process.env.TAG_NAME;
           try {
             const ref = `tags/${tagname}`
-            const response = await github.git.getRef({owner, repo, ref});
+            const response = await github.rest.git.getRef({owner, repo, ref});
             if (response.data.object.sha === context.sha) {
-              core.info(`Tag '${tagname}' is already defined but points to the right commit.`);
+              core.info(`Tag '${tagname}' is already defined and points to the right commit.`);
               core.info(`Commit: ${context.sha}`);
             }
             else {
@@ -167,7 +167,7 @@ jobs:
           }
     # Create GitHub release draft
     - name: Create GitHub release draft
-      uses: actions/github-script@v4
+      uses: actions/github-script@v6
       env:
         TAG_NAME: v${{ steps.metadata.outputs.version }}
         ZIP_FILE: ${{ steps.metadata.outputs.zipfile }}
@@ -180,7 +180,7 @@ jobs:
           const { TAG_NAME, ZIP_FILE, ZIP_NAME } = process.env;
 
           core.info(`Create new draft for '${TAG_NAME}'`);
-          const createResponse = await github.repos.createRelease({
+          const createResponse = await github.rest.repos.createRelease({
             owner,
             repo,
             name: TAG_NAME,
@@ -191,7 +191,7 @@ jobs:
           });
 
           core.info(`Upload build result; upload_url: ${createResponse.data.upload_url}`);
-          const uploadResponse = await github.repos.uploadReleaseAsset({
+          const uploadResponse = await github.rest.repos.uploadReleaseAsset({
             url: createResponse.data.upload_url,
             headers: {'Content-Type': 'application/zip'},
             name: ZIP_NAME,
