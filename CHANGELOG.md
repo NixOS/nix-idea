@@ -3,6 +3,18 @@
 ## [Unreleased]
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.4.0.4]
+### Added
 - Support for IDEA 2022.2 EAP
 
 ### Removed
