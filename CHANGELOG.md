@@ -10,6 +10,7 @@
 ### Removed
 
 ### Fixed
+- Trailing commas reported as syntax error (#46)
 
 ### Security
 
