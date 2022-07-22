@@ -10,9 +10,12 @@
 ### Removed
 
 ### Fixed
-- Trailing commas reported as syntax error (#46)
 
 ### Security
+
+## [0.4.0.5]
+### Fixed
+- Trailing commas reported as syntax error (#46)
 
 ## [0.4.0.4]
 ### Added
