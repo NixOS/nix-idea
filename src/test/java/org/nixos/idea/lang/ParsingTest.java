@@ -27,6 +27,14 @@ public final class ParsingTest extends ParsingTestCase {
     doTest(true);
   }
 
+  public void testFunctionEmptySet() {
+    doTest(true);
+  }
+
+  public void testFunctionTrailingComma() {
+    doTest(true);
+  }
+
   public void testIdentifier() {
     doTest(true);
   }

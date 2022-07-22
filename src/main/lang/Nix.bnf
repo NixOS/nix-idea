@@ -96,7 +96,7 @@ private let_recover ::= braces_recover !(ASSERT | SEMI | IF | THEN | ELSE | LET 
 
 expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 }
 private lambda_params ::= ID [ !missing_semi AT param_set ] | param_set [ !missing_semi AT ID ]
-param_set ::= LCURLY [ ( param COMMA )* ( ELLIPSIS | param ) ] recover_param_set RCURLY { pin=1 }
+param_set ::= LCURLY ( param COMMA )* [ ( ELLIPSIS | param ) ] recover_param_set RCURLY { pin=1 }
 param ::= ID [ param_has ] { pin=2 recoverWhile=param_recover }
 private param_has ::= HAS expr { pin=1 }
 private param_recover ::= curly_recover !COMMA
