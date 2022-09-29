@@ -19,8 +19,8 @@ tasks.named("patchChangelog") {
     // GitHub seems to use CRLF as line feeds.
     // We have to replace them to avoid files with mixed line endings.
     doFirst {
-        val releaseNote = property("releaseNote") as String
-        if (releaseNote != null) {
+        val releaseNote = property("releaseNote")
+        if (releaseNote is String) {
             setProperty("releaseNote", releaseNote.replace("\r\n", "\n"))
         }
     }
