@@ -2,12 +2,14 @@
 
 ## [Unreleased]
 ### Added
+- Support for IDEA 2022.3 EAP
 
 ### Changed
 
 ### Deprecated
 
 ### Removed
+- Support for IDEA 2021.2
 
 ### Fixed
 
