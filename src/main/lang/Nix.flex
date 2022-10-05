@@ -2,16 +2,18 @@ package org.nixos.idea.lang;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import gnu.trove.TLongArrayList;
-import gnu.trove.TLongIntHashMap;
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongList;
 
 import static org.nixos.idea.psi.NixTypes.*;
 
 %%
 
 %{
-  private final TLongArrayList states = new TLongArrayList();
-  private final TLongIntHashMap stateIndexMap = new TLongIntHashMap();
+  private final LongList states = new LongArrayList();
+  private final Long2IntMap stateIndexMap = new Long2IntOpenHashMap();
 
   {
     states.add(YYINITIAL);
@@ -26,7 +28,7 @@ import static org.nixos.idea.psi.NixTypes.*;
   }
 
   public void restoreState(int stateIndex) {
-    long state = states.get(stateIndex);
+    long state = states.getLong(stateIndex);
     currentStateIndex = stateIndex;
     parentStateIndex = (int) (state >> 32);
     yybegin((int) state);
