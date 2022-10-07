@@ -6,7 +6,7 @@ plugins {
     // Java support
     id("java")
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij") version "1.6.0"
+    id("org.jetbrains.intellij") version "1.9.0"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "1.3.1"
     // grammarkit - read more: https://github.com/JetBrains/gradle-grammar-kit-plugin
@@ -36,8 +36,9 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.7.0"))
+    testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher") // https://github.com/gradle/gradle/issues/22333
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 }
 
@@ -72,6 +73,7 @@ sourceSets {
 }
 
 val tasksUsingDownloadedJbr = mutableListOf<Task>()
+// Check https://github.com/gradle/gradle/issues/20151 if an alternative for deprecated buildFinished became available.
 gradle.buildFinished {
     val regex = Regex("""\.gradle/.*/jbr/.*/java\b""")
     for (task in tasksUsingDownloadedJbr) {
