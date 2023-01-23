@@ -2,18 +2,23 @@
 
 ## [Unreleased]
 ### Added
-- Support for IDEA 2023.1 EAP
 
 ### Changed
 
 ### Deprecated
 
 ### Removed
-- Support for IDEA 2021.3
 
 ### Fixed
 
 ### Security
+
+## [0.4.0.7]
+### Added
+- Support for IDEA 2023.1 EAP
+
+### Removed
+- Support for IDEA 2021.3
 
 ## [0.4.0.6]
 ### Added
