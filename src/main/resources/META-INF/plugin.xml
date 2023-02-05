@@ -37,6 +37,9 @@
                 id="org.nixos.idea.settings.NixIDEASettings"
                 instance="org.nixos.idea.settings.NixIDEASettings" />
 
+        <colorSettingsPage
+                implementation="org.nixos.idea.settings.NixColorSettingsPage" />
+
     </extensions>
 
 </idea-plugin>
