@@ -141,22 +141,20 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
 }
 
 <STRING> {
-  ([^\$\"\\]|\$[^\{\"\\]|\\{ANY}|\$\\{ANY})*\$/\" { return STR; }
-  ([^\$\"\\]|\$[^\{\"\\]|\\{ANY}|\$\\{ANY})+ |
-  \$|\\|\$\\            { return STR; }
+  [^\$\"\\]+            { return STR; }
+  "$"|"$$"|\\           { return STR; }
+  \\{ANY}               { return STR_ESCAPE; }
   "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
   \"                    { popState(); return STRING_CLOSE; }
 }
 
 <IND_STRING> {
-  ([^\$\']|\$[^\{\']|\'[^\'\$])+ |
-  "''$" |
-  \$ |
-  "'''" |
-  "''"\\{ANY}           { return IND_STR; }
+  [^\$\']+              { return IND_STR; }
+  "$"|"$$"|"'"          { return IND_STR; }
+  "''$"|"'''"           { return IND_STR_ESCAPE; }
+  "''"\\{ANY}           { return IND_STR_ESCAPE; }
   "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
   "''"                  { popState(); return IND_STRING_CLOSE; }
-  "'"                   { return IND_STR; }
 }
 
 <ANTIQUOTATION_START> {

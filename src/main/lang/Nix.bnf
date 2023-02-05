@@ -185,10 +185,11 @@ std_string ::= STRING_OPEN string_part* STRING_CLOSE { pin=1 }
 ind_string ::= IND_STRING_OPEN string_part* IND_STRING_CLOSE { pin=1 }
 ;{ extends("string_text|antiquotation")=string_part }
 string_part ::= string_text | antiquotation { recoverWhile=string_part_recover }
-string_text ::= STR | IND_STR
+string_text ::= string_token+
 antiquotation ::= DOLLAR LCURLY expr recover_antiquotation RCURLY { pin=1 }
 private recover_antiquotation ::= { recoverWhile=curly_recover }
-private string_part_recover ::= !(STR | IND_STR | DOLLAR | STRING_CLOSE | IND_STRING_CLOSE)
+private string_part_recover ::= !(DOLLAR | STRING_CLOSE | IND_STRING_CLOSE | string_token)
+private string_token ::= STR | IND_STR | STR_ESCAPE | IND_STR_ESCAPE
 
 ;{ extends("bind_attr|bind_inherit")=bind }
 bind ::= bind_attr | bind_inherit
