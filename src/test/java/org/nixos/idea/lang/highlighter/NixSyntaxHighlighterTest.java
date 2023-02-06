@@ -1,4 +1,4 @@
-package org.nixos.idea.lang;
+package org.nixos.idea.lang.highlighter;
 
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.psi.TokenType;
@@ -12,8 +12,6 @@ import org.nixos.idea._testutil.ReflectionUtils;
 import org.nixos.idea.psi.NixTokenType;
 import org.nixos.idea.psi.NixTypes;
 
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -21,8 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 final class NixSyntaxHighlighterTest {
     @Test
@@ -46,31 +42,5 @@ final class NixSyntaxHighlighterTest {
         return Stream.concat(
                 Stream.of(Named.of("TokenType.BAD_CHARACTER", TokenType.BAD_CHARACTER)),
                 ReflectionUtils.getPublicStaticFieldValues(NixTypes.class, NixTokenType.class));
-    }
-
-    @ParameterizedTest
-    @MethodSource
-    void testKeyNamesHaveNixPrefix(@NotNull TextAttributesKey key) {
-        assertTrue(key.getExternalName().startsWith("NIX_"));
-    }
-
-    static @NotNull Stream<Named<TextAttributesKey>> testKeyNamesHaveNixPrefix() {
-        return ReflectionUtils.getPublicStaticFieldValues(NixSyntaxHighlighter.class, TextAttributesKey.class);
-    }
-
-    @ParameterizedTest
-    @MethodSource
-    void testNoDuplicateKeyNames(@NotNull TextAttributesKey key) {
-        Set<String> duplicates = ReflectionUtils.getPublicStaticFieldValues(NixSyntaxHighlighter.class, TextAttributesKey.class)
-                .filter(other -> other.getPayload().getExternalName().equals(key.getExternalName()))
-                .map(Named::getName)
-                .collect(Collectors.toSet());
-        if (duplicates.size() != 1) {
-            fail("Duplicates: " + duplicates);
-        }
-    }
-
-    static @NotNull Stream<Named<TextAttributesKey>> testNoDuplicateKeyNames() {
-        return ReflectionUtils.getPublicStaticFieldValues(NixSyntaxHighlighter.class, TextAttributesKey.class);
     }
 }

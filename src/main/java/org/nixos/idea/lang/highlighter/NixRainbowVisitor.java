@@ -1,4 +1,4 @@
-package org.nixos.idea.lang;
+package org.nixos.idea.lang.highlighter;
 
 import com.intellij.codeInsight.daemon.RainbowVisitor;
 import com.intellij.codeInsight.daemon.impl.HighlightVisitor;
@@ -29,6 +29,10 @@ import java.util.List;
 import java.util.function.BiPredicate;
 
 public final class NixRainbowVisitor extends RainbowVisitor {
+    public static final List<TextAttributesKey> RAINBOW_ATTRIBUTES = List.of(
+            NixTextAttributes.LOCAL_VARIABLE,
+            NixTextAttributes.PARAMETER);
+
     @Override
     public boolean suitableForFile(@NotNull PsiFile file) {
         return file instanceof NixFile;
@@ -142,9 +146,9 @@ public final class NixRainbowVisitor extends RainbowVisitor {
         if (source instanceof NixExprLet ||
                 source instanceof NixLegacyLet ||
                 source instanceof NixSet) {
-            return NixSyntaxHighlighter.LOCAL_VARIABLE;
+            return NixTextAttributes.LOCAL_VARIABLE;
         } else if (source instanceof NixExprLambda) {
-            return NixSyntaxHighlighter.PARAMETER;
+            return NixTextAttributes.PARAMETER;
         } else {
             throw new IllegalArgumentException("Invalid source: " + source);
         }
@@ -152,7 +156,7 @@ public final class NixRainbowVisitor extends RainbowVisitor {
 
     private void highlight(@Nullable PsiElement element, @Nullable PsiElement source, @NotNull String attrPath) {
         if (element != null && source != null) {
-            TextAttributesKey attributesKey = attrPath.contains(".") ? NixSyntaxHighlighter.IDENTIFIER : getAttributesBySource(source);
+            TextAttributesKey attributesKey = attrPath.contains(".") ? NixTextAttributes.IDENTIFIER : getAttributesBySource(source);
             addInfo(getInfo(source, element, attrPath, attributesKey));
         }
     }

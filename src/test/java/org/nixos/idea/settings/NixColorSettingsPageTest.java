@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Named;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.nixos.idea._testutil.ReflectionUtils;
-import org.nixos.idea.lang.NixSyntaxHighlighter;
+import org.nixos.idea.lang.highlighter.NixTextAttributes;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -25,6 +25,6 @@ final class NixColorSettingsPageTest {
     }
 
     static @NotNull Stream<Named<TextAttributesKey>> testNoKeyMissing() {
-        return ReflectionUtils.getPublicStaticFieldValues(NixSyntaxHighlighter.class, TextAttributesKey.class);
+        return ReflectionUtils.getPublicStaticFieldValues(NixTextAttributes.class, TextAttributesKey.class);
     }
 }

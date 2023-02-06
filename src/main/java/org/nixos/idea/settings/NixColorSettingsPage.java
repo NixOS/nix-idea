@@ -12,45 +12,47 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.icon.NixIcons;
 import org.nixos.idea.lang.NixLanguage;
-import org.nixos.idea.lang.NixSyntaxHighlighter;
+import org.nixos.idea.lang.highlighter.NixRainbowVisitor;
+import org.nixos.idea.lang.highlighter.NixSyntaxHighlighter;
+import org.nixos.idea.lang.highlighter.NixTextAttributes;
 
 import javax.swing.Icon;
 import java.util.Map;
 
 public final class NixColorSettingsPage implements RainbowColorSettingsPage {
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
-            descriptor("Keyword", NixSyntaxHighlighter.KEYWORD),
-            descriptor("Operators//Semicolon", NixSyntaxHighlighter.SEMICOLON),
-            descriptor("Operators//Comma", NixSyntaxHighlighter.COMMA),
-            descriptor("Operators//Dot", NixSyntaxHighlighter.DOT),
-            descriptor("Operators//Assignment operator", NixSyntaxHighlighter.ASSIGN),
-            descriptor("Operators//Colon", NixSyntaxHighlighter.COLON),
-            descriptor("Operators//At sign (@)", NixSyntaxHighlighter.AT),
-            descriptor("Operators//Ellipsis", NixSyntaxHighlighter.ELLIPSIS),
-            descriptor("Operators//Other operators", NixSyntaxHighlighter.OPERATION_SIGN),
-            descriptor("Braces//Parentheses", NixSyntaxHighlighter.PARENTHESES),
-            descriptor("Braces//Curly braces", NixSyntaxHighlighter.BRACES),
-            descriptor("Braces//Brackets", NixSyntaxHighlighter.BRACKETS),
-            descriptor("Variables and Attributes//Other identifier", NixSyntaxHighlighter.IDENTIFIER),
-            descriptor("Variables and Attributes//Local variable", NixSyntaxHighlighter.LOCAL_VARIABLE),
-            descriptor("Variables and Attributes//Function parameter", NixSyntaxHighlighter.PARAMETER),
-            descriptor("Literals and Values//Number", NixSyntaxHighlighter.NUMBER),
-            descriptor("Literals and Values//String", NixSyntaxHighlighter.STRING),
-            descriptor("Literals and Values//Escape sequence", NixSyntaxHighlighter.STRING_ESCAPE),
-            descriptor("Literals and Values//Path", NixSyntaxHighlighter.PATH),
-            descriptor("Literals and Values//URI", NixSyntaxHighlighter.URI),
-            descriptor("Comments//Line comment", NixSyntaxHighlighter.LINE_COMMENT),
-            descriptor("Comments//Block comment", NixSyntaxHighlighter.BLOCK_COMMENT),
+            descriptor("Keyword", NixTextAttributes.KEYWORD),
+            descriptor("Operators//Semicolon", NixTextAttributes.SEMICOLON),
+            descriptor("Operators//Comma", NixTextAttributes.COMMA),
+            descriptor("Operators//Dot", NixTextAttributes.DOT),
+            descriptor("Operators//Assignment operator", NixTextAttributes.ASSIGN),
+            descriptor("Operators//Colon", NixTextAttributes.COLON),
+            descriptor("Operators//At sign (@)", NixTextAttributes.AT),
+            descriptor("Operators//Ellipsis", NixTextAttributes.ELLIPSIS),
+            descriptor("Operators//Other operators", NixTextAttributes.OPERATION_SIGN),
+            descriptor("Braces//Parentheses", NixTextAttributes.PARENTHESES),
+            descriptor("Braces//Curly braces", NixTextAttributes.BRACES),
+            descriptor("Braces//Brackets", NixTextAttributes.BRACKETS),
+            descriptor("Variables and Attributes//Other identifier", NixTextAttributes.IDENTIFIER),
+            descriptor("Variables and Attributes//Local variable", NixTextAttributes.LOCAL_VARIABLE),
+            descriptor("Variables and Attributes//Function parameter", NixTextAttributes.PARAMETER),
+            descriptor("Literals and Values//Number", NixTextAttributes.NUMBER),
+            descriptor("Literals and Values//String", NixTextAttributes.STRING),
+            descriptor("Literals and Values//Escape sequence", NixTextAttributes.STRING_ESCAPE),
+            descriptor("Literals and Values//Path", NixTextAttributes.PATH),
+            descriptor("Literals and Values//URI", NixTextAttributes.URI),
+            descriptor("Comments//Line comment", NixTextAttributes.LINE_COMMENT),
+            descriptor("Comments//Block comment", NixTextAttributes.BLOCK_COMMENT),
     };
 
     @Override
-    public @Nullable Language getLanguage() {
+    public @NotNull Language getLanguage() {
         return NixLanguage.INSTANCE;
     }
 
     @Override
     public boolean isRainbowType(TextAttributesKey type) {
-        return type.equals(NixSyntaxHighlighter.LOCAL_VARIABLE) || type.equals(NixSyntaxHighlighter.PARAMETER);
+        return NixRainbowVisitor.RAINBOW_ATTRIBUTES.contains(type);
     }
 
     @Override

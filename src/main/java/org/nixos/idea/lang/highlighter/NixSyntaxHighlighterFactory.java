@@ -1,4 +1,4 @@
-package org.nixos.idea.lang;
+package org.nixos.idea.lang.highlighter;
 
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory;
