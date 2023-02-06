@@ -1,24 +1,25 @@
 package org.nixos.idea.settings;
 
+import com.intellij.lang.Language;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
-import com.intellij.openapi.options.colors.ColorSettingsPage;
+import com.intellij.openapi.options.colors.RainbowColorSettingsPage;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.icon.NixIcons;
+import org.nixos.idea.lang.NixLanguage;
 import org.nixos.idea.lang.NixSyntaxHighlighter;
 
 import javax.swing.Icon;
 import java.util.Map;
 
-public final class NixColorSettingsPage implements ColorSettingsPage {
+public final class NixColorSettingsPage implements RainbowColorSettingsPage {
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
             descriptor("Keyword", NixSyntaxHighlighter.KEYWORD),
-            descriptor("Identifier", NixSyntaxHighlighter.IDENTIFIER),
             descriptor("Operators//Semicolon", NixSyntaxHighlighter.SEMICOLON),
             descriptor("Operators//Comma", NixSyntaxHighlighter.COMMA),
             descriptor("Operators//Dot", NixSyntaxHighlighter.DOT),
@@ -30,6 +31,9 @@ public final class NixColorSettingsPage implements ColorSettingsPage {
             descriptor("Braces//Parentheses", NixSyntaxHighlighter.PARENTHESES),
             descriptor("Braces//Curly braces", NixSyntaxHighlighter.BRACES),
             descriptor("Braces//Brackets", NixSyntaxHighlighter.BRACKETS),
+            descriptor("Variables and Attributes//Other identifier", NixSyntaxHighlighter.IDENTIFIER),
+            descriptor("Variables and Attributes//Local variable", NixSyntaxHighlighter.LOCAL_VARIABLE),
+            descriptor("Variables and Attributes//Function parameter", NixSyntaxHighlighter.PARAMETER),
             descriptor("Literals and Values//Number", NixSyntaxHighlighter.NUMBER),
             descriptor("Literals and Values//String", NixSyntaxHighlighter.STRING),
             descriptor("Literals and Values//Escape sequence", NixSyntaxHighlighter.STRING_ESCAPE),
@@ -38,6 +42,16 @@ public final class NixColorSettingsPage implements ColorSettingsPage {
             descriptor("Comments//Line comment", NixSyntaxHighlighter.LINE_COMMENT),
             descriptor("Comments//Block comment", NixSyntaxHighlighter.BLOCK_COMMENT),
     };
+
+    @Override
+    public @Nullable Language getLanguage() {
+        return NixLanguage.INSTANCE;
+    }
+
+    @Override
+    public boolean isRainbowType(TextAttributesKey type) {
+        return type.equals(NixSyntaxHighlighter.LOCAL_VARIABLE) || type.equals(NixSyntaxHighlighter.PARAMETER);
+    }
 
     @Override
     public @NotNull Icon getIcon() {

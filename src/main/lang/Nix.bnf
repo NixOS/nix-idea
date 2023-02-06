@@ -151,6 +151,7 @@ expr_op_base ::= expr_app
 // one AST node for a series of function calls.
 expr_app ::= expr_select ( !missing_semi expr_select ) *
 
+;{ methods("expr_select")=[ value="/expr[0]" default="/expr[1]" ] }
 expr_select ::= expr_simple [ !missing_semi ( select_attr | legacy_app_or )]
 private select_attr ::= DOT attr_path [ select_default ] { pin=1 }
 private select_default ::= OR_KW expr_select { pin=1 }
@@ -205,7 +206,7 @@ attr ::= std_attr | string_attr
 std_attr ::= ID | OR_KW
 string_attr ::= std_string | antiquotation
 
-attr_path ::= attr ( DOT attr )*
+attr_path ::= attr ( DOT attr )* { methods=[ firstAttr="/attr[0]" ] }
 
 
 // The lexer uses curly braces to determine its state. To avoid inconsistencies

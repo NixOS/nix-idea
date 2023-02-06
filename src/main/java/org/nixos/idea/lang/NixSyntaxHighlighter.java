@@ -19,8 +19,6 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
 
     public static final TextAttributesKey KEYWORD =
             createTextAttributesKey("NIX_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD);
-    public static final TextAttributesKey IDENTIFIER =
-            createTextAttributesKey("NIX_IDENTIFIER", DefaultLanguageHighlighterColors.IDENTIFIER);
 
     public static final TextAttributesKey SEMICOLON =
             createTextAttributesKey("NIX_SEMICOLON", DefaultLanguageHighlighterColors.SEMICOLON);
@@ -45,6 +43,13 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
             createTextAttributesKey("NIX_BRACES", DefaultLanguageHighlighterColors.BRACES);
     public static final TextAttributesKey BRACKETS =
             createTextAttributesKey("NIX_BRACKETS", DefaultLanguageHighlighterColors.BRACKETS);
+
+    public static final TextAttributesKey IDENTIFIER =
+            createTextAttributesKey("NIX_IDENTIFIER", DefaultLanguageHighlighterColors.IDENTIFIER);
+    public static final TextAttributesKey LOCAL_VARIABLE =
+            createTextAttributesKey("NIX_LOCAL_VARIABLE", DefaultLanguageHighlighterColors.LOCAL_VARIABLE);
+    public static final TextAttributesKey PARAMETER =
+            createTextAttributesKey("NIX_PARAMETER", DefaultLanguageHighlighterColors.PARAMETER);
 
     public static final TextAttributesKey STRING =
             createTextAttributesKey("NIX_STRING", DefaultLanguageHighlighterColors.STRING);
