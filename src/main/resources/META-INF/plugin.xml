@@ -23,6 +23,7 @@
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.highlighter.NixSyntaxHighlighterFactory" />
 
+        <highlightVisitor implementation="org.nixos.idea.lang.highlighter.NixHighlightVisitor" />
         <highlightVisitor implementation="org.nixos.idea.lang.highlighter.NixRainbowVisitor" />
 
         <lang.braceMatcher
