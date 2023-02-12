@@ -21,6 +21,7 @@ import org.nixos.idea.psi.NixLegacyLet;
 import org.nixos.idea.psi.NixParam;
 import org.nixos.idea.psi.NixParamSet;
 import org.nixos.idea.psi.NixSet;
+import org.nixos.idea.psi.NixStdAttr;
 import org.nixos.idea.psi.NixTypes;
 
 import java.util.List;
@@ -31,8 +32,8 @@ import java.util.function.BiPredicate;
  */
 abstract class NixHighlightVisitorDelegate {
 
-    private static final HighlightInfoType LOCAL_VARIABLE = new HighlightInfoType.HighlightInfoTypeImpl(HighlightInfoType.SYMBOL_TYPE_SEVERITY, NixTextAttributes.LOCAL_VARIABLE, false);
-    private static final HighlightInfoType PARAMETER = new HighlightInfoType.HighlightInfoTypeImpl(HighlightInfoType.SYMBOL_TYPE_SEVERITY, NixTextAttributes.PARAMETER, false);
+    public static final HighlightInfoType LOCAL_VARIABLE = new HighlightInfoType.HighlightInfoTypeImpl(HighlightInfoType.SYMBOL_TYPE_SEVERITY, NixTextAttributes.LOCAL_VARIABLE, false);
+    public static final HighlightInfoType PARAMETER = new HighlightInfoType.HighlightInfoTypeImpl(HighlightInfoType.SYMBOL_TYPE_SEVERITY, NixTextAttributes.PARAMETER, false);
 
     static boolean suitableForFile(@NotNull PsiFile file) {
         return file instanceof NixFile;
@@ -41,20 +42,23 @@ abstract class NixHighlightVisitorDelegate {
     abstract void highlight(@NotNull PsiElement element, @NotNull PsiElement source, @NotNull String attrPath, @Nullable HighlightInfoType type);
 
     void visit(@NotNull PsiElement element) {
-        if (element instanceof NixExprSelect) {
-            NixExprSelect expr = (NixExprSelect) element;
-            NixExpr value = expr.getValue();
-            if (!(value instanceof NixIdentifier)) {
-                return;
-            }
+        if (element instanceof NixIdentifier) {
+            NixExpr value = (NixIdentifier) element;
             String identifier = value.getText();
             PsiElement source = findSource(element, identifier);
             highlight(value, source, identifier);
-
+        } else if (element instanceof NixExprSelect) {
+            NixExprSelect expr = (NixExprSelect) element;
+            NixExpr value = expr.getValue();
             NixAttrPath attrPath = expr.getAttrPath();
-            if (attrPath != null) {
+            if (attrPath != null && value instanceof NixIdentifier) {
+                String identifier = value.getText();
+                PsiElement source = findSource(element, identifier);
                 String pathStr = identifier;
                 for (NixAttr nixAttr : expr.getAttrPath().getAttrList()) {
+                    if (!(nixAttr instanceof NixStdAttr)) {
+                        break;
+                    }
                     pathStr = pathStr + '.' + nixAttr.getText();
                     highlight(nixAttr, source, pathStr);
                 }
@@ -115,11 +119,17 @@ abstract class NixHighlightVisitorDelegate {
                 if (fullPath) {
                     List<NixAttr> attrs = bindAttr.getAttrPath().getAttrList();
                     NixAttr first = attrs.get(0);
+                    if (!(first instanceof NixStdAttr)) {
+                        continue;
+                    }
                     String pathStr = first.getText();
                     if (action.test(first, pathStr)) {
                         return true;
                     }
                     for (NixAttr attr : attrs.subList(1, attrs.size())) {
+                        if (!(attr instanceof NixStdAttr)) {
+                            break;
+                        }
                         pathStr = pathStr + '.' + attr.getText();
                         if (action.test(attr, pathStr)) {
                             return true;
@@ -132,7 +142,7 @@ abstract class NixHighlightVisitorDelegate {
                 }
             } else if (bind instanceof NixBindInherit) {
                 for (NixAttr attr : ((NixBindInherit) bind).getAttrList()) {
-                    if (action.test(attr, fullPath ? attr.getText() : null)) {
+                    if (attr instanceof NixStdAttr && action.test(attr, fullPath ? attr.getText() : null)) {
                         return true;
                     }
                 }
