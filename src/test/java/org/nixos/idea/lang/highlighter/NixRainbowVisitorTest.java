@@ -89,6 +89,19 @@ public final class NixRainbowVisitorTest extends BasePlatformTestCase {
                 "]");
     }
 
+    // TODO: Ideally, hidden elements should have a different color then the elements hiding them. Unfortunately,
+    //  I haven't found a good way to implement this.
+    @SuppressWarnings("unused")
+    public void ignoreTestHidingChangesColor() {
+        doTest("{<rainbow color='ff000004'>f</rainbow>, <rainbow color='ff000002'>hidden</rainbow>}: [\n" +
+                "  <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000002'>hidden</rainbow>\n" +
+                "  (let <rainbow color='ff000001'>hidden</rainbow> = null; in <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000001'>hidden</rainbow>)\n" +
+                "  (let { <rainbow color='ff000001'>hidden</rainbow> = null; <rainbow color='ff000003'>body</rainbow> = <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000001'>hidden</rainbow>; })\n" +
+                "  (rec { <rainbow color='ff000001'>hidden</rainbow> = null; <rainbow color='ff000003'>body</rainbow> = <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000001'>hidden</rainbow>; })\n" +
+                "  (<rainbow color='ff000001'>hidden</rainbow>: <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000001'>hidden</rainbow>)\n" +
+                "]");
+    }
+
     private void doTest(@NotNull String code) {
         myFixture.testRainbow("rainbow.nix", code, true, true);
     }
