@@ -89,6 +89,26 @@ public final class NixRainbowVisitorTest extends BasePlatformTestCase {
                 "]");
     }
 
+    public void testUnknownSource() {
+        doTest("[\n" +
+                "  <rainbow color='ff000004'>x</rainbow>\n" +
+                "  <rainbow color='ff000001'>compareVersions</rainbow>\n" +
+                "]");
+    }
+
+    public void testNoRainbowForBuiltins() {
+        doTest("[\n" +
+                "  null\n" +
+                "  true\n" +
+                "  false\n" +
+                "  import\n" +
+                "  map\n" +
+                "  builtins.null\n" +
+                "  builtins.map\n" +
+                "  builtins.compareVersions\n" +
+                "]");
+    }
+
     // TODO: Ideally, hidden elements should have a different color then the elements hiding them. Unfortunately,
     //  I haven't found a good way to implement this.
     @SuppressWarnings("unused")

@@ -9,7 +9,6 @@ import com.intellij.openapi.options.colors.RainbowColorSettingsPage;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.icon.NixIcons;
 import org.nixos.idea.lang.NixLanguage;
 import org.nixos.idea.lang.highlighter.NixRainbowVisitor;
@@ -36,6 +35,9 @@ public final class NixColorSettingsPage implements RainbowColorSettingsPage {
             descriptor("Variables and Attributes//Other identifier", NixTextAttributes.IDENTIFIER),
             descriptor("Variables and Attributes//Local variable", NixTextAttributes.LOCAL_VARIABLE),
             descriptor("Variables and Attributes//Function parameter", NixTextAttributes.PARAMETER),
+            descriptor("Built-in constants and functions//Literals", NixTextAttributes.LITERAL),
+            descriptor("Built-in constants and functions//Import function", NixTextAttributes.IMPORT),
+            descriptor("Built-in constants and functions//Other built-ins", NixTextAttributes.BUILTIN),
             descriptor("Literals and Values//Number", NixTextAttributes.NUMBER),
             descriptor("Literals and Values//String", NixTextAttributes.STRING),
             descriptor("Literals and Values//Escape sequence", NixTextAttributes.STRING_ESCAPE),
@@ -45,6 +47,13 @@ public final class NixColorSettingsPage implements RainbowColorSettingsPage {
             descriptor("Comments//Block comment", NixTextAttributes.BLOCK_COMMENT),
     };
 
+    private static final Map<String, TextAttributesKey> ADDITIONAL_HIGHLIGHTING_TAG = Map.of(
+            "builtin", NixTextAttributes.BUILTIN,
+            "import", NixTextAttributes.IMPORT,
+            "literal", NixTextAttributes.LITERAL,
+            "variable", NixTextAttributes.LOCAL_VARIABLE,
+            "parameter", NixTextAttributes.PARAMETER);
+
     @Override
     public @NotNull Language getLanguage() {
         return NixLanguage.INSTANCE;
@@ -52,6 +61,9 @@ public final class NixColorSettingsPage implements RainbowColorSettingsPage {
 
     @Override
     public boolean isRainbowType(TextAttributesKey type) {
+        // I think this method shall return true if the NixRainbowVisitor will always override the color of the given
+        // key. Unfortunately this method is not documented, but I assume the semantic highlighting will avoid using
+        // colors which correspond to attribute keys for which this method returns false.
         return NixRainbowVisitor.RAINBOW_ATTRIBUTES.contains(type);
     }
 
@@ -67,31 +79,32 @@ public final class NixColorSettingsPage implements RainbowColorSettingsPage {
 
     @Override
     public @NonNls @NotNull String getDemoText() {
-        // language=Nix
         return "/* This code demonstrates the syntax highlighting for the Nix Expression Language */\n" +
                 "let\n" +
-                "    literals.number = 42;\n" +
-                "    literals.string1 = \"This is a normal string\";\n" +
-                "    literals.string2 = ''\n" +
-                "        Broken escape sequence:  \\${literals.number}\n" +
-                "        Escaped interpolation:   ''${literals.number}\n" +
-                "        Generic escape sequence: $''\\{literals.number}\n" +
+                "    <variable>literals</variable>.null = <literal>null</literal>;\n" +
+                "    <variable>literals</variable>.boolean = <literal>true</literal>;\n" +
+                "    <variable>literals</variable>.number = 42;\n" +
+                "    <variable>literals</variable>.string1 = \"This is a normal string\";\n" +
+                "    <variable>literals</variable>.string2 = ''\n" +
+                "        Broken escape sequence:  \\${<variable>literals</variable>.number}\n" +
+                "        Escaped interpolation:   ''${<variable>literals</variable>.number}\n" +
+                "        Generic escape sequence: $''\\{<variable>literals</variable>.number}\n" +
                 "        '';\n" +
-                "    literals.paths = [/etc/gitconfig ~/.gitconfig .git/config];\n" +
+                "    <variable>literals</variable>.paths = [/etc/gitconfig ~/.gitconfig .git/config];\n" +
                 "    # Note that unquoted URIs were deperecated by RFC 45\n" +
-                "    literals.uri = https://github.com/NixOS/rfcs/pull/45;\n" +
+                "    <variable>literals</variable>.uri = https://github.com/NixOS/rfcs/pull/45;\n" +
                 "in {\n" +
-                "    inherit (literals) number string1 string2 paths uri;\n" +
-                "    nixpkgs = import <nixpkgs>;\n" +
-                "    baseNames = map baseNameOf literals.paths;\n" +
-                "    f = { multiply ? 1, add ? 0, ... }@args:\n" +
-                "        builtins.mapAttrs (name: value: multiply * value + add) args;\n" +
+                "    inherit (<variable>literals</variable>) number string1 string2 paths uri;\n" +
+                "    nixpkgs = <import>import</import> <nixpkgs>;\n" +
+                "    baseNames = <builtin>map</builtin> <builtin>baseNameOf</builtin> <variable>literals</variable>.paths;\n" +
+                "    f = { <parameter>multiply</parameter> ? 1, <parameter>add</parameter> ? 0, ... }@<parameter>args</parameter>:\n" +
+                "        <builtin>builtins</builtin>.<builtin>mapAttrs</builtin> (<parameter>name</parameter>: <parameter>value</parameter>: <parameter>multiply</parameter> * <parameter>value</parameter> + <parameter>add</parameter>) <parameter>args</parameter>;\n" +
                 "}";
     }
 
     @Override
-    public @Nullable Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
-        return null;
+    public @NotNull Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
+        return ADDITIONAL_HIGHLIGHTING_TAG;
     }
 
     @Override

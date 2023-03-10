@@ -45,7 +45,7 @@ public final class NixHighlightVisitor implements HighlightVisitor {
 
     private final class Delegate extends NixHighlightVisitorDelegate {
         @Override
-        void highlight(@NotNull PsiElement element, @NotNull PsiElement source, @NotNull String attrPath, @Nullable HighlightInfoType type) {
+        void highlight(@NotNull PsiElement element, @Nullable PsiElement source, @NotNull String attrPath, @Nullable HighlightInfoType type) {
             if (type != null) {
                 myHolder.add(HighlightInfo.newHighlightInfo(type)
                         .range(element)

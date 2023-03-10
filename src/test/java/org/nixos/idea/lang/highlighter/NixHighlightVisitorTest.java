@@ -19,9 +19,9 @@ public final class NixHighlightVisitorTest extends BasePlatformTestCase {
     public void testSelectExpression() {
         // TODO: Highlight x.y as a local variable
         doTest("let\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = null;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y = null;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\" = null;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\" = some_value;\n" +
                 "in [\n" +
                 "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>\n" +
                 "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y\n" +
@@ -31,13 +31,27 @@ public final class NixHighlightVisitorTest extends BasePlatformTestCase {
                 "]");
     }
 
+    public void testBuiltins() {
+        doTest("[\n" +
+                "  <symbolName type=\"LITERAL\">null</symbolName>\n" +
+                "  <symbolName type=\"LITERAL\">true</symbolName>\n" +
+                "  <symbolName type=\"LITERAL\">false</symbolName>\n" +
+                "  <symbolName type=\"IMPORT\">import</symbolName>\n" +
+                "  <symbolName type=\"BUILTIN\">map</symbolName>\n" +
+                "  <symbolName type=\"BUILTIN\">builtins</symbolName>.<symbolName type=\"LITERAL\">null</symbolName>\n" +
+                "  <symbolName type=\"BUILTIN\">builtins</symbolName>.<symbolName type=\"BUILTIN\">map</symbolName>\n" +
+                "  <symbolName type=\"BUILTIN\">builtins</symbolName>.<symbolName type=\"BUILTIN\">compareVersions</symbolName>\n" +
+                "  compareVersions\n" +
+                "]");
+    }
+
     public void testLetExpression() {
         doTest("let\n" +
-                "  inherit (null) \"no-highlighting-for-string-attributes\" <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = null;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y = null;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z = null;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\" = null;\n" +
+                "  inherit (some_value) \"no-highlighting-for-string-attributes\" <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\" = some_value;\n" +
                 "  <symbolName type=\"LOCAL_VARIABLE\">copy</symbolName> = <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
                 "in [\n" +
                 "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>\n" +
@@ -48,11 +62,11 @@ public final class NixHighlightVisitorTest extends BasePlatformTestCase {
 
     public void testLegacyLetExpression() {
         doTest("let {\n" +
-                "  inherit (null) \"no-highlighting-for-string-attributes\" <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = null;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y = null;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z = null;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\" = null;\n" +
+                "  inherit (some_value) \"no-highlighting-for-string-attributes\" <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\" = some_value;\n" +
                 "  <symbolName type=\"LOCAL_VARIABLE\">body</symbolName> = [\n" +
                 "    <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>\n" +
                 "    <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y\n" +
@@ -63,11 +77,11 @@ public final class NixHighlightVisitorTest extends BasePlatformTestCase {
 
     public void testRecursiveSet() {
         doTest("rec {\n" +
-                "  inherit (null) \"no-highlighting-for-string-attributes\" <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = null;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y = null;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z = null;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\" = null;\n" +
+                "  inherit (some_value) \"no-highlighting-for-string-attributes\" <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\" = some_value;\n" +
                 "  <symbolName type=\"LOCAL_VARIABLE\">body</symbolName> = [\n" +
                 "    <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>\n" +
                 "    <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y\n" +
@@ -78,10 +92,10 @@ public final class NixHighlightVisitorTest extends BasePlatformTestCase {
 
     public void testNoHighlightingForNonRecursiveSet() {
         doTest("{\n" +
-                "  inherit (null) \"no-highlighting-for-string-attributes\" x;\n" +
-                "  x = null;\n" +
-                "  x.y = null;\n" +
-                "  x.\"no-highlighting-for-string-attributes\" = null;\n" +
+                "  inherit (some_value) \"no-highlighting-for-string-attributes\" x;\n" +
+                "  x = some_value;\n" +
+                "  x.y = some_value;\n" +
+                "  x.\"no-highlighting-for-string-attributes\" = some_value;\n" +
                 "}");
     }
 
@@ -100,15 +114,15 @@ public final class NixHighlightVisitorTest extends BasePlatformTestCase {
         doTest("{<symbolName type=\"PARAMETER\">f</symbolName>, <symbolName type=\"PARAMETER\">hidden</symbolName>}: [\n" +
                 "  <symbolName type=\"PARAMETER\">f</symbolName> <symbolName type=\"PARAMETER\">hidden</symbolName>\n" +
                 "  (\n" +
-                "    let <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName> = null;\n" +
+                "    let <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName> = some_value;\n" +
                 "    in <symbolName type=\"PARAMETER\">f</symbolName> <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName>\n" +
                 "  )\n" +
                 "  (let {\n" +
-                "    <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName> = null;\n" +
+                "    <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName> = some_value;\n" +
                 "    <symbolName type=\"LOCAL_VARIABLE\">body</symbolName> = <symbolName type=\"PARAMETER\">f</symbolName> <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName>;\n" +
                 "  })\n" +
                 "  (rec {\n" +
-                "    <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName> = null;\n" +
+                "    <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName> = some_value;\n" +
                 "    <symbolName type=\"LOCAL_VARIABLE\">body</symbolName> = <symbolName type=\"PARAMETER\">f</symbolName> <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName>;\n" +
                 "  })\n" +
                 "]");
@@ -116,8 +130,8 @@ public final class NixHighlightVisitorTest extends BasePlatformTestCase {
 
     public void testParameterHidesVariable() {
         doTest("let\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">f</symbolName> = null;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName> = null;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">f</symbolName> = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName> = some_value;\n" +
                 "in\n" +
                 "  <symbolName type=\"PARAMETER\">hidden</symbolName>:\n" +
                 "  <symbolName type=\"LOCAL_VARIABLE\">f</symbolName> <symbolName type=\"PARAMETER\">hidden</symbolName>");
