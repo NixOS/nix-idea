@@ -41,7 +41,7 @@ public final class NixTextAttributes {
     public static final TextAttributesKey IMPORT =
             createTextAttributesKey("NIX_IMPORT", DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey BUILTIN =
-            createTextAttributesKey("NIX_BUILTIN", DefaultLanguageHighlighterColors.CONSTANT);
+            createTextAttributesKey("NIX_BUILTIN", DefaultLanguageHighlighterColors.PREDEFINED_SYMBOL);
     public static final TextAttributesKey LOCAL_VARIABLE =
             createTextAttributesKey("NIX_LOCAL_VARIABLE", DefaultLanguageHighlighterColors.LOCAL_VARIABLE);
     public static final TextAttributesKey PARAMETER =
