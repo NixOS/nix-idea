@@ -21,7 +21,13 @@
 
         <lang.syntaxHighlighterFactory
                 language="Nix"
-                implementationClass="org.nixos.idea.lang.NixSyntaxHighlighterFactory" />
+                implementationClass="org.nixos.idea.lang.highlighter.NixSyntaxHighlighterFactory" />
+
+        <highlightVisitor implementation="org.nixos.idea.lang.highlighter.NixHighlightVisitor" />
+        <highlightVisitor implementation="org.nixos.idea.lang.highlighter.NixRainbowVisitor" />
+
+        <additionalTextAttributes scheme="Default" file="org/nixos/idea/colorSchemes/NixDefault.xml"/>
+        <additionalTextAttributes scheme="Darcula" file="org/nixos/idea/colorSchemes/NixDarcula.xml"/>
 
         <lang.braceMatcher
                 language="Nix"
@@ -36,6 +42,9 @@
                 displayName="NixIDEA Settings"
                 id="org.nixos.idea.settings.NixIDEASettings"
                 instance="org.nixos.idea.settings.NixIDEASettings" />
+
+        <colorSettingsPage
+                implementation="org.nixos.idea.settings.NixColorSettingsPage" />
 
     </extensions>
 

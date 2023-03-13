@@ -97,6 +97,12 @@ gradle.buildFinished {
 }
 
 tasks {
+    withType<JavaCompile> {
+        options.encoding = "UTF-8"
+    }
+    withType<Javadoc> {
+        options.encoding = "UTF-8"
+    }
 
     task<Exec>("jbr") {
         description = "Create a symlink to package jetbrains.jdk"

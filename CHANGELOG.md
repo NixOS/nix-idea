@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 ### Added
+- Highlighting of built-in functions and constants
+- Support for [semantic highlighting](https://www.jetbrains.com/help/idea/configuring-colors-and-fonts.html#semantic-highlighting)
+- Settings to change the colors used by the highlighter
 
 ### Changed
 
