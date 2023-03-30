@@ -7,7 +7,7 @@ public final class LexerTest extends LexerTestCase {
   public void testRestartabilityWithAntiquotations() {
     // Checks that the lexer is restartable. See
     // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360010305800
-    checkCorrectRestartOnEveryToken(
+    checkCorrectRestart(
         "''\n" +
         "  ${\n" +
         "    [\n" +

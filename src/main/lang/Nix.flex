@@ -2,53 +2,33 @@ package org.nixos.idea.lang;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import it.unimi.dsi.fastutil.longs.Long2IntMap;
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
-import it.unimi.dsi.fastutil.longs.LongArrayList;
-import it.unimi.dsi.fastutil.longs.LongList;
+import it.unimi.dsi.fastutil.ints.AbstractIntList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 import static org.nixos.idea.psi.NixTypes.*;
 
 %%
 
 %{
-  private final LongList states = new LongArrayList();
-  private final Long2IntMap stateIndexMap = new Long2IntOpenHashMap();
+  private final AbstractIntList states = new IntArrayList();
 
-  {
-    states.add(YYINITIAL);
-    stateIndexMap.put(YYINITIAL, 0);
+  private void pushState(int newState) {
+      // store current state on the stack to allow restoring it in popState(...)
+      states.push(yystate());
+      yybegin(newState);
   }
 
-  private int currentStateIndex = 0;
-  private int parentStateIndex = 0;
-
-  public int getStateIndex() {
-    return currentStateIndex;
-  }
-
-  public void restoreState(int stateIndex) {
-    long state = states.getLong(stateIndex);
-    currentStateIndex = stateIndex;
-    parentStateIndex = (int) (state >> 32);
-    yybegin((int) state);
-  }
-
-  private void pushState(int yystate) {
-    long state = ((long) currentStateIndex << 32) | ((long) yystate & 0x0FFFFFFFFL);
-    int stateIndex = stateIndexMap.get(state); // Returns 0 if not found
-    if (stateIndex == 0 && state != YYINITIAL) {
-      stateIndex = states.size();
-      states.add(state);
-      stateIndexMap.put(state, stateIndex);
+  private void popState(int expectedState) {
+    // safe-guard, because we always know which state we're currently in in the rules below
+    if (yystate() != expectedState) {
+        throw new IllegalStateException(String.format("Unexpected state. Current: %d, expected: %d", yystate(), expectedState));
     }
-    parentStateIndex = currentStateIndex;
-    currentStateIndex = stateIndex;
-    yybegin(yystate);
+    // start the lexer with the previous state, which was stored by pushState(...)
+    yybegin(states.popInt());
   }
 
-  private void popState() {
-    restoreState(parentStateIndex);
+  protected void onReset() {
+      states.clear();
   }
 %}
 
@@ -57,7 +37,7 @@ import static org.nixos.idea.psi.NixTypes.*;
 %function advance
 %type IElementType
 %unicode
-%xstate STRING IND_STRING ANTIQUOTATION_START
+%state BLOCK STRING IND_STRING ANTIQUOTATION_START ANTIQUOTATION
 
 ANY=[^]
 ID=[a-zA-Z_][a-zA-Z0-9_'-]*
@@ -74,7 +54,34 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
 
 %%
 
-<YYINITIAL> {
+<STRING> {
+  [^\$\"\\]+            { return STR; }
+  "$"|"$$"|\\           { return STR; }
+  \\{ANY}               { return STR_ESCAPE; }
+  "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
+  \"                    { popState(STRING); return STRING_CLOSE; }
+}
+
+<IND_STRING> {
+  [^\$\']+              { return IND_STR; }
+  "$"|"$$"|"'"          { return IND_STR; }
+  "''$"|"'''"           { return IND_STR_ESCAPE; }
+  "''"\\{ANY}           { return IND_STR_ESCAPE; }
+  "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
+  "''"                  { popState(IND_STRING); return IND_STRING_CLOSE; }
+}
+
+<ANTIQUOTATION_START> {
+  // '$' and '{' must be two separate tokens to make NixBraceMatcher work
+  // correctly with Grammar-Kit.
+  "{"                   { popState(ANTIQUOTATION_START); pushState(ANTIQUOTATION); return LCURLY; }
+}
+
+<ANTIQUOTATION> {
+  "}"                   { popState(ANTIQUOTATION); return RCURLY; }
+}
+
+<YYINITIAL, BLOCK, ANTIQUOTATION> {
   "if"                  { return IF; }
   "then"                { return THEN; }
   "else"                { return ELSE; }
@@ -94,8 +101,8 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   "@"                   { return AT; }
   "("                   { return LPAREN; }
   ")"                   { return RPAREN; }
-  "{"                   { pushState(YYINITIAL); return LCURLY; }
-  "}"                   { popState(); return RCURLY; }
+  "{"                   { pushState(BLOCK); return LCURLY; }
+  "}"                   { popState(BLOCK); return RCURLY; }
   "["                   { return LBRAC; }
   "]"                   { return RBRAC; }
   // '$' and '{' must be two separate tokens to make NixBraceMatcher work
@@ -136,29 +143,8 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
 
   {SCOMMENT}            { return SCOMMENT; }
   {MCOMMENT}            { return MCOMMENT; }
-  {WHITE_SPACE}         { return com.intellij.psi.TokenType.WHITE_SPACE; }
-  [^]                   { return com.intellij.psi.TokenType.BAD_CHARACTER; }
 }
 
-<STRING> {
-  [^\$\"\\]+            { return STR; }
-  "$"|"$$"|\\           { return STR; }
-  \\{ANY}               { return STR_ESCAPE; }
-  "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
-  \"                    { popState(); return STRING_CLOSE; }
-}
-
-<IND_STRING> {
-  [^\$\']+              { return IND_STR; }
-  "$"|"$$"|"'"          { return IND_STR; }
-  "''$"|"'''"           { return IND_STR_ESCAPE; }
-  "''"\\{ANY}           { return IND_STR_ESCAPE; }
-  "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
-  "''"                  { popState(); return IND_STRING_CLOSE; }
-}
-
-<ANTIQUOTATION_START> {
-  // '$' and '{' must be two separate tokens to make NixBraceMatcher work
-  // correctly with Grammar-Kit.
-  "{"                   { popState(); pushState(YYINITIAL); return LCURLY; }
-}
+// matched by all %state states
+{WHITE_SPACE}           { return com.intellij.psi.TokenType.WHITE_SPACE; }
+[^]                     { return com.intellij.psi.TokenType.BAD_CHARACTER; }
