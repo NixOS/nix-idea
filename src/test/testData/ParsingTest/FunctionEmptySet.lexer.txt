@@ -1,0 +1,6 @@
+{ ('{')
+WHITE_SPACE (' ')
+} ('}')
+: (':')
+WHITE_SPACE (' ')
+ID ('null')

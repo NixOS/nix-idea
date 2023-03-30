@@ -1,0 +1,5 @@
+⁠let ('let')
+WHITE_SPACE (' ')
+⁠in ('in')
+WHITE_SPACE (' ')
+ID ('x')

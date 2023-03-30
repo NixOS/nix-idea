@@ -117,6 +117,11 @@ tasks {
             ?: tasksUsingDownloadedJbr.add(this)
     }
 
+    withType<Test> {
+        systemProperty("idea.test.execution.policy", "org.nixos.idea.NixTestExecutionPolicy")
+        systemProperty("plugin.testDataPath", rootProject.rootDir.resolve("src/test/testData").path)
+    }
+
     task("metadata") {
         outputs.upToDateWhen { false }
         doLast {
