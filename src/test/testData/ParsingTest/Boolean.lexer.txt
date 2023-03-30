@@ -1,0 +1,7 @@
+[ ('[')
+WHITE_SPACE ('\n')
+ID ('true')
+WHITE_SPACE ('\n')
+ID ('false')
+WHITE_SPACE ('\n')
+] (']')

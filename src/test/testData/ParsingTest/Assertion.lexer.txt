@@ -1,0 +1,6 @@
+⁠assert ('assert')
+WHITE_SPACE (' ')
+ID ('e1')
+; (';')
+WHITE_SPACE (' ')
+ID ('e2')
