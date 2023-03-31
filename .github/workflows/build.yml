@@ -129,9 +129,9 @@ jobs:
     - name: Read metadata
       id: metadata
       run: |
-        echo "::set-output name=version::$(cat build/metadata/version.txt)"
-        echo "::set-output name=zipfile::$(cat build/metadata/zipfile.txt)"
-        echo "::set-output name=zipname::$(basename "$(cat build/metadata/zipfile.txt)")"
+        echo "version=$(cat build/metadata/version.txt)" >> "$GITHUB_OUTPUT"
+        echo "zipfile=$(cat build/metadata/zipfile.txt)" >> "$GITHUB_OUTPUT"
+        echo "zipname=$(basename "$(cat build/metadata/zipfile.txt)")" >> "$GITHUB_OUTPUT"
     # Fail job if the release tag already exists and points to a different commit
     - name: Check release tag
       uses: actions/github-script@v6
