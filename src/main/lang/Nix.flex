@@ -22,6 +22,9 @@ import static org.nixos.idea.psi.NixTypes.*;
   }
 
   private void popState(int expectedState) {
+    if (states.isEmpty()){
+      throw new IllegalStateException("Popping an empty stack of states. Expected: " + expectedState);
+    }
     // safe-guard, because we always know which state we're currently in in the rules below
     if (yystate() != expectedState) {
         throw new IllegalStateException(String.format("Unexpected state. Current: %d, expected: %d", yystate(), expectedState));
