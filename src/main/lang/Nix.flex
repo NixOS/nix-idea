@@ -84,6 +84,10 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   "}"                   { popState(ANTIQUOTATION); return RCURLY; }
 }
 
+<BLOCK> {
+  "}"                   { popState(BLOCK); return RCURLY; }
+}
+
 <YYINITIAL, BLOCK, ANTIQUOTATION> {
   "if"                  { return IF; }
   "then"                { return THEN; }
@@ -105,7 +109,7 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   "("                   { return LPAREN; }
   ")"                   { return RPAREN; }
   "{"                   { pushState(BLOCK); return LCURLY; }
-  "}"                   { popState(BLOCK); return RCURLY; }
+  "}"                   { return RCURLY; }
   "["                   { return LBRAC; }
   "]"                   { return RBRAC; }
   // '$' and '{' must be two separate tokens to make NixBraceMatcher work
