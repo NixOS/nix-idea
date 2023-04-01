@@ -150,8 +150,8 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
 
   {SCOMMENT}            { return SCOMMENT; }
   {MCOMMENT}            { return MCOMMENT; }
+  {WHITE_SPACE}         { return com.intellij.psi.TokenType.WHITE_SPACE; }
 }
 
 // matched by all %state states
-{WHITE_SPACE}           { return com.intellij.psi.TokenType.WHITE_SPACE; }
 [^]                     { return com.intellij.psi.TokenType.BAD_CHARACTER; }
