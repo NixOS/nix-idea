@@ -13,6 +13,9 @@ import static org.nixos.idea.psi.NixTypes.*;
   private final AbstractIntList states = new IntArrayList();
 
   private void pushState(int newState) {
+      if (newState == YYINITIAL){
+          throw new IllegalStateException("Pusing YYINITIAL is not supported");
+      }
       // store current state on the stack to allow restoring it in popState(...)
       states.push(yystate());
       yybegin(newState);
