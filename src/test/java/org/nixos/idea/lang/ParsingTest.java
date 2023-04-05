@@ -145,10 +145,13 @@ public final class ParsingTest extends ParsingTestCase {
 
   @Override
   protected void tearDown() throws Exception {
-    // Ensure that the parser does not generate errors even when the errors have
-    // accidentally been added to the expected result.
-    ensureNoErrorElements();
-    super.tearDown();
+    try {
+      // Ensure that the parser does not generate errors even when the errors have
+      // accidentally been added to the expected result.
+      ensureNoErrorElements();
+    } finally {
+      super.tearDown();
+    }
   }
 
   @Override
