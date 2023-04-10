@@ -24,4 +24,8 @@ a.${foo}/b.${bar}
 
 # ./a.${foo}/b.${bar} is a path.
 ./a.${foo}/b.${bar}
+
+# trailing slashes
+/dir/subdir/
+./dir/subdir/
 ]
