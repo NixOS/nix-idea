@@ -3,6 +3,7 @@ package org.nixos.idea.lang.highlighter;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.TokenSet;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
@@ -15,12 +16,12 @@ import org.nixos.idea.psi.NixTypes;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static java.util.function.Predicate.not;
+import static org.junit.jupiter.api.Assertions.*;
 
 final class NixSyntaxHighlighterTest {
+    private static final TokenSet EMPTY_LENGTH_TOKENS = TokenSet.create(NixTypes.PATH_END);
+
     @Test
     void testAttributesKeysForUnknownTokenType() {
         TextAttributesKey[] tokenHighlights = new NixSyntaxHighlighter().getTokenHighlights(TokenType.CODE_FRAGMENT);
@@ -38,9 +39,10 @@ final class NixSyntaxHighlighterTest {
                 () -> assertNotNull(tokenHighlights[index], String.format("tokenHighlights[%d]", index))));
     }
 
-    static @NotNull Stream<Named<IElementType>> testAttributesKeysForKnownTokenTypes() {
+    static @NotNull Stream<Named<? extends IElementType>> testAttributesKeysForKnownTokenTypes() {
         return Stream.concat(
                 Stream.of(Named.of("TokenType.BAD_CHARACTER", TokenType.BAD_CHARACTER)),
-                ReflectionUtils.getPublicStaticFieldValues(NixTypes.class, NixTokenType.class));
+                ReflectionUtils.getPublicStaticFieldValues(NixTypes.class, NixTokenType.class)
+        ).filter(not(named -> EMPTY_LENGTH_TOKENS.contains(named.getPayload())));
     }
 }

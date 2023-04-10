@@ -99,7 +99,8 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   {PATH_CHAR}+          { return PATH_SEGMENT; }
   // anything else, e.g. whitespace, stops lexing of a PATH
   // we're delegating back to the parent state
-  [^]                   { popState(PATH); yypushback(yylength()); }
+  // PATH_END is an empty-length token to signal the end of the path
+  [^]                   { popState(PATH); yypushback(yylength()); return PATH_END; }
 }
 
 <YYINITIAL, BLOCK, ANTIQUOTATION> {
