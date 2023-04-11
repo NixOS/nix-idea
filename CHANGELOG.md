@@ -13,6 +13,10 @@
 
 ### Security
 
+## [0.4.0.9]
+### Added
+- Support for [string interpolation in paths](https://nixos.org/manual/nix/stable/language/string-interpolation#path) (#60)
+
 ## [0.4.0.8]
 ### Added
 - Highlighting of built-in functions and constants
