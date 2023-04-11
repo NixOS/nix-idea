@@ -43,15 +43,17 @@ import static org.nixos.idea.psi.NixTypes.*;
 %function advance
 %type IElementType
 %unicode
-%state BLOCK STRING IND_STRING ANTIQUOTATION_START ANTIQUOTATION
+%state BLOCK STRING IND_STRING ANTIQUOTATION_START ANTIQUOTATION PATH
 
 ANY=[^]
 ID=[a-zA-Z_][a-zA-Z0-9_'-]*
 INT=[0-9]+
 FLOAT=(([1-9][0-9]*\.[0-9]*)|(0?\.[0-9]+))([Ee][+-]?[0-9]+)?
-PATH=[a-zA-Z0-9._+-]*(\/[a-zA-Z0-9._+-]+)+\/?
-HPATH=\~(\/[a-zA-Z0-9._+-]+)+\/?
-SPATH=\<[a-zA-Z0-9._+-]+(\/[a-zA-Z0-9._+-]+)*\>
+PATH_CHAR=[a-zA-Z0-9\.\_\-\+]
+PATH={PATH_CHAR}*(\/{PATH_CHAR}+)+\/?
+PATH_SEG={PATH_CHAR}*\/
+HPATH_START=\~\/
+SPATH=\<{PATH_CHAR}+(\/{PATH_CHAR}+)*\>
 URI=[a-zA-Z][a-zA-Z0-9.+-]*\:[a-zA-Z0-9%/?:@&=+$,\-_.!~*']+
 
 WHITE_SPACE=[\ \t\r\n]+
@@ -89,6 +91,16 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
 
 <BLOCK> {
   "}"                   { popState(BLOCK); return RCURLY; }
+}
+
+<PATH> {
+  "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
+  {PATH_SEG}            { return PATH_SEGMENT; }
+  {PATH_CHAR}+          { return PATH_SEGMENT; }
+  // anything else, e.g. whitespace, stops lexing of a PATH
+  // we're delegating back to the parent state
+  // PATH_END is an empty-length token to signal the end of the path
+  [^]                   { popState(PATH); yypushback(yylength()); return PATH_END; }
 }
 
 <YYINITIAL, BLOCK, ANTIQUOTATION> {
@@ -146,8 +158,10 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   {ID}                  { return ID; }
   {INT}                 { return INT; }
   {FLOAT}               { return FLOAT; }
-  {PATH}                { return PATH; }
-  {HPATH}               { return HPATH; }
+  "/" / "${"            { pushState(PATH); return PATH_SEGMENT; }
+  {PATH}
+  | {PATH_SEG}
+  | {HPATH_START}       { pushState(PATH); return PATH_SEGMENT; }
   {SPATH}               { return SPATH; }
   {URI}                 { return URI; }
 

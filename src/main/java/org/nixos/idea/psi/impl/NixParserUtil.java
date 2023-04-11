@@ -3,6 +3,7 @@ package org.nixos.idea.psi.impl;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.parser.GeneratedParserUtilBase;
 import com.intellij.openapi.util.Key;
+import com.intellij.psi.TokenType;
 import org.jetbrains.annotations.NotNull;
 
 public final class NixParserUtil extends GeneratedParserUtilBase {

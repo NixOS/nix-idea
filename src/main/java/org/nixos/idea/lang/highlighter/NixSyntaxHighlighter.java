@@ -66,8 +66,7 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
             // Literals
             entry(NixTypes.INT, NixTextAttributes.NUMBER),
             entry(NixTypes.FLOAT, NixTextAttributes.NUMBER),
-            entry(NixTypes.PATH, NixTextAttributes.PATH),
-            entry(NixTypes.HPATH, NixTextAttributes.PATH),
+            entry(NixTypes.PATH_SEGMENT, NixTextAttributes.PATH),
             entry(NixTypes.SPATH, NixTextAttributes.PATH),
             entry(NixTypes.URI, NixTextAttributes.URI),
             // String literals

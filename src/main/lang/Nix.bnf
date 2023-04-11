@@ -169,7 +169,9 @@ expr_simple ::=
   | list
   | legacy_let
 identifier ::= ID
-literal ::= INT | FLOAT | PATH | HPATH | SPATH | URI
+literal ::= INT | FLOAT | URI | path
+;{ extends("path")=literal }
+path ::= SPATH | PATH_SEGMENT (PATH_SEGMENT | antiquotation)* PATH_END
 parens ::= LPAREN expr recover_parens RPAREN { pin=1 }
 set ::= [ REC ] LCURLY recover_set (bind recover_set)* RCURLY { pin=2 }
 list ::= LBRAC recover_list (expr_select recover_list)* RBRAC { pin=1 }

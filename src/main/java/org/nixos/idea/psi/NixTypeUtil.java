@@ -24,9 +24,9 @@ public final class NixTypeUtil {
                     NixTypes.ID,
                     NixTypes.INT,
                     NixTypes.FLOAT,
-                    NixTypes.PATH,
-                    NixTypes.HPATH,
                     NixTypes.SPATH,
+                    NixTypes.PATH_SEGMENT,
+                    NixTypes.PATH_END,
                     NixTypes.URI));
 
     private NixTypeUtil() {} // Cannot be instantiated
