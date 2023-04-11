@@ -77,6 +77,14 @@ public class NixParserDefinition implements ParserDefinition {
         if (leftType == NixTypes.DOLLAR && rightType == NixTypes.LCURLY) {
             return SpaceRequirements.MUST_NOT;
         }
+        else if (leftType == NixTypes.PATH_SEGMENT) {
+            // path segment, antiquotation or PATH_END on the right
+            return SpaceRequirements.MUST_NOT;
+        }
+        else if (rightType == NixTypes.PATH_END) {
+            // path segment or antiquotation on the left
+            return SpaceRequirements.MUST_NOT;
+        }
         else if (NixTypeUtil.MIGHT_COLLAPSE_WITH_ID.contains(leftType) &&
                  NixTypeUtil.MIGHT_COLLAPSE_WITH_ID.contains(rightType)) {
             return SpaceRequirements.MUST;

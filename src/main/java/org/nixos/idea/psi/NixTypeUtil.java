@@ -26,6 +26,7 @@ public final class NixTypeUtil {
                     NixTypes.FLOAT,
                     NixTypes.SPATH,
                     NixTypes.PATH_SEGMENT,
+                    NixTypes.PATH_END,
                     NixTypes.URI));
 
     private NixTypeUtil() {} // Cannot be instantiated
