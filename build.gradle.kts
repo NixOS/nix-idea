@@ -53,6 +53,7 @@ intellij {
 }
 
 changelog {
+    repositoryUrl.set("https://github.com/NixOS/nix-idea")
     lineSeparator.set("\n")
     // Workarounds because our version numbers do not match the format of semantic versioning:
     headerParserRegex.set("^[-._+0-9a-zA-Z]+\$")
