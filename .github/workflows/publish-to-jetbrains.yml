@@ -4,7 +4,11 @@ on:
   release:
     types: [ published ]
   workflow_dispatch:
-    inputs: {}
+    inputs:
+      release_tag:
+        description: 'Use release notes of'
+        type: string
+        required: true
 
 jobs:
   publish:
@@ -33,6 +37,18 @@ jobs:
           ${{hashFiles('gradle/wrapper/gradle-wrapper.properties')}}-\
           ${{hashFiles('gradle.properties', '**/*.gradle.kts')}}"
     # Build and publish
+    - name: Obtain release notes
+      uses: actions/github-script@v6
+      with:
+        script: |
+          await require('.github/scripts/get-release-notes.js')({
+            github, context, core,
+            outputFile: 'release_note.md',
+            releaseTagInput: 'release_tag',
+            allowFallbackToLatest: true,
+          });
+    - name: Patch changelog for release
+      run: ./gradlew --stacktrace patchChangelog --release-note="$(<release_note.md)"
     - name: Build and publish plugin
       id: gradle-build
       env:
