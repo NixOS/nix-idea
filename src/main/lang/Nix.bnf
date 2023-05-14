@@ -14,6 +14,8 @@
   elementTypeHolderClass="org.nixos.idea.psi.NixTypes"
   elementTypeClass="org.nixos.idea.psi.NixElementType"
   tokenTypeClass="org.nixos.idea.psi.NixTokenType"
+  // Visitor
+  psiVisitorName="NixElementVisitor"
 
   // do not record error reporting information in recover rules and missing_semi
   consumeTokenMethod(".*_recover|missing_semi")="consumeTokenFast"
