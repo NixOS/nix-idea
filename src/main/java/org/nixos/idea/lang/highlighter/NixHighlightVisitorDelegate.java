@@ -1,32 +1,23 @@
 package org.nixos.idea.lang.highlighter;
 
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType;
-import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.file.NixFile;
+import org.nixos.idea.interpretation.Attribute;
+import org.nixos.idea.interpretation.AttributePath;
+import org.nixos.idea.interpretation.Declaration;
+import org.nixos.idea.interpretation.VariableUsage;
 import org.nixos.idea.lang.builtins.NixBuiltin;
-import org.nixos.idea.psi.NixAttr;
-import org.nixos.idea.psi.NixAttrPath;
-import org.nixos.idea.psi.NixBind;
-import org.nixos.idea.psi.NixBindAttr;
-import org.nixos.idea.psi.NixBindInherit;
-import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixExprLambda;
 import org.nixos.idea.psi.NixExprLet;
-import org.nixos.idea.psi.NixExprSelect;
-import org.nixos.idea.psi.NixIdentifier;
 import org.nixos.idea.psi.NixLegacyLet;
-import org.nixos.idea.psi.NixParam;
-import org.nixos.idea.psi.NixParamSet;
+import org.nixos.idea.psi.NixPsiElement;
 import org.nixos.idea.psi.NixSet;
-import org.nixos.idea.psi.NixStdAttr;
-import org.nixos.idea.psi.NixTypes;
 
-import java.util.List;
-import java.util.function.BiPredicate;
+import java.util.Collection;
 
 /**
  * Delegate for the highlighting logic used by {@link NixHighlightVisitor} and {@link NixRainbowVisitor}.
@@ -56,115 +47,21 @@ abstract class NixHighlightVisitorDelegate {
     abstract void highlight(@NotNull PsiElement element, @Nullable PsiElement source, @NotNull String attrPath, @Nullable HighlightInfoType type);
 
     void visit(@NotNull PsiElement element) {
-        if (element instanceof NixIdentifier) {
-            NixExpr value = (NixIdentifier) element;
-            String identifier = value.getText();
-            PsiElement source = findSource(element, identifier);
-            highlight(value, source, identifier);
-        } else if (element instanceof NixExprSelect) {
-            NixExprSelect expr = (NixExprSelect) element;
-            NixExpr value = expr.getValue();
-            NixAttrPath attrPath = expr.getAttrPath();
-            if (attrPath != null && value instanceof NixIdentifier) {
-                String identifier = value.getText();
-                PsiElement source = findSource(element, identifier);
-                String pathStr = identifier;
-                for (NixAttr nixAttr : expr.getAttrPath().getAttrList()) {
-                    if (!(nixAttr instanceof NixStdAttr)) {
-                        break;
-                    }
-                    pathStr = pathStr + '.' + nixAttr.getText();
-                    highlight(nixAttr, source, pathStr);
-                }
-            }
-        } else {
-            iterateVariables(element, true, (var, path) -> {
-                highlight(var, element, path);
-                return false;
-            });
-        }
-    }
-
-    private static @Nullable PsiElement findSource(@NotNull PsiElement context, @NotNull String identifier) {
-        do {
-            if (iterateVariables(context, false, (var, __) -> var.textMatches(identifier))) {
-                return context;
+        if (element instanceof NixPsiElement) {
+            NixPsiElement nixElement = (NixPsiElement) element;
+            VariableUsage usage = VariableUsage.by(nixElement);
+            if (usage != null) {
+                NixPsiElement source = nixElement.getScope().getSource(usage.path());
+                highlight(usage.path(), usage.attributeElements(), source);
             } else {
-                context = context.getParent();
-            }
-        } while (context != null);
-        return null;
-    }
-
-    private static boolean iterateVariables(@NotNull PsiElement element, boolean fullPath, @NotNull BiPredicate<PsiElement, String> action) {
-        if (element instanceof NixExprLet) {
-            NixExprLet let = (NixExprLet) element;
-            return iterateVariables(let.getBindList(), fullPath, action);
-        } else if (element instanceof NixLegacyLet) {
-            NixLegacyLet let = (NixLegacyLet) element;
-            return iterateVariables(let.getBindList(), fullPath, action);
-        } else if (element instanceof NixSet) {
-            NixSet set = (NixSet) element;
-            return set.getNode().findChildByType(NixTypes.REC) != null &&
-                    iterateVariables(set.getBindList(), fullPath, action);
-        } else if (element instanceof NixExprLambda) {
-            NixExprLambda lambda = (NixExprLambda) element;
-            ASTNode mainParam = lambda.getNode().findChildByType(NixTypes.ID);
-            if (mainParam != null && action.test(mainParam.getPsi(), fullPath ? mainParam.getText() : null)) {
-                return true;
-            }
-            NixParamSet paramSet = lambda.getParamSet();
-            if (paramSet != null) {
-                for (NixParam param : paramSet.getParamList()) {
-                    ASTNode paramName = param.getNode().findChildByType(NixTypes.ID);
-                    if (paramName != null && action.test(paramName.getPsi(), fullPath ? paramName.getText() : null)) {
-                        return true;
+                for (Collection<Declaration> declarations : nixElement.getDeclarations().values()) {
+                    for (Declaration declaration : declarations) {
+                        assert declaration.source() == element;
+                        highlight(declaration.path(), declaration.attributeElements(), declaration.source());
                     }
                 }
             }
         }
-        return false;
-    }
-
-    private static boolean iterateVariables(@NotNull List<NixBind> bindList, boolean fullPath, @NotNull BiPredicate<PsiElement, String> action) {
-        for (NixBind bind : bindList) {
-            if (bind instanceof NixBindAttr) {
-                NixBindAttr bindAttr = (NixBindAttr) bind;
-                if (fullPath) {
-                    List<NixAttr> attrs = bindAttr.getAttrPath().getAttrList();
-                    NixAttr first = attrs.get(0);
-                    if (!(first instanceof NixStdAttr)) {
-                        continue;
-                    }
-                    String pathStr = first.getText();
-                    if (action.test(first, pathStr)) {
-                        return true;
-                    }
-                    for (NixAttr attr : attrs.subList(1, attrs.size())) {
-                        if (!(attr instanceof NixStdAttr)) {
-                            break;
-                        }
-                        pathStr = pathStr + '.' + attr.getText();
-                        if (action.test(attr, pathStr)) {
-                            return true;
-                        }
-                    }
-                } else {
-                    if (action.test(bindAttr.getAttrPath().getFirstAttr(), null)) {
-                        return true;
-                    }
-                }
-            } else if (bind instanceof NixBindInherit) {
-                for (NixAttr attr : ((NixBindInherit) bind).getAttrList()) {
-                    if (attr instanceof NixStdAttr && action.test(attr, fullPath ? attr.getText() : null)) {
-                        return true;
-                    }
-                }
-            } else {
-                throw new IllegalStateException("Unexpected NixBind implementation: " + bind.getClass());
-            }
-        }
-        return false;
     }
 
     private static @NotNull HighlightInfoType getHighlightingBySource(@NotNull PsiElement source) {
@@ -185,6 +82,20 @@ abstract class NixHighlightVisitorDelegate {
             case LITERAL: return LITERAL;
             case OTHER: return BUILTIN;
             default: throw new IllegalStateException("unknown type: " + builtin.highlightingType());
+        }
+    }
+
+    private void highlight(@NotNull AttributePath path, @NotNull PsiElement[] attributeElements, @Nullable NixPsiElement source) {
+        StringBuilder pathStrBuilder = new StringBuilder();
+        for (int i = 0; i < path.size(); i++) {
+            Attribute attribute = path.get(i);
+            if (attribute.hasQuotes() || attribute.hasInterpolation()) {
+                return;
+            }
+
+            pathStrBuilder.append(attribute);
+            highlight(attributeElements[i], source, pathStrBuilder.toString());
+            pathStrBuilder.append('.');
         }
     }
 

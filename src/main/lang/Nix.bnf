@@ -1,13 +1,16 @@
 {
+  // Parser classes
   parserClass="org.nixos.idea.lang.NixParser"
   parserUtilClass="org.nixos.idea.psi.impl.NixParserUtil"
-  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
-
+  // PSI element interfaces
   psiClassPrefix="Nix"
-  psiImplClassSuffix="Impl"
   psiPackage="org.nixos.idea.psi"
+  implements="org.nixos.idea.psi.NixPsiElement"
+  // PSI element implementations
+  psiImplClassSuffix="Impl"
   psiImplPackage="org.nixos.idea.psi.impl"
-
+  extends="org.nixos.idea.psi.impl.AbstractNixPsiElement"
+  // Constants (NixTypes)
   elementTypeHolderClass="org.nixos.idea.psi.NixTypes"
   elementTypeClass="org.nixos.idea.psi.NixElementType"
   tokenTypeClass="org.nixos.idea.psi.NixTokenType"
@@ -95,9 +98,10 @@ private recover_let ::= { recoverWhile=let_recover }
 private let_recover ::= braces_recover !(ASSERT | SEMI | IF | THEN | ELSE | LET | IN | WITH) !bind
 
 expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 }
-private lambda_params ::= ID [ !missing_semi AT param_set ] | param_set [ !missing_semi AT ID ]
+private lambda_params ::= paramName [ !missing_semi AT param_set ] | param_set [ !missing_semi AT ID ]
 param_set ::= LCURLY ( param COMMA )* [ ( ELLIPSIS | param ) ] recover_param_set RCURLY { pin=1 }
-param ::= ID [ param_has ] { pin=2 recoverWhile=param_recover }
+param ::= paramName [ param_has ] { pin=2 recoverWhile=param_recover }
+paramName ::= ID { implements=identifier }
 private param_has ::= HAS expr { pin=1 }
 private param_recover ::= curly_recover !COMMA
 private recover_param_set ::= { recoverWhile=curly_recover }
@@ -159,16 +163,16 @@ private select_default ::= OR_KW expr_select { pin=1 }
 //  https://github.com/JetBrains/Grammar-Kit/issues/257
 upper legacy_app_or ::= OR_KW { extends=expr_app }
 
-;{ extends("identifier|literal|string|parens|set|list|legacy_let")=expr_simple }
+;{ extends("variable_access|literal|string|parens|set|list|legacy_let")=expr_simple }
 expr_simple ::=
-    identifier
+    variable_access
   | literal
   | string
   | parens
   | set
   | list
   | legacy_let
-identifier ::= ID
+variable_access ::= ID { implements=identifier }
 literal ::= INT | FLOAT | URI | path
 ;{ extends("path")=literal }
 path ::= SPATH | PATH_SEGMENT (PATH_SEGMENT | antiquotation)* PATH_END
@@ -205,11 +209,13 @@ private missing_semi ::= <<parseIsBindValue>> ( RCURLY | IN | bind )
 
 ;{ extends(".*_attr")=attr }
 attr ::= std_attr | string_attr
-std_attr ::= ID | OR_KW
+std_attr ::= ID | OR_KW { implements=identifier }
 string_attr ::= std_string | antiquotation
 
 attr_path ::= attr ( DOT attr )* { methods=[ firstAttr="/attr[0]" ] }
 
+// Interface for identifiers.
+fake identifier ::= ID | OR_KW;
 
 // The lexer uses curly braces to determine its state. To avoid inconsistencies
 // between the parser and lexer (i.e. the lexer sees a string where the parser
