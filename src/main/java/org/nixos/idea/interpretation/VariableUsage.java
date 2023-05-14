@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.psi.NixAttr;
 import org.nixos.idea.psi.NixAttrPath;
+import org.nixos.idea.psi.NixBindInheritVar;
 import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixExprSelect;
 import org.nixos.idea.psi.NixPsiElement;
@@ -45,6 +46,8 @@ public final class VariableUsage {
                 return builder.build();
             }
             return null;
+        } else if (element instanceof NixAttr && element.getParent() instanceof NixBindInheritVar) {
+            return new Builder(element).addAttribute((NixAttr) element).build();
         } else {
             return null;
         }

@@ -23,6 +23,16 @@ public final class NixRainbowVisitorTest extends BasePlatformTestCase {
                 "]");
     }
 
+    public void testInheritExpression() {
+        doTest("let\n" +
+                "  <rainbow color='ff000004'>x</rainbow> = null;\n" +
+                "  <rainbow color='ff000002'>y</rainbow> = null;\n" +
+                "in {\n" +
+                "  inherit <rainbow color='ff000004'>x</rainbow>;\n" +
+                "  inherit <rainbow color='ff000004'>x</rainbow> <rainbow color='ff000002'>y</rainbow>;\n" +
+                "}");
+    }
+
     public void testLetExpression() {
         doTest("let\n" +
                 "  inherit (null) \"no-highlighting-for-string-attributes\" <rainbow color='ff000004'>x</rainbow>;\n" +

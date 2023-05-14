@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.psi.NixAttr;
 import org.nixos.idea.psi.NixBind;
 import org.nixos.idea.psi.NixBindAttr;
-import org.nixos.idea.psi.NixBindInherit;
+import org.nixos.idea.psi.NixBindInheritAttr;
 import org.nixos.idea.psi.NixExprLambda;
 import org.nixos.idea.psi.NixExprLet;
 import org.nixos.idea.psi.NixIdentifier;
@@ -82,8 +82,8 @@ public final class Declaration {
                     builder.addAttribute(attr);
                 }
                 declarations.add(builder.build());
-            } else if (bind instanceof NixBindInherit) {
-                for (NixAttr attr : ((NixBindInherit) bind).getAttrList()) {
+            } else if (bind instanceof NixBindInheritAttr) {
+                for (NixAttr attr : ((NixBindInheritAttr) bind).getAttrList()) {
                     declarations.add(new Builder(attr, source)
                             .addAttribute(attr)
                             .build());

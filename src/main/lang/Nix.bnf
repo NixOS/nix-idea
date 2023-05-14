@@ -198,11 +198,14 @@ private recover_antiquotation ::= { recoverWhile=curly_recover }
 private string_part_recover ::= !(DOLLAR | STRING_CLOSE | IND_STRING_CLOSE | string_token)
 private string_token ::= STR | IND_STR | STR_ESCAPE | IND_STR_ESCAPE
 
-;{ extends("bind_attr|bind_inherit")=bind }
-bind ::= bind_attr | bind_inherit
+;{ extends("bind_attr|bind_inherit")=bind
+   extends("bind_inherit_.*")=bind_inherit }
+bind ::= bind_attr | bind_inherit_attr | bind_inherit_var
 bind_attr ::= attr_path ASSIGN bind_value SEMI { pin=2 }
 bind_value ::= <<parseBindValue expr0>> { elementType=expr }
-bind_inherit ::= INHERIT [ LPAREN expr RPAREN ] attr* SEMI { pin=1 }
+bind_inherit_attr ::= INHERIT LPAREN expr RPAREN attr* SEMI { pin=2 }
+bind_inherit_var ::= INHERIT attr* SEMI { pin=1 }
+fake bind_inherit ::= [ expr ] attr*
 // Is used in various rules just to provide a better error message when a
 // semicolon is missing. Must always be used with `!`.
 private missing_semi ::= <<parseIsBindValue>> ( RCURLY | IN | bind )
