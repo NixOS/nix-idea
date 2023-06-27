@@ -1,3 +1,4 @@
+import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
@@ -8,7 +9,7 @@ plugins {
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
     id("org.jetbrains.intellij") version "1.13.3"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
-    id("org.jetbrains.changelog") version "1.3.1"
+    id("org.jetbrains.changelog") version "2.1.0"
     // grammarkit - read more: https://github.com/JetBrains/gradle-grammar-kit-plugin
     id("org.jetbrains.grammarkit") version "2021.2.2"
 }
@@ -52,7 +53,11 @@ intellij {
 }
 
 changelog {
+    repositoryUrl.set("https://github.com/NixOS/nix-idea")
+    lineSeparator.set("\n")
+    // Workarounds because our version numbers do not match the format of semantic versioning:
     headerParserRegex.set("^[-._+0-9a-zA-Z]+\$")
+    combinePreReleases.set(false)
 }
 
 grammarKit {
@@ -129,7 +134,14 @@ tasks {
             dir.mkdirs()
             dir.resolve("version.txt").writeText(pluginVersion)
             dir.resolve("zipfile.txt").writeText(buildPlugin.get().archiveFile.get().toString())
-            dir.resolve("latest_changelog.md").writeText(changelog.getLatest().toText())
+            dir.resolve("latest_changelog.md").writeText(with(changelog) {
+                renderItem(
+                    (getOrNull(pluginVersion) ?: getUnreleased())
+                        .withHeader(false)
+                        .withEmptySections(false),
+                    Changelog.OutputType.MARKDOWN
+                )
+            })
         }
     }
 
@@ -175,7 +187,14 @@ tasks {
         )
 
         // Get the latest available change notes from the changelog file
-        changeNotes.set(provider { changelog.getLatest().toHTML() })
+        changeNotes.set(provider { with(changelog) {
+            renderItem(
+                (getOrNull(pluginVersion) ?: getUnreleased())
+                    .withHeader(false)
+                    .withEmptySections(false),
+                Changelog.OutputType.HTML
+            )
+        }})
     }
 
     runPluginVerifier {

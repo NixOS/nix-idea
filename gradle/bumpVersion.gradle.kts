@@ -24,14 +24,6 @@ tasks.named("patchChangelog") {
             setProperty("releaseNote", releaseNote.replace("\r\n", "\n"))
         }
     }
-    // The task (as of org.jetbrains.changelog 1.3.1) removes trailing newlines from the changelog.
-    // Add a trailing newline afterwards as a workaround.
-    doLast {
-        val file = file(property("outputFile"))
-        if (!file.readText().endsWith("\n")) {
-            file.appendText("\n")
-        }
-    }
 }
 
 /**
