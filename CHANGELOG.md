@@ -11,6 +11,8 @@
 ### Removed
 
 ### Fixed
+- Final changes on release notes not applied to *“What’s New”* section
+  of published plugin
 
 ### Security
 
