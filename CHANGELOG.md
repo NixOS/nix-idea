@@ -3,11 +3,21 @@
 ## [Unreleased]
 
 ### Added
-- Support for IDEA 2023.2
 
 ### Changed
 
 ### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.4.0.10] - 2023-07-30
+
+### Added
+- Support for IDEA 2023.2
 
 ### Removed
 - Support for IDEA 2022.1
@@ -15,8 +25,6 @@
 ### Fixed
 - Final changes on release notes not applied to *“What’s New”* section
   of published plugin
-
-### Security
 
 ## [0.4.0.9]
 
@@ -146,7 +154,7 @@ the plugin.
 ### Changed
 - Update project to build for recent IJ versions
 
-[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.9...HEAD
+[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.10...HEAD
 [0.3.0.0]: https://github.com/NixOS/nix-idea/commits/v0.3.0.0
 [0.3.0.3]: https://github.com/NixOS/nix-idea/compare/v0.3.0.0...v0.3.0.3
 [0.3.0.4]: https://github.com/NixOS/nix-idea/compare/v0.3.0.3...v0.3.0.4
@@ -154,6 +162,7 @@ the plugin.
 [0.3.0.6]: https://github.com/NixOS/nix-idea/compare/v0.3.0.5...v0.3.0.6
 [0.4.0.0]: https://github.com/NixOS/nix-idea/compare/v0.3.0.6...v0.4.0.0
 [0.4.0.1]: https://github.com/NixOS/nix-idea/compare/v0.4.0.0...v0.4.0.1
+[0.4.0.10]: https://github.com/NixOS/nix-idea/compare/v0.4.0.9...v0.4.0.10
 [0.4.0.2]: https://github.com/NixOS/nix-idea/compare/v0.4.0.1...v0.4.0.2
 [0.4.0.3]: https://github.com/NixOS/nix-idea/compare/v0.4.0.2...v0.4.0.3
 [0.4.0.4]: https://github.com/NixOS/nix-idea/compare/v0.4.0.3...v0.4.0.4
