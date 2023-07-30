@@ -3,12 +3,14 @@
 ## [Unreleased]
 
 ### Added
+- Support for IDEA 2023.2
 
 ### Changed
 
 ### Deprecated
 
 ### Removed
+- Support for IDEA 2022.1
 
 ### Fixed
 - Final changes on release notes not applied to *“What’s New”* section
