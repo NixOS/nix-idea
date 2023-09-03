@@ -1,14 +1,18 @@
 package org.nixos.idea.interpretation;
 
+import com.google.errorprone.annotations.Immutable;
 import org.apache.commons.lang3.function.ToBooleanBiFunction;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.psi.NixAntiquotation;
 import org.nixos.idea.psi.NixAttr;
+import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixIdentifier;
+import org.nixos.idea.psi.NixIndString;
 import org.nixos.idea.psi.NixStdAttr;
 import org.nixos.idea.psi.NixStdString;
+import org.nixos.idea.psi.NixString;
 import org.nixos.idea.psi.NixStringAttr;
 import org.nixos.idea.psi.NixStringPart;
 import org.nixos.idea.psi.NixStringText;
@@ -21,25 +25,34 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public final class Attribute implements Comparable<Attribute> {
+/**
+ * Immutable attribute class. Attributes can be generated from {@link NixAttr} or {@link NixIdentifier}.
+ * You can compare two attributes by calling {@link #matches(Attribute)}.
+ * This class does not implement {@link #equals(Object)} or {@link #hashCode()} because
+ * the match my not be conclusive for {@linkplain #isDynamic() dynamic attributes}.
+ *
+ * @see AttributePath
+ * @see AttributeMap
+ */
+@Immutable
+public final class Attribute {
     private static final char INTERPOLATION_PLACEHOLDER = '*';
     private static final int INTERPOLATION_PLACEHOLDER_LENGTH = 1;
 
+    private final @NotNull Type myType;
     private final @NotNull String @NotNull [] myStringParts;
     private final @NotNull String @NotNull [] myRawStringParts;
-    private final boolean myInQuotes;
 
     private Attribute(@NotNull Builder builder) {
         int size = builder.myStringParts.size();
         assert builder.myRawStringParts == null || builder.myRawStringParts.size() == size;
+        myType = builder.myType;
         myStringParts = new String[size + 1];
         Collections.copy(Arrays.asList(myStringParts), builder.myStringParts);
         myStringParts[size] = builder.myNextString;
         if (builder.myRawStringParts == null) {
-            myInQuotes = false;
             myRawStringParts = myStringParts;
         } else {
-            myInQuotes = true;
             myRawStringParts = new String[size + 1];
             Collections.copy(Arrays.asList(myRawStringParts), builder.myRawStringParts);
             myRawStringParts[size] = builder.myNextRawString;
@@ -47,7 +60,7 @@ public final class Attribute implements Comparable<Attribute> {
     }
 
     public static @NotNull Attribute of(@NotNull NixIdentifier element) {
-        return new Builder(false).addString(element.getText()).build();
+        return new Builder(Type.ID).addString(element.getText()).build();
     }
 
     public static @NotNull Attribute of(@NotNull NixStdAttr element) {
@@ -57,47 +70,178 @@ public final class Attribute implements Comparable<Attribute> {
     public static @NotNull Attribute of(@NotNull NixAttr element) {
         if (element instanceof NixStdAttr) {
             return of((NixStdAttr) element);
-        }
-        else if (element instanceof NixStringAttr) {
+        } else if (element instanceof NixStringAttr) {
             return of((NixStringAttr) element);
         }
         throw new IllegalStateException("unknown attribute type");
     }
 
     public static @NotNull Attribute of(@NotNull NixStringAttr element) {
-        NixAntiquotation antiquotation = element.getAntiquotation();
-        if (antiquotation != null) {
+        NixAntiquotation interpolation = element.getAntiquotation();
+        if (interpolation != null) {
             assert element.getStdString() == null;
-            return new Builder(false).addInterpolation().build();
-        }
-        else {
-            NixStdString string = Objects.requireNonNull(element.getStdString());
-            Attribute.Builder builder = new Builder(true);
-            for (NixStringPart part : string.getStringPartList()) {
-                if (part instanceof NixStringText) {
-                    builder.addString(NixStringUtil.parse((NixStringText) part), part.getText());
-                }
-                else {
-                    assert part instanceof NixAntiquotation;
-                    builder.addInterpolation();
-                }
+            NixExpr expression = interpolation.getExpr();
+            if (expression instanceof NixString) {
+                Type type = expression instanceof NixIndString ? Type.INTERPOLATION_STR_IND : Type.INTERPOLATION_STR_STD;
+                return new Builder(type).addString((NixString) expression).build();
+            } else {
+                return new Builder(Type.INTERPOLATION).addInterpolation(interpolation).build();
             }
+        } else {
+            NixStdString string = Objects.requireNonNull(element.getStdString());
+            Attribute.Builder builder = new Builder(Type.STR);
+            builder.addString(string);
             return builder.build();
         }
     }
 
+    /**
+     * Returns whether the attribute is a simple identifier.
+     * <table>
+     *     <caption>Return value for various example attributes</caption>
+     *     <tr>
+     *         <th scope="col">Attribute</th>
+     *         <th scope="col">Return value</th>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code abc}</td>
+     *         <td>{@code true}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code "abc"}</td>
+     *         <td>{@code false}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code ${"abc"}}</td>
+     *         <td>{@code false}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code ${''abc''}}</td>
+     *         <td>{@code false}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code ${x}}</td>
+     *         <td>{@code false}</td>
+     *     </tr>
+     * </table>
+     *
+     * @return {@code true} if the attribute is a simple identifier, {@code false} otherwise.
+     */
     @Contract(pure = true)
-    public boolean hasQuotes() {
-        return myInQuotes;
+    public boolean isIdentifier() {
+        return myType == Type.ID;
     }
 
+    /**
+     * Returns whether the attribute name is enclosed in quotes.
+     * There is a special case for non-dynamic attributes using an interpolation.
+     * In such case, the attribute is treated as if the surrounding interpolation does not exist,
+     * meaning {@code ${"…"}} is effectively equivalent to {@code "…"}
+     * <table>
+     *     <caption>Return value for various example attributes</caption>
+     *     <tr>
+     *         <th scope="col">Attribute</th>
+     *         <th scope="col">Return value</th>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code xyz}</td>
+     *         <td>{@code false}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code ""}</td>
+     *         <td>{@code true}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code "42"}</td>
+     *         <td>{@code true}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code "a"}</td>
+     *         <td>{@code true}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code ${"a"}}</td>
+     *         <td>{@code true} <small>(special case described above)</small></td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code ${''a''}}</td>
+     *         <td>{@code true} <small>(special case described above)</small></td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code ${"a" + "b"}}</td>
+     *         <td>{@code false}</td>
+     *     </tr>
+     * </table>
+     *
+     * @return {@code true} if the attribute name is enclosed in quotes, {@code false} otherwise.
+     */
     @Contract(pure = true)
-    public boolean hasInterpolation() {
+    public boolean hasQuotes() {
+        return myType == Type.STR || myType == Type.INTERPOLATION_STR_STD || myType == Type.INTERPOLATION_STR_IND;
+    }
+
+    /**
+     * Returns whether the attribute is dynamic.
+     * Dynamic attributes do not have a {@linkplain #getName() plain name}.
+     * Obtaining the actual name of the attribute would require a generic evaluation of the expression.
+     * Attributes become dynamic if they contain an interpolation with any expression except a string literal.
+     * <table>
+     *     <caption>Return value for various example attributes</caption>
+     *     <tr>
+     *         <th scope="col">Attribute</th>
+     *         <th scope="col">Return value</th>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code abc}</td>
+     *         <td>{@code false}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code "abc"}</td>
+     *         <td>{@code false}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code ${abc}}</td>
+     *         <td>{@code true}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code ${"abc"}}</td>
+     *         <td>{@code false}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code ${''abc''}}</td>
+     *         <td>{@code false}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code "${"abc"}"}</td>
+     *         <td>{@code true}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code ${"a${"b"}c"}}</td>
+     *         <td>{@code true}</td>
+     *     </tr>
+     *     <tr>
+     *         <td>{@code ${"ab" + "c"}}</td>
+     *         <td>{@code true}</td>
+     *     </tr>
+     * </table>
+     * The most significant limitation of dynamic attributes in Nix is that
+     * you cannot use dynamic attributes when defining variables in {@code let}-expressions.
+     *
+     * @return {@code true} if the attribute is dynamic, {@code false} otherwise.
+     */
+    @Contract(pure = true)
+    public boolean isDynamic() {
         return myStringParts.length > 1;
     }
 
+    /**
+     * Returns the plain name of the attribute.
+     * The name is {@code null} if and only if this is a {@linkplain #isDynamic() dynamic attribute}.
+     *
+     * @return the name of the attribute, or {@code null}.
+     */
     @Contract(pure = true)
-    public @Nullable Object getKey() {
+    public @Nullable String getName() {
         return myStringParts.length == 1 ? myStringParts[0] : null;
     }
 
@@ -112,7 +256,7 @@ public final class Attribute implements Comparable<Attribute> {
         } else if (other.myStringParts.length == 1) {
             return matches0(other.myStringParts[0], myStringParts);
         } else if (smallerOnLarger(myStringParts[0], other.myStringParts[0], String::startsWith) &&
-                smallerOnLarger(myStringParts[myStringParts.length - 1], other.myStringParts[other.myStringParts.length - 1], String::startsWith)) {
+                smallerOnLarger(myStringParts[myStringParts.length - 1], other.myStringParts[other.myStringParts.length - 1], String::endsWith)) {
             return TriState.MAYBE;
         } else {
             return TriState.FALSE;
@@ -130,7 +274,7 @@ public final class Attribute implements Comparable<Attribute> {
             if (match == -1) {
                 return TriState.FALSE;
             }
-            pos += match + currentPart.length();
+            pos = match + currentPart.length();
         }
         assert pos <= fullString.length();
         if (pos == fullString.length() || fullString.endsWith(parts[parts.length - 1])) {
@@ -149,65 +293,74 @@ public final class Attribute implements Comparable<Attribute> {
 
     @Override
     @Contract(pure = true)
-    public int compareTo(@NotNull Attribute other) {
-        for (int i = 0; ; i++) {
-            if (i < myStringParts.length && i < other.myStringParts.length) {
-                //noinspection StringEquality
-                if (myStringParts[i] != other.myStringParts[i]) {
-                    int stringComparison;
-                    if (myStringParts[i] == null) {
-                        return 1;
-                    } else if (other.myStringParts[i] == null) {
-                        return -1;
-                    } else if ((stringComparison = myStringParts[i].compareTo(other.myStringParts[i])) != 0) {
-                        return stringComparison;
-                    }
-                }
-            } else {
-                return Integer.compare(myStringParts.length, other.myStringParts.length);
-            }
-        }
-    }
-
-    @Override
-    @Contract(pure = true)
     public String toString() {
         StringBuilder builder = new StringBuilder();
         assert myStringParts.length >= 1;
-        if (myInQuotes) {
-            builder.append('"');
-            for (String rawPart : myRawStringParts) {
-                builder.append(rawPart).append(INTERPOLATION_PLACEHOLDER);
-            }
-            builder.setLength(builder.length() - INTERPOLATION_PLACEHOLDER_LENGTH);
-            builder.append('"');
-        } else {
-            for (String part : myStringParts) {
-                builder.append(part);
-                builder.append(INTERPOLATION_PLACEHOLDER);
-            }
-            builder.setLength(builder.length() - INTERPOLATION_PLACEHOLDER_LENGTH);
+        builder.append(myType.prefix);
+        for (String part : myRawStringParts) {
+            builder.append(part).append(INTERPOLATION_PLACEHOLDER);
         }
+        builder.setLength(builder.length() - INTERPOLATION_PLACEHOLDER_LENGTH);
+        builder.append(myType.suffix);
         return builder.toString();
+    }
+
+    private enum Type {
+        ID("", ""),
+        STR("\"", "\""),
+        INTERPOLATION("", ""),
+        INTERPOLATION_STR_STD("${\"", "\"}"),
+        INTERPOLATION_STR_IND("${''", "''}"),
+
+        ;
+
+        private final String prefix;
+        private final String suffix;
+
+        Type(String prefix, String suffix) {
+            this.prefix = prefix;
+            this.suffix = suffix;
+        }
     }
 
     private static final class Builder {
         private static final String EMPTY_STRING = "";
 
+        private final @NotNull Type myType;
         private final @NotNull List<String> myStringParts = new ArrayList<>();
         private final @Nullable List<String> myRawStringParts;
         private @NotNull String myNextString = EMPTY_STRING;
         private @NotNull String myNextRawString = EMPTY_STRING;
 
-        private Builder(boolean inQuotes) {
-            this.myRawStringParts = inQuotes ? new ArrayList<>() : null;
+        private Builder(@NotNull Type type) {
+            myType = type;
+            myRawStringParts = type == Type.ID ? null : new ArrayList<>();
         }
 
-        @Contract("-> this")
-        private @NotNull Builder addInterpolation() {
+        @Contract("_ -> this")
+        private @NotNull Builder addInterpolation(@NotNull NixAntiquotation ignore) {
             myStringParts.add(myNextString);
+            myNextString = EMPTY_STRING;
             if (myRawStringParts != null) {
                 myRawStringParts.add(myNextRawString);
+                myNextRawString = EMPTY_STRING;
+            }
+            return this;
+        }
+
+        @Contract("_ -> this")
+        private @NotNull Builder addString(@NotNull NixString string) {
+            if (myRawStringParts == null) {
+                throw new IllegalStateException("Attribute.Builder.addString(NixString) not available for Type.ID. " +
+                        "Use Attribute.Builder.addString(String) instead.");
+            }
+            for (NixStringPart part : string.getStringParts()) {
+                if (part instanceof NixStringText) {
+                    myNextString = concat(myNextString, NixStringUtil.parse((NixStringText) part));
+                    myNextRawString = concat(myNextRawString, part.getText());
+                } else {
+                    addInterpolation((NixAntiquotation) part);
+                }
             }
             return this;
         }
@@ -215,21 +368,10 @@ public final class Attribute implements Comparable<Attribute> {
         @Contract("_ -> this")
         private @NotNull Builder addString(@NotNull String str) {
             if (myRawStringParts != null) {
-                throw new IllegalStateException("Attribute.Builder.addString(String) only available for unquoted attributes. " +
-                        "Use Attribute.Builder.addString(String, String) instead.");
+                throw new IllegalStateException("Attribute.Builder.addString(String) only available for Type.ID. " +
+                        "Use Attribute.Builder.addString(NixString) instead.");
             }
             myNextString = concat(myNextString, str);
-            return this;
-        }
-
-        @Contract("_, _ -> this")
-        private @NotNull Builder addString(@NotNull String str, @NotNull String raw) {
-            if (myRawStringParts == null) {
-                throw new IllegalStateException("Attribute.Builder.addString(String, String) only available for quoted attributes. " +
-                        "Use Attribute.Builder.addString(String) instead.");
-            }
-            myNextString = concat(myNextString, str);
-            myNextRawString = concat(myNextString, raw);
             return this;
         }
 

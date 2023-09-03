@@ -24,7 +24,7 @@ import java.util.Objects;
 
 abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements NixPsiElement {
 
-    private static final Key<CachedValue<Scope>> SCOPE_KEY = Key.create("AbstractNixPsiElement.scope");
+    private static final Key<CachedValue<Scope>> KEY_SCOPE = Key.create("AbstractNixPsiElement.scope");
 
     private @Nullable AttributeMap<Collection<Declaration>> declarations;
     private @Nullable AttributeMap<Collection<VariableUsage>> usages;
@@ -50,7 +50,7 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
 
     @Override
     public @NotNull Scope getScope() {
-        return CachedValuesManager.getCachedValue(this, SCOPE_KEY, () -> {
+        return CachedValuesManager.getCachedValue(this, KEY_SCOPE, () -> {
             PsiElement parent = getParent();
             Scope parentScope = Scope.EMPTY;
             if (parent instanceof NixPsiElement) {
@@ -68,8 +68,7 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
             VariableUsage usage = VariableUsage.by(this);
             if (usage != null) {
                 builder.set(usage.path(), List.of(usage));
-            }
-            else {
+            } else {
                 for (PsiElement child : getChildren()) {
                     if (child instanceof NixPsiElement) {
                         builder.merge(((NixPsiElement) child).getUsages(), MergeFunctions::mergeLists);
@@ -91,6 +90,7 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
     // VarHandle mechanics
     private static final VarHandle DECLARATIONS;
     private static final VarHandle USAGES;
+
     static {
         try {
             MethodHandles.Lookup l = MethodHandles.lookup();

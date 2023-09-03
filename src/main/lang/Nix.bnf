@@ -100,7 +100,7 @@ private recover_let ::= { recoverWhile=let_recover }
 private let_recover ::= braces_recover !(ASSERT | SEMI | IF | THEN | ELSE | LET | IN | WITH) !bind
 
 expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 }
-private lambda_params ::= paramName [ !missing_semi AT param_set ] | param_set [ !missing_semi AT ID ]
+private lambda_params ::= paramName [ !missing_semi AT param_set ] | param_set [ !missing_semi AT paramName ]
 param_set ::= LCURLY ( param COMMA )* [ ( ELLIPSIS | param ) ] recover_param_set RCURLY { pin=1 }
 param ::= paramName [ param_has ] { pin=2 recoverWhile=param_recover }
 paramName ::= ID { implements=identifier }
@@ -188,10 +188,11 @@ private recover_list ::= { recoverWhile=list_recover }
 private set_recover ::= curly_recover !bind
 private list_recover ::= brac_recover !expr_select
 
-;{ extends(".*_string")="string" }
-string ::= std_string | ind_string
+;{ extends(".*_string")="string" methods(".*_string|string_methods")=[ string_parts="string_part" ] }
+string ::= std_string | ind_string { implements=string_methods }
 std_string ::= STRING_OPEN string_part* STRING_CLOSE { pin=1 }
 ind_string ::= IND_STRING_OPEN string_part* IND_STRING_CLOSE { pin=1 }
+fake string_methods ::= string_part*
 ;{ extends("string_text|antiquotation")=string_part }
 string_part ::= string_text | antiquotation { recoverWhile=string_part_recover }
 string_text ::= string_token+

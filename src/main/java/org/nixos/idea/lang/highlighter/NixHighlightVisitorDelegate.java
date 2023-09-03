@@ -51,13 +51,13 @@ abstract class NixHighlightVisitorDelegate {
             NixPsiElement nixElement = (NixPsiElement) element;
             VariableUsage usage = VariableUsage.by(nixElement);
             if (usage != null) {
-                NixPsiElement source = nixElement.getScope().getSource(usage.path());
+                NixPsiElement source = nixElement.getScope().getOrigin(usage.path());
                 highlight(usage.path(), usage.attributeElements(), source);
             } else {
                 for (Collection<Declaration> declarations : nixElement.getDeclarations().values()) {
                     for (Declaration declaration : declarations) {
-                        assert declaration.source() == element;
-                        highlight(declaration.path(), declaration.attributeElements(), declaration.source());
+                        assert declaration.scope() == element;
+                        highlight(declaration.path(), declaration.attributeElements(), declaration.scope());
                     }
                 }
             }
@@ -89,7 +89,7 @@ abstract class NixHighlightVisitorDelegate {
         StringBuilder pathStrBuilder = new StringBuilder();
         for (int i = 0; i < path.size(); i++) {
             Attribute attribute = path.get(i);
-            if (attribute.hasQuotes() || attribute.hasInterpolation()) {
+            if (!attribute.isIdentifier()) {
                 return;
             }
 

@@ -1,5 +1,6 @@
 package org.nixos.idea.interpretation;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,8 +10,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Path of {@linkplain Attribute attributes} separated by dots. This class is immutable.
+ * An attribute path cannot be empty, meaning there is always at least one attribute within this container.
+ * Due to the existence of {@linkplain Attribute#isDynamic() dynamic attributes},
+ * this class does not implement {@link #equals(Object)} or {@link #hashCode()}.
+ *
+ * @see AttributeMap
+ */
+@Immutable
 public final class AttributePath {
-    private static final AttributePath EMPTY = new AttributePath(new Attribute[0]);
 
     private final @NotNull Attribute @NotNull [] myPath;
 
@@ -24,14 +33,9 @@ public final class AttributePath {
     }
 
     @Contract(pure = true)
-    public static @NotNull AttributePath empty() {
-        return EMPTY;
-    }
-
-    @Contract(pure = true)
     public static @NotNull AttributePath of(@NotNull Attribute @NotNull ... attrs) {
         if (attrs.length == 0) {
-            return EMPTY;
+            throw new IllegalArgumentException("AttributePath cannot be empty");
         } else {
             return new AttributePath(attrs);
         }
@@ -40,15 +44,10 @@ public final class AttributePath {
     @Contract(pure = true)
     public static @NotNull AttributePath of(@NotNull Collection<@NotNull Attribute> attrs) {
         if (attrs.isEmpty()) {
-            return EMPTY;
+            throw new IllegalArgumentException("AttributePath cannot be empty");
         } else {
             return new AttributePath(attrs.toArray(Attribute[]::new));
         }
-    }
-
-    @Contract(pure = true)
-    public boolean isEmpty() {
-        return myPath.length == 0;
     }
 
     @Contract(pure = true)
@@ -67,12 +66,12 @@ public final class AttributePath {
     }
 
     @Contract(pure = true)
-    public @NotNull Attribute @NotNull [] attributesAsArray() {
+    public @NotNull Attribute @NotNull [] toArray() {
         return myPath.clone();
     }
 
     @Contract(pure = true)
-    public @NotNull List<Attribute> attributes() {
+    public @NotNull List<Attribute> toList() {
         return List.of(myPath);
     }
 
@@ -80,21 +79,6 @@ public final class AttributePath {
     @Contract(pure = true)
     public String toString() {
         return Arrays.stream(myPath).map(Attribute::toString).collect(Collectors.joining("."));
-    }
-
-    @Override
-    @Contract(pure = true)
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AttributePath that = (AttributePath) o;
-        return Arrays.equals(myPath, that.myPath);
-    }
-
-    @Override
-    @Contract(pure = true)
-    public int hashCode() {
-        return Arrays.hashCode(myPath);
     }
 
     public static final class Builder {

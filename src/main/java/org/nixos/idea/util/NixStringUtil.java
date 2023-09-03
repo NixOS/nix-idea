@@ -1,7 +1,6 @@
 package org.nixos.idea.util;
 
 import com.intellij.lang.ASTNode;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -27,14 +26,14 @@ public final class NixStringUtil {
      * The code above prints the following:
      * <pre>"This should be escaped: \${}"</pre>
      *
-     * @param rawString The raw string which shall be the result when the expression is evaluated.
+     * @param unescaped The raw string which shall be the result when the expression is evaluated.
      * @return Source code for a Nix expression which evaluates to the given string.
      */
     @Contract(pure = true)
-    public static @NotNull String quote(@NotNull CharSequence rawString) {
+    public static @NotNull String quote(@NotNull CharSequence unescaped) {
         StringBuilder builder = new StringBuilder();
         builder.append('"');
-        escape(builder, rawString);
+        escape(builder, unescaped);
         builder.append('"');
         return builder.toString();
     }
@@ -55,11 +54,11 @@ public final class NixStringUtil {
      * </pre>
      *
      * @param builder   The target string builder. The result will be appended to the given string builder.
-     * @param rawString The raw string which shall be escaped.
+     * @param unescaped The raw string which shall be escaped.
      */
-    public static void escape(@NotNull StringBuilder builder, @NotNull CharSequence rawString) {
-        for (int charIndex = 0; charIndex < rawString.length(); charIndex++) {
-            char nextChar = rawString.charAt(charIndex);
+    public static void escape(@NotNull StringBuilder builder, @NotNull CharSequence unescaped) {
+        for (int charIndex = 0; charIndex < unescaped.length(); charIndex++) {
+            char nextChar = unescaped.charAt(charIndex);
             switch (nextChar) {
                 case '"':
                 case '\\':
@@ -98,8 +97,8 @@ public final class NixStringUtil {
      */
     public static @NotNull String parse(@NotNull NixStringText textNode) {
         StringBuilder builder = new StringBuilder();
-        for (PsiElement child : textNode.getChildren()) {
-            parse(builder, child.getNode());
+        for (ASTNode child = textNode.getNode().getFirstChildNode(); child != null; child = child.getTreeNext()) {
+            parse(builder, child);
         }
         return builder.toString();
     }

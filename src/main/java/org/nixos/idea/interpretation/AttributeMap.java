@@ -113,7 +113,7 @@ public final class AttributeMap<V> {
     public @NotNull Collection<Attribute> attributes() {
         return new AbstractCollection<>() {
             @Override
-            public Iterator<Attribute> iterator() {
+            public @NotNull Iterator<Attribute> iterator() {
                 return myChildLevels.keySet().stream().map(key -> key.attribute).iterator();
             }
 
@@ -128,7 +128,7 @@ public final class AttributeMap<V> {
     public @NotNull Collection<V> values() {
         return new AbstractCollection<>() {
             @Override
-            public Iterator<V> iterator() {
+            public @NotNull Iterator<V> iterator() {
                 return streamValues().iterator();
             }
 
@@ -154,7 +154,7 @@ public final class AttributeMap<V> {
         }
 
         private static @NotNull Key of(@NotNull Attribute attribute) {
-            Object key = attribute.getKey();
+            Object key = attribute.getName();
             if (key == null) {
                 return new Wildcard(attribute);
             } else {
