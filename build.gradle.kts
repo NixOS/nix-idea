@@ -2,12 +2,13 @@ import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
+import java.util.EnumSet
 
 plugins {
     // Java support
     id("java")
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij") version "1.13.3"
+    id("org.jetbrains.intellij") version "1.15.0"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "2.1.0"
     // grammarkit - read more: https://github.com/JetBrains/gradle-grammar-kit-plugin
@@ -198,7 +199,7 @@ tasks {
     }
 
     runPluginVerifier {
-        failureLevel.set(org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel.ALL)
+        failureLevel.set(EnumSet.complementOf(EnumSet.of(org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel.EXPERIMENTAL_API_USAGES)))
     }
 
     publishPlugin {

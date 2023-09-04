@@ -5,6 +5,7 @@
     <vendor>NixOS</vendor>
 
     <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
 
@@ -45,6 +46,9 @@
 
         <colorSettingsPage
                 implementation="org.nixos.idea.settings.NixColorSettingsPage" />
+
+        <platform.lsp.serverSupportProvider
+                implementation="org.nixos.idea.lsp.NixLspServerSupportProvider"/>
 
     </extensions>
 
