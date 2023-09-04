@@ -3,9 +3,9 @@ package org.nixos.idea.interpretation;
 import com.intellij.openapi.project.Project;
 import org.junit.jupiter.api.Test;
 import org.nixos.idea._testutil.WithIdeaPlatform;
-import org.nixos.idea.psi.NixAttr;
 import org.nixos.idea.psi.NixElementFactory;
 import org.nixos.idea.psi.NixExprSelect;
+import org.nixos.idea.psi.NixInheritedName;
 import org.nixos.idea.psi.NixVariableAccess;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +47,7 @@ final class VariableUsageTest {
 
     @Test
     void testInheritVariable() {
-        NixAttr attr = NixElementFactory.createElement(myProject, NixAttr.class,
+        NixInheritedName attr = NixElementFactory.createElement(myProject, NixInheritedName.class,
                 "{inherit ", "a", ";}");
         VariableUsage usage = VariableUsage.by(attr);
         assertNotNull(usage);
@@ -59,14 +59,9 @@ final class VariableUsageTest {
 
     @Test
     void testInheritFromExpression() {
-        NixAttr attr = NixElementFactory.createElement(myProject, NixAttr.class,
+        NixInheritedName attr = NixElementFactory.createElement(myProject, NixInheritedName.class,
                 "{inherit (x) ", "a", ";}");
         assertNull(VariableUsage.by(attr));
     }
 
-    @Test
-    void testAttributeOutsideOfInherit() {
-        NixAttr attr = NixElementFactory.createAttr(myProject, "a");
-        assertNull(VariableUsage.by(attr));
-    }
 }

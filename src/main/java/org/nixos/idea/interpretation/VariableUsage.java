@@ -8,6 +8,7 @@ import org.nixos.idea.psi.NixAttrPath;
 import org.nixos.idea.psi.NixBindInheritVar;
 import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixExprSelect;
+import org.nixos.idea.psi.NixInheritedName;
 import org.nixos.idea.psi.NixPsiElement;
 import org.nixos.idea.psi.NixVariableAccess;
 
@@ -39,7 +40,7 @@ public final class VariableUsage {
      * <ul>
      *     <li>{@link NixExprSelect}
      *     <li>{@link NixVariableAccess} when it is not part of {@link NixExprSelect}
-     *     <li>{@link NixAttr} as part of {@link NixBindInheritVar}
+     *     <li>{@link NixInheritedName} as part of {@link NixBindInheritVar}
      * </ul>
      *
      * @return the element which uses the variable.
@@ -47,7 +48,7 @@ public final class VariableUsage {
     @Contract(pure = true)
     public @NotNull NixPsiElement element() {
         assert myElement instanceof NixExprSelect || myElement instanceof NixVariableAccess ||
-                myElement instanceof NixAttr && myElement.getParent() instanceof NixBindInheritVar
+                myElement instanceof NixInheritedName && myElement.getParent() instanceof NixBindInheritVar
                 : "element type does not match Javadoc: " + myElement.getClass();
         return myElement;
     }
@@ -106,8 +107,8 @@ public final class VariableUsage {
                 return builder.build();
             }
             return null;
-        } else if (element instanceof NixAttr && element.getParent() instanceof NixBindInheritVar) {
-            return new Builder(element).addAttribute((NixAttr) element).build();
+        } else if (element instanceof NixInheritedName && element.getParent() instanceof NixBindInheritVar) {
+            return new Builder(element).addAttribute(((NixInheritedName) element).getAttr()).build();
         } else {
             return null;
         }

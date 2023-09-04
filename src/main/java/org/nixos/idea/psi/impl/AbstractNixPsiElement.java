@@ -26,8 +26,8 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
 
     private static final Key<CachedValue<Scope>> KEY_SCOPE = Key.create("AbstractNixPsiElement.scope");
 
-    private @Nullable AttributeMap<Collection<Declaration>> declarations;
-    private @Nullable AttributeMap<Collection<VariableUsage>> usages;
+    private @Nullable AttributeMap<Collection<Declaration>> myDeclarations;
+    private @Nullable AttributeMap<Collection<VariableUsage>> myUsages;
 
     AbstractNixPsiElement(@NotNull ASTNode node) {
         super(node);
@@ -35,7 +35,7 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
 
     @Override
     public @NotNull AttributeMap<Collection<Declaration>> getDeclarations() {
-        if (declarations == null) {
+        if (myDeclarations == null) {
             AttributeMap.Builder<Collection<Declaration>> builder = AttributeMap.builder();
             Collection<Declaration> declarationList = Declaration.allOf(this);
             if (declarationList != null) {
@@ -43,9 +43,9 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
                     builder.merge(declaration.path(), List.of(declaration), MergeFunctions::mergeLists);
                 }
             }
-            DECLARATIONS.compareAndSet(this, null, builder.build());
+            MY_DECLARATIONS.compareAndSet(this, null, builder.build());
         }
-        return Objects.requireNonNull(declarations);
+        return Objects.requireNonNull(myDeclarations);
     }
 
     @Override
@@ -63,7 +63,7 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
 
     @Override
     public @NotNull AttributeMap<Collection<VariableUsage>> getUsages() {
-        if (usages == null) {
+        if (myUsages == null) {
             AttributeMap.Builder<Collection<VariableUsage>> builder = AttributeMap.builder();
             VariableUsage usage = VariableUsage.by(this);
             if (usage != null) {
@@ -75,27 +75,26 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
                     }
                 }
             }
-            USAGES.compareAndSet(this, null, builder.build());
+            MY_USAGES.compareAndSet(this, null, builder.build());
         }
-        return Objects.requireNonNull(usages);
+        return Objects.requireNonNull(myUsages);
     }
 
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
-        declarations = null;
-        usages = null;
+        myDeclarations = null;
+        myUsages = null;
     }
 
     // VarHandle mechanics
-    private static final VarHandle DECLARATIONS;
-    private static final VarHandle USAGES;
-
+    private static final VarHandle MY_DECLARATIONS;
+    private static final VarHandle MY_USAGES;
     static {
         try {
             MethodHandles.Lookup l = MethodHandles.lookup();
-            DECLARATIONS = l.findVarHandle(AbstractNixPsiElement.class, "declarations", AttributeMap.class);
-            USAGES = l.findVarHandle(AbstractNixPsiElement.class, "usages", AttributeMap.class);
+            MY_DECLARATIONS = l.findVarHandle(AbstractNixPsiElement.class, "myDeclarations", AttributeMap.class);
+            MY_USAGES = l.findVarHandle(AbstractNixPsiElement.class, "myUsages", AttributeMap.class);
         } catch (ReflectiveOperationException e) {
             throw new ExceptionInInitializerError(e);
         }

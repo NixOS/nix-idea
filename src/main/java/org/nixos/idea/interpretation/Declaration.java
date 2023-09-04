@@ -10,8 +10,9 @@ import org.nixos.idea.psi.NixBindInheritAttr;
 import org.nixos.idea.psi.NixBindInheritVar;
 import org.nixos.idea.psi.NixExprLambda;
 import org.nixos.idea.psi.NixExprLet;
-import org.nixos.idea.psi.NixIdentifier;
+import org.nixos.idea.psi.NixInheritedName;
 import org.nixos.idea.psi.NixLegacyLet;
+import org.nixos.idea.psi.NixNamedElement;
 import org.nixos.idea.psi.NixParam;
 import org.nixos.idea.psi.NixParamName;
 import org.nixos.idea.psi.NixParamSet;
@@ -30,17 +31,12 @@ import java.util.List;
  * @see NixPsiElement#getDeclarations()
  */
 public final class Declaration {
-    private final @NotNull NixPsiElement myElement;
+    private final @NotNull NixNamedElement myElement;
     private final @NotNull NixPsiElement myScope;
-    private final @NotNull AttributePath myUsedPath;
-    private final @NotNull NixPsiElement[] myAttributeElements;
 
-    private Declaration(@NotNull Builder builder) {
-        assert builder.myAttributeElements.size() == builder.myAttributes.size();
-        myElement = builder.myElement;
-        myScope = builder.myScope;
-        myUsedPath = AttributePath.of(builder.myAttributes);
-        myAttributeElements = builder.myAttributeElements.toArray(NixPsiElement[]::new);
+    private Declaration(@NotNull NixNamedElement element, @NotNull NixPsiElement scope) {
+        myElement = element;
+        myScope = scope;
     }
 
     /**
@@ -48,7 +44,7 @@ public final class Declaration {
      * The following element types might be returned by this method:
      * <ul>
      *     <li>{@link NixBindAttr} for assignments in {@code let}-expressions or recursive sets.
-     *     <li>{@link NixAttr} for the attributes behind the {@code inherit} keyword.
+     *     <li>{@link NixInheritedName} for the attributes behind the {@code inherit} keyword.
      *     <li>{@link NixParam} for function parameters in set notation.
      *     <li>{@link NixParamName} for function parameters outside the set notation.
      * </ul>
@@ -56,8 +52,8 @@ public final class Declaration {
      * @return Element which declares or defines the variable.
      */
     @Contract(pure = true)
-    public @NotNull NixPsiElement element() {
-        assert myElement instanceof NixBindAttr || myElement instanceof NixAttr ||
+    public @NotNull NixNamedElement element() {
+        assert myElement instanceof NixBindAttr || myElement instanceof NixInheritedName ||
                 myElement instanceof NixParam || myElement instanceof NixParamName
                 : "element type does not match Javadoc: " + myElement.getClass();
         return myElement;
@@ -93,7 +89,7 @@ public final class Declaration {
      */
     @Contract(pure = true)
     public @NotNull AttributePath path() {
-        return myUsedPath;
+        return myElement.getAttributePath();
     }
 
     /**
@@ -105,9 +101,10 @@ public final class Declaration {
      */
     @Contract(pure = true)
     public @NotNull NixPsiElement @NotNull [] attributeElements() {
-        assert Arrays.stream(myAttributeElements).allMatch(el -> el instanceof NixParamName || el instanceof NixAttr)
+        NixPsiElement[] result = myElement.getAttributeElements();
+        assert Arrays.stream(result).allMatch(el -> el instanceof NixParamName || el instanceof NixAttr)
                 : "element type does not match Javadoc";
-        return myAttributeElements.clone();
+        return result;
     }
 
     /**
@@ -135,16 +132,12 @@ public final class Declaration {
             List<Declaration> declarations = new ArrayList<>();
             NixParamName mainParam = lambda.getParamName();
             if (mainParam != null) {
-                declarations.add(new Builder(mainParam, lambda)
-                        .addAttribute(mainParam)
-                        .build());
+                declarations.add(new Declaration(mainParam, lambda));
             }
             NixParamSet paramSet = lambda.getParamSet();
             if (paramSet != null) {
                 for (NixParam param : paramSet.getParamList()) {
-                    declarations.add(new Builder(param, lambda)
-                            .addAttribute(param.getParamName())
-                            .build());
+                    declarations.add(new Declaration(param, lambda));
                 }
             }
             return declarations;
@@ -158,16 +151,10 @@ public final class Declaration {
         for (NixBind bind : bindList) {
             if (bind instanceof NixBindAttr) {
                 NixBindAttr bindAttr = (NixBindAttr) bind;
-                Builder builder = new Builder(bindAttr, source);
-                for (NixAttr attr : bindAttr.getAttrPath().getAttrList()) {
-                    builder.addAttribute(attr);
-                }
-                declarations.add(builder.build());
+                declarations.add(new Declaration(bindAttr, source));
             } else if (bind instanceof NixBindInheritAttr) {
-                for (NixAttr attr : ((NixBindInheritAttr) bind).getAttrList()) {
-                    declarations.add(new Builder(attr, source)
-                            .addAttribute(attr)
-                            .build());
+                for (NixInheritedName inheritedName : ((NixBindInheritAttr) bind).getInheritedNames()) {
+                    declarations.add(new Declaration(inheritedName, source));
                 }
             } else {
                 assert bind instanceof NixBindInheritVar : "Unexpected NixBind implementation: " + bind.getClass();
@@ -176,37 +163,4 @@ public final class Declaration {
         return declarations;
     }
 
-    private static final class Builder {
-        private final @NotNull NixPsiElement myElement;
-        private final @NotNull NixPsiElement myScope;
-        private final @NotNull List<Attribute> myAttributes = new ArrayList<>();
-        private final @NotNull List<NixPsiElement> myAttributeElements = new ArrayList<>();
-
-        private Builder(@NotNull NixPsiElement element, @NotNull NixPsiElement scope) {
-            myElement = element;
-            myScope = scope;
-        }
-
-        @Contract("_ -> this")
-        private @NotNull Builder addAttribute(@NotNull NixIdentifier element) {
-            return addAttribute(Attribute.of(element), element);
-        }
-
-        @Contract("_ -> this")
-        private @NotNull Builder addAttribute(@NotNull NixAttr element) {
-            return addAttribute(Attribute.of(element), element);
-        }
-
-        @Contract("_, _ -> this")
-        private @NotNull Builder addAttribute(@NotNull Attribute attribute, @NotNull NixPsiElement element) {
-            myAttributes.add(attribute);
-            myAttributeElements.add(element);
-            return this;
-        }
-
-        @Contract(pure = true)
-        private @NotNull Declaration build() {
-            return new Declaration(this);
-        }
-    }
 }
