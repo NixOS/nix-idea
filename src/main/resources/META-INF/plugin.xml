@@ -31,6 +31,9 @@
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixCommenter"/>
 
+        <configurationType
+                implementation="org.nixos.idea.runConfiguration.NixRunConfigurationType"/>
+
         <projectConfigurable
                 groupId="build"
                 displayName="NixIDEA Settings"
