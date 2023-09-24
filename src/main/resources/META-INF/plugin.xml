@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
 
     <id>nix-idea</id>
     <name>NixIDEA</name>
@@ -6,6 +6,8 @@
 
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.platform</depends>
+
+    <xi:include href="/META-INF/nix-idea-lsp.xml"/>
 
     <extensions defaultExtensionNs="com.intellij">
 
@@ -47,8 +49,8 @@
         <colorSettingsPage
                 implementation="org.nixos.idea.settings.NixColorSettingsPage" />
 
-        <platform.lsp.serverSupportProvider
-                implementation="org.nixos.idea.lsp.NixLspServerSupportProvider"/>
+        <!-- <platform.lsp.serverSupportProvider
+                implementation="org.nixos.idea.lsp.NixLspServerSupportProvider"/> -->
 
     </extensions>
 

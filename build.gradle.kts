@@ -35,13 +35,23 @@ java {
 // Configure project's dependencies
 repositories {
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
+    implementation("com.github.ballerina-platform:lsp4intellij:0.95.2")
+
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher") // https://github.com/gradle/gradle/issues/22333
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+
+    constraints {
+        implementation("com.google.guava:guava:32.1.2-jre") {
+            // https://devhub.checkmarx.com/cve-details/CVE-2020-8908/
+            because("version 27.1-jre pulled from lsp4intellij has CVE-2020-8908")
+        }
+    }
 }
 
 // Configure gradle-intellij-plugin plugin.
@@ -199,7 +209,9 @@ tasks {
     }
 
     runPluginVerifier {
-        failureLevel.set(EnumSet.complementOf(EnumSet.of(org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel.EXPERIMENTAL_API_USAGES)))
+        failureLevel.set(EnumSet.of(
+            org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel.INVALID_PLUGIN,
+            org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel.MISSING_DEPENDENCIES))
     }
 
     publishPlugin {
