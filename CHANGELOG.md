@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- Support for IDEA 2023.3
 
 ### Changed
 
