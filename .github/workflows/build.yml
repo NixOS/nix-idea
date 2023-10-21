@@ -27,9 +27,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        jdk: [ 11 ]
+        jdk: [ 17 ]
         include:
-        - jdk: 11
+        - jdk: 17
           primary: true
 
     steps:
@@ -40,7 +40,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: ${{ matrix.jdk }}
-        distribution: adopt
+        distribution: temurin
     # Setup caches and collect metadata
     - name: Setup cache for Gradle and dependencies
       uses: actions/cache@v3

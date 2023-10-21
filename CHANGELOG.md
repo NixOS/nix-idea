@@ -3,12 +3,14 @@
 ## [Unreleased]
 
 ### Added
+- Support for IDEA 2023.3
 
 ### Changed
 
 ### Deprecated
 
 ### Removed
+- Support for IDEA 2022.2
 
 ### Fixed
 
