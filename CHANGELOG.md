@@ -10,6 +10,7 @@
 ### Deprecated
 
 ### Removed
+- Support for IDEA 2022.2
 
 ### Fixed
 
