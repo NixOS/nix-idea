@@ -12,7 +12,7 @@ plugins {
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "2.2.0"
     // grammarkit - read more: https://github.com/JetBrains/gradle-grammar-kit-plugin
-    id("org.jetbrains.grammarkit") version "2021.2.2"
+    id("org.jetbrains.grammarkit") version "2022.3.2"
 }
 
 // Import variables from gradle.properties file
@@ -146,14 +146,14 @@ tasks {
     }
 
     val generateNixLexer by registering(GenerateLexerTask::class) {
-        source = "src/main/lang/Nix.flex"
+        sourceFile = file("src/main/lang/Nix.flex")
         targetDir = "src/gen/java/org/nixos/idea/lang"
         targetClass = "_NixLexer"
         purgeOldFiles = true
     }
 
     val generateNixParser by registering(GenerateParserTask::class) {
-        source = "src/main/lang/Nix.bnf"
+        sourceFile = file("src/main/lang/Nix.bnf")
         targetRoot = "src/gen/java"
         pathToParser = "/org/nixos/idea/lang/NixParser"
         pathToPsiRoot = "/org/nixos/idea/psi"
