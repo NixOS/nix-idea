@@ -29,7 +29,7 @@ group = pluginGroup
 version = pluginVersion
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 // Configure project's dependencies
