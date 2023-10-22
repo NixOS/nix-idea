@@ -2,6 +2,7 @@ import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 plugins {
     // Java support
@@ -44,27 +45,27 @@ dependencies {
 
 // Configure gradle-intellij-plugin plugin.
 // Read more: https://github.com/JetBrains/gradle-intellij-plugin
-intellij.pluginName.set(pluginName)
+intellij.pluginName = pluginName
 intellij {
-    version.set(platformVersion)
-    type.set(platformType)
-    updateSinceUntilBuild.set(true)
+    version = platformVersion
+    type = platformType
+    updateSinceUntilBuild = true
 }
 
 changelog {
-    repositoryUrl.set("https://github.com/NixOS/nix-idea")
-    lineSeparator.set("\n")
+    repositoryUrl = "https://github.com/NixOS/nix-idea"
+    lineSeparator = "\n"
     // Workarounds because our version numbers do not match the format of semantic versioning:
-    headerParserRegex.set("^[-._+0-9a-zA-Z]+\$")
-    combinePreReleases.set(false)
+    headerParserRegex = "^[-._+0-9a-zA-Z]+\$"
+    combinePreReleases = false
 }
 
 grammarKit {
     // version of IntelliJ patched JFlex (see bintray link below), Default is 1.7.0-1
-    jflexRelease.set("1.7.0-1")
+    jflexRelease = "1.7.0-1"
 
     // tag or short commit hash of Grammar-Kit to use (see link below). Default is 2020.1
-    grammarKitRelease.set("2021.1.2")
+    grammarKitRelease = "2021.1.2"
 }
 
 sourceSets {
@@ -117,7 +118,7 @@ tasks {
     withType<org.jetbrains.intellij.tasks.RunIdeBase> {
         project.file("jbr/bin/java")
             .takeIf { it.exists() }
-            ?.let { projectExecutable.set(it.toString()) }
+            ?.let { projectExecutable = it.toString() }
             ?: tasksUsingDownloadedJbr.add(this)
     }
 
@@ -145,18 +146,18 @@ tasks {
     }
 
     val generateNixLexer by registering(GenerateLexerTask::class) {
-        source.set("src/main/lang/Nix.flex")
-        targetDir.set("src/gen/java/org/nixos/idea/lang")
-        targetClass.set("_NixLexer")
-        purgeOldFiles.set(true)
+        source = "src/main/lang/Nix.flex"
+        targetDir = "src/gen/java/org/nixos/idea/lang"
+        targetClass = "_NixLexer"
+        purgeOldFiles = true
     }
 
     val generateNixParser by registering(GenerateParserTask::class) {
-        source.set("src/main/lang/Nix.bnf")
-        targetRoot.set("src/gen/java")
-        pathToParser.set("/org/nixos/idea/lang/NixParser")
-        pathToPsiRoot.set("/org/nixos/idea/psi")
-        purgeOldFiles.set(true)
+        source = "src/main/lang/Nix.bnf"
+        targetRoot = "src/gen/java"
+        pathToParser = "/org/nixos/idea/lang/NixParser"
+        pathToPsiRoot = "/org/nixos/idea/psi"
+        purgeOldFiles = true
     }
 
     compileJava {
@@ -168,41 +169,41 @@ tasks {
     }
 
     patchPluginXml {
-        version.set(pluginVersion)
-        sinceBuild.set(pluginSinceBuild)
-        untilBuild.set(pluginUntilBuild)
+        version = pluginVersion
+        sinceBuild = pluginSinceBuild
+        untilBuild = pluginUntilBuild
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
-        pluginDescription.set(
-            projectDir.resolve("README.md").readText().lines().run {
-                val start = "<!-- Plugin description -->"
-                val end = "<!-- Plugin description end -->"
+        pluginDescription = projectDir.resolve("README.md").readText().lines().run {
+            val start = "<!-- Plugin description -->"
+            val end = "<!-- Plugin description end -->"
 
-                if (!containsAll(listOf(start, end))) {
-                    throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
-                }
-                subList(indexOf(start) + 1, indexOf(end))
-            }.joinToString("\n").run { markdownToHTML(this) }
-        )
+            if (!containsAll(listOf(start, end))) {
+                throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+            }
+            subList(indexOf(start) + 1, indexOf(end))
+        }.joinToString("\n").run { markdownToHTML(this) }
 
         // Get the latest available change notes from the changelog file
-        changeNotes.set(provider { with(changelog) {
-            renderItem(
-                (getOrNull(pluginVersion) ?: getUnreleased())
-                    .withHeader(false)
-                    .withEmptySections(false),
-                Changelog.OutputType.HTML
-            )
-        }})
+        changeNotes = provider {
+            with(changelog) {
+                renderItem(
+                        (getOrNull(pluginVersion) ?: getUnreleased())
+                                .withHeader(false)
+                                .withEmptySections(false),
+                        Changelog.OutputType.HTML
+                )
+            }
+        }
     }
 
     runPluginVerifier {
-        failureLevel.set(org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel.ALL)
+        failureLevel = RunPluginVerifierTask.FailureLevel.ALL
     }
 
     publishPlugin {
-        token.set(System.getenv("JETBRAINS_TOKEN"))
-        channels.set(listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first()))
+        token = System.getenv("JETBRAINS_TOKEN")
+        channels = listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first())
     }
 
 }
