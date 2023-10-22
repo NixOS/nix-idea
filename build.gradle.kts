@@ -39,7 +39,6 @@ repositories {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher") // https://github.com/gradle/gradle/issues/22333
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 }
 
@@ -130,7 +129,7 @@ tasks {
     task("metadata") {
         outputs.upToDateWhen { false }
         doLast {
-            val dir = project.buildDir.resolve("metadata")
+            val dir = project.layout.buildDirectory.dir("metadata").get().asFile
             dir.mkdirs()
             dir.resolve("version.txt").writeText(pluginVersion)
             dir.resolve("zipfile.txt").writeText(buildPlugin.get().archiveFile.get().toString())
