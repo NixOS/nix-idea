@@ -1,10 +1,13 @@
 package org.nixos.idea._testutil;
 
+import com.intellij.ide.IdeEventQueue;
 import com.intellij.testFramework.EdtTestUtil;
 import org.junit.jupiter.api.extension.DynamicTestInvocationContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
+import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
+import org.opentest4j.TestAbortedException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -57,10 +60,36 @@ final class EdtExtension implements InvocationInterceptor {
     }
 
     private static void runAndWait(Invocation<?> invocation) throws Throwable {
-        EdtTestUtil.runInEdtAndWait(invocation::proceed);
+        ThrowableCollector uncaughtExceptions = new ThrowableCollector(TestAbortedException.class::isInstance);
+        try (var ignored = wrap(uncaughtExceptions)) {
+            uncaughtExceptions.execute(() -> EdtTestUtil.runInEdtAndWait(invocation::proceed));
+        }
     }
 
     private static <T> T runAndGet(Invocation<T> invocation) throws Throwable {
-        return EdtTestUtil.runInEdtAndGet(invocation::proceed);
+        @SuppressWarnings("unchecked")
+        T[] result = (T[]) new Object[1];
+        runAndWait(() -> result[0] = invocation.proceed());
+        return result[0];
+    }
+
+    private static AutoCloseable wrap(ThrowableCollector uncaughtExceptions) {
+        Thread edt = EdtTestUtil.runInEdtAndGet(Thread::currentThread);
+        Thread.UncaughtExceptionHandler previousExceptionHandler = edt.getUncaughtExceptionHandler();
+        edt.setUncaughtExceptionHandler((thread, exception) -> uncaughtExceptions.execute(() -> {throw exception;}));
+
+        return () -> {
+            try {
+                // Make sure all deferred tasks have finished
+                boolean incomplete;
+                do {
+                    incomplete = EdtTestUtil.runInEdtAndGet(() -> IdeEventQueue.getInstance().peekEvent() != null);
+                } while (incomplete);
+            } finally {
+                edt.setUncaughtExceptionHandler(previousExceptionHandler);
+            }
+            // Re-throw any exception which might have been thrown by a deferred task
+            uncaughtExceptions.assertEmpty();
+        };
     }
 }
