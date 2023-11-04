@@ -20,11 +20,11 @@ jobs:
     # Setup environment
     - name: Checkout repository
       uses: actions/checkout@v3
-    - name: Set up JDK 11
+    - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
-        java-version: 11
-        distribution: adopt
+        java-version: 17
+        distribution: temurin
     # Fail if the release was not triggered from the master branch
     - name: Verify branch
       if: github.event_name == 'release'
@@ -56,37 +56,12 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          const fs = require('fs');
-          const owner = context.repo.owner;
-          const repo = context.repo.repo;
-          let releaseNote;
-
-          if (context.eventName === 'release') {
-            releaseNote = context.payload.release.body;
-          }
-          else if (context.payload.inputs.release_tag) {
-            const tag = context.payload.inputs.release_tag;
-            try {
-              const response = await github.rest.repos.getReleaseByTag({owner, repo, tag});
-              releaseNote = response.data.body;
-            }
-            catch (e) {
-              if (e.status === 404) {
-                core.setFailed(`No release with tag '${tag}' has been found.`);
-                return;
-              }
-              else {
-                throw e;
-              }
-            }
-          }
-          else {
-            const response = await github.rest.repos.getLatestRelease({owner, repo});
-            releaseNote = response.data.body;
-          }
-
-          core.info(`Release notes:\n${releaseNote}`);
-          fs.writeFileSync('release_note.md', releaseNote, { encoding: 'utf8', flag: 'wx' });
+          await require('.github/scripts/get-release-notes.js')({
+            github, context, core,
+            outputFile: 'release_note.md',
+            releaseTagInput: 'release_tag',
+            allowFallbackToLatest: true,
+          });
     - name: Update files with Gradle
       run: ./gradlew --stacktrace metadata patchChangelog --release-note="$(<release_note.md)" bumpVersion
     # Commit and push

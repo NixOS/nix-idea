@@ -1,7 +1,6 @@
 package org.nixos.idea._testutil;
 
 import com.intellij.testFramework.EdtTestUtil;
-import com.intellij.testFramework.TestApplicationManagerKt;
 import org.junit.jupiter.api.extension.DynamicTestInvocationContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
@@ -58,12 +57,10 @@ final class EdtExtension implements InvocationInterceptor {
     }
 
     private static void runAndWait(Invocation<?> invocation) throws Throwable {
-        TestApplicationManagerKt.replaceIdeEventQueueSafely();
         EdtTestUtil.runInEdtAndWait(invocation::proceed);
     }
 
     private static <T> T runAndGet(Invocation<T> invocation) throws Throwable {
-        TestApplicationManagerKt.replaceIdeEventQueueSafely();
         return EdtTestUtil.runInEdtAndGet(invocation::proceed);
     }
 }
