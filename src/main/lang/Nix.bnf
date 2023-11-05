@@ -23,9 +23,14 @@
   // no one really needs to know that + - * / are expected at any offset
   consumeTokenMethod("expr_op.*")="consumeTokenFast"
 
-  // Named elements
-  implements("bind_attr|inherited_name|param|param_name")="org.nixos.idea.psi.NixNamedElement"
-  mixin("bind_attr|inherited_name|param|param_name")="org.nixos.idea.psi.impl.AbstractNixNamedElement"
+  // Declaration elements
+  implements("bind_attr|inherited_name|param|param_name")="org.nixos.idea.psi.NixDeclarationElement"
+  mixin("bind_attr|inherited_name|param|param_name")="org.nixos.idea.psi.impl.AbstractNixDeclarationElement"
+
+  // Elements which support external references
+  // TODO: Test UrlReferenceHost
+  implements("variable_access|expr_select")="com.intellij.model.psi.PsiExternalReferenceHost"
+  implements("string_text")="com.intellij.model.psi.UrlReferenceHost"
 
   tokens = [
     // This list does not contain all tokens. This list only defines the debug
@@ -103,7 +108,7 @@ expr_with ::= WITH expr SEMI expr { pin=1 }
 private recover_let ::= { recoverWhile=let_recover }
 private let_recover ::= braces_recover !(ASSERT | SEMI | IF | THEN | ELSE | LET | IN | WITH) !bind
 
-expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 }
+expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 methods=[ params_in_set="/param_set/param" ] }
 private lambda_params ::= param_name [ !missing_semi AT param_set ] | param_set [ !missing_semi AT param_name ]
 param_set ::= LCURLY ( param COMMA )* [ ( ELLIPSIS | param ) ] recover_param_set RCURLY { pin=1 }
 param ::= param_name [ param_has ] { pin=2 recoverWhile=param_recover }

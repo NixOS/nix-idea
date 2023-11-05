@@ -59,6 +59,10 @@ public final class Attribute {
         }
     }
 
+    public static @NotNull Attribute of(@NotNull String string) {
+        return new Builder(Type.ID).addString(string).build();
+    }
+
     public static @NotNull Attribute of(@NotNull NixIdentifier element) {
         return new Builder(Type.ID).addString(element.getText()).build();
     }

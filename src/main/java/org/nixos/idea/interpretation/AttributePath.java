@@ -61,8 +61,21 @@ public final class AttributePath {
     }
 
     @Contract(pure = true)
+    public @NotNull Attribute last() {
+        return myPath[myPath.length - 1];
+    }
+
+    @Contract(pure = true)
     public @NotNull Attribute get(int index) {
         return myPath[index];
+    }
+
+    @Contract(pure = true)
+    public @NotNull AttributePath prefix(int index) {
+        if (index >= myPath.length) {
+            throw new IllegalArgumentException("index out of range: " + index + " , size: " + myPath.length);
+        }
+        return AttributePath.of(Arrays.copyOf(myPath, index + 1));
     }
 
     @Contract(pure = true)

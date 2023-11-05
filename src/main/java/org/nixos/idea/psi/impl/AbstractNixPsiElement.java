@@ -2,6 +2,7 @@ package org.nixos.idea.psi.impl;
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
+import com.intellij.model.psi.PsiSymbolReference;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.CachedValue;
@@ -9,15 +10,27 @@ import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.nixos.idea.interpretation.Attribute;
 import org.nixos.idea.interpretation.AttributeMap;
+import org.nixos.idea.interpretation.AttributePath;
 import org.nixos.idea.interpretation.Declaration;
 import org.nixos.idea.interpretation.Scope;
 import org.nixos.idea.interpretation.VariableUsage;
+import org.nixos.idea.lang.navigation.reference.NixAttributeReference;
+import org.nixos.idea.lang.navigation.reference.NixScopeReference;
+import org.nixos.idea.psi.NixAttr;
+import org.nixos.idea.psi.NixAttrPath;
+import org.nixos.idea.psi.NixBindInherit;
+import org.nixos.idea.psi.NixExpr;
+import org.nixos.idea.psi.NixExprSelect;
+import org.nixos.idea.psi.NixInheritedName;
 import org.nixos.idea.psi.NixPsiElement;
+import org.nixos.idea.psi.NixVariableAccess;
 import org.nixos.idea.util.MergeFunctions;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -78,6 +91,40 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
             MY_USAGES.compareAndSet(this, null, builder.build());
         }
         return Objects.requireNonNull(myUsages);
+    }
+
+    @Override
+    @SuppressWarnings("UnstableApiUsage")
+    public @NotNull Collection<? extends @NotNull PsiSymbolReference> getOwnReferences() {
+        if (this instanceof NixVariableAccess) {
+            return List.of(new NixScopeReference(this, getText()));
+        } else if (this instanceof NixExprSelect) {
+            NixExprSelect typedThis = (NixExprSelect) this;
+            List<NixAttributeReference> result = new ArrayList<>();
+            NixAttrPath attrPath = typedThis.getAttrPath();
+            if (attrPath != null) {
+                AttributePath.Builder pathBuilder = AttributePath.builder();
+                for (NixAttr attr : attrPath.getAttrList()) {
+                    pathBuilder.add(Attribute.of(attr));
+                    result.add(new NixAttributeReference(this, typedThis.getValue(), pathBuilder.build(), attr));
+                }
+            }
+            return List.copyOf(result);
+        } else if (this instanceof NixInheritedName) {
+            NixInheritedName typedThis = (NixInheritedName) this;
+            NixBindInherit parent = (NixBindInherit) getParent();
+            NixExpr accessedObject = parent.getExpr();
+            if (accessedObject == null) {
+                String variableName = Attribute.of(typedThis.getAttr()).getName();
+                return variableName == null ? List.of() : List.of(new NixScopeReference(this, variableName));
+            } else {
+                NixAttr attr = typedThis.getAttr();
+                AttributePath path = AttributePath.of(Attribute.of(attr));
+                return List.of(new NixAttributeReference(this, accessedObject, path, attr));
+            }
+        } else {
+            return List.of();
+        }
     }
 
     @Override

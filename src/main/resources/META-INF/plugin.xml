@@ -37,6 +37,32 @@
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixCommenter"/>
 
+        <lang.namesValidator
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixNamesValidator"/>
+
+        <searcher forClass="com.intellij.find.usages.api.UsageSearchParameters"
+                  implementationClass="org.nixos.idea.lang.navigation.search.NixUsageSearcher"/>
+        <searcher forClass="com.intellij.refactoring.rename.api.RenameUsageSearchParameters"
+                  implementationClass="org.nixos.idea.lang.navigation.search.NixRenameUsageSearcher"/>
+
+        <!--
+        <lang.findUsagesProvider
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.navigation.NixFindUsagesProvider"/>
+                -->
+
+        <!--
+        <renamePsiElementProcessor
+                implementation="org.nixos.idea.lang.NixRenamePsiElementProcessor"/>
+                -->
+
+        <!--
+        <lang.refactoringSupport
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixRefactoringSupportProvider"/>
+                -->
+
         <projectConfigurable
                 groupId="build"
                 displayName="NixIDEA Settings"

@@ -73,8 +73,7 @@ public final class AttributeMap<V> {
         AttributeMap<V> child = myChildLevels.get(key);
         if (child != null) {
             return child.contains(level + 1, path);
-        }
-        else {
+        } else {
             TriState result = TriState.FALSE;
             for (Map.Entry<Key, AttributeMap<V>> entry : myChildLevels.entrySet()) {
                 if (key instanceof Key.Wildcard || entry.getKey() instanceof Key.Wildcard) {
@@ -98,15 +97,24 @@ public final class AttributeMap<V> {
             visitor.accept(AttributePath.of(attributeStack), myValue);
         }
 
-        Attribute attr = path.get(attributeStack.size());
-        attributeStack.addLast(attr);
-        for (Map.Entry<Key, AttributeMap<V>> entry : myChildLevels.entrySet()) {
-            Attribute attrFromMap = entry.getKey().attribute;
-            if (attrFromMap.matches(attr).may()) {
+        if (attributeStack.size() < path.size()) {
+            Attribute attr = path.get(attributeStack.size());
+            attributeStack.addLast(attr);
+            for (Map.Entry<Key, AttributeMap<V>> entry : myChildLevels.entrySet()) {
+                Attribute attrFromMap = entry.getKey().attribute;
+                if (attrFromMap.matches(attr).may()) {
+                    entry.getValue().walk(attributeStack, path, visitor);
+                }
+            }
+            attributeStack.removeLast();
+        } else {
+            for (Map.Entry<Key, AttributeMap<V>> entry : myChildLevels.entrySet()) {
+                Attribute attrFromMap = entry.getKey().attribute;
+                attributeStack.addLast(attrFromMap);
                 entry.getValue().walk(attributeStack, path, visitor);
+                attributeStack.removeLast();
             }
         }
-        attributeStack.removeLast();
     }
 
     @Contract(pure = true)

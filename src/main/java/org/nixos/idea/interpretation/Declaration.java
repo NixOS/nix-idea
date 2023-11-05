@@ -8,11 +8,11 @@ import org.nixos.idea.psi.NixBind;
 import org.nixos.idea.psi.NixBindAttr;
 import org.nixos.idea.psi.NixBindInheritAttr;
 import org.nixos.idea.psi.NixBindInheritVar;
+import org.nixos.idea.psi.NixDeclarationElement;
 import org.nixos.idea.psi.NixExprLambda;
 import org.nixos.idea.psi.NixExprLet;
 import org.nixos.idea.psi.NixInheritedName;
 import org.nixos.idea.psi.NixLegacyLet;
-import org.nixos.idea.psi.NixNamedElement;
 import org.nixos.idea.psi.NixParam;
 import org.nixos.idea.psi.NixParamName;
 import org.nixos.idea.psi.NixParamSet;
@@ -31,10 +31,10 @@ import java.util.List;
  * @see NixPsiElement#getDeclarations()
  */
 public final class Declaration {
-    private final @NotNull NixNamedElement myElement;
+    private final @NotNull NixDeclarationElement myElement;
     private final @NotNull NixPsiElement myScope;
 
-    private Declaration(@NotNull NixNamedElement element, @NotNull NixPsiElement scope) {
+    private Declaration(@NotNull NixDeclarationElement element, @NotNull NixPsiElement scope) {
         myElement = element;
         myScope = scope;
     }
@@ -52,7 +52,7 @@ public final class Declaration {
      * @return Element which declares or defines the variable.
      */
     @Contract(pure = true)
-    public @NotNull NixNamedElement element() {
+    public @NotNull NixDeclarationElement element() {
         assert myElement instanceof NixBindAttr || myElement instanceof NixInheritedName ||
                 myElement instanceof NixParam || myElement instanceof NixParamName
                 : "element type does not match Javadoc: " + myElement.getClass();
