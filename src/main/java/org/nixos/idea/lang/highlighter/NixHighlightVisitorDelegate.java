@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.file.NixFile;
 import org.nixos.idea.interpretation.Attribute;
 import org.nixos.idea.interpretation.AttributePath;
-import org.nixos.idea.interpretation.Declaration;
 import org.nixos.idea.interpretation.VariableUsage;
 import org.nixos.idea.lang.builtins.NixBuiltin;
 import org.nixos.idea.psi.NixExprLambda;

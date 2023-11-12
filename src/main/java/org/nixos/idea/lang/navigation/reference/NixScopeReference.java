@@ -14,7 +14,7 @@ import org.nixos.idea.lang.navigation.symbol.NixSymbol;
 import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixExprLambda;
 import org.nixos.idea.psi.NixPsiElement;
-import org.nixos.idea.util.NixTextRangeFactory;
+import org.nixos.idea.util.TextRangeFactory;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class NixScopeReference extends SingleTargetReference implements PsiSymbolReference {
@@ -35,7 +35,7 @@ public final class NixScopeReference extends SingleTargetReference implements Ps
 
     @Override
     public @NotNull TextRange getRangeInElement() {
-        return NixTextRangeFactory.root(myElement);
+        return TextRangeFactory.root(myElement);
     }
 
     @Override

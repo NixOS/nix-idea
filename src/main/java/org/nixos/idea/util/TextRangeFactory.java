@@ -8,9 +8,9 @@ import org.nixos.idea.psi.NixPsiElement;
 /**
  * Factory methods to construct {@link TextRange} instances from PSI elements.
  */
-public final class NixTextRangeFactory {
+public final class TextRangeFactory {
 
-    private NixTextRangeFactory() {
+    private TextRangeFactory() {
         // Cannot be instantiated
     }
 

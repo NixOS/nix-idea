@@ -13,11 +13,10 @@ import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.interpretation.Attribute;
 import org.nixos.idea.interpretation.AttributeMap;
 import org.nixos.idea.interpretation.AttributePath;
-import org.nixos.idea.interpretation.Declaration;
-import org.nixos.idea.interpretation.Scope;
 import org.nixos.idea.interpretation.VariableUsage;
 import org.nixos.idea.lang.navigation.reference.NixAttributeReference;
 import org.nixos.idea.lang.navigation.reference.NixScopeReference;
+import org.nixos.idea.lang.navigation.scope.Scope;
 import org.nixos.idea.psi.NixAttr;
 import org.nixos.idea.psi.NixAttrPath;
 import org.nixos.idea.psi.NixBindInherit;
@@ -26,7 +25,6 @@ import org.nixos.idea.psi.NixExprSelect;
 import org.nixos.idea.psi.NixInheritedName;
 import org.nixos.idea.psi.NixPsiElement;
 import org.nixos.idea.psi.NixVariableAccess;
-import org.nixos.idea.util.MergeFunctions;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -39,52 +37,33 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
 
     private static final Key<CachedValue<Scope>> KEY_SCOPE = Key.create("AbstractNixPsiElement.scope");
 
-    private @Nullable AttributeMap<Collection<Declaration>> myDeclarations;
-    private @Nullable AttributeMap<Collection<VariableUsage>> myUsages;
+    private @Nullable AttributeMap<VariableUsage> myUsages;
 
     AbstractNixPsiElement(@NotNull ASTNode node) {
         super(node);
     }
 
     @Override
-    public @NotNull AttributeMap<Collection<Declaration>> getDeclarations() {
-        if (myDeclarations == null) {
-            AttributeMap.Builder<Collection<Declaration>> builder = AttributeMap.builder();
-            Collection<Declaration> declarationList = Declaration.allOf(this);
-            if (declarationList != null) {
-                for (Declaration declaration : declarationList) {
-                    builder.merge(declaration.path(), List.of(declaration), MergeFunctions::mergeLists);
-                }
-            }
-            MY_DECLARATIONS.compareAndSet(this, null, builder.build());
-        }
-        return Objects.requireNonNull(myDeclarations);
-    }
-
-    @Override
     public @NotNull Scope getScope() {
         return CachedValuesManager.getCachedValue(this, KEY_SCOPE, () -> {
-            PsiElement parent = getParent();
-            Scope parentScope = Scope.EMPTY;
-            if (parent instanceof NixPsiElement) {
-                parentScope = ((NixPsiElement) parent).getScope();
-            }
-            Scope result = parentScope.subScope(this, getDeclarations());
+            Scope parentScope = getParent() instanceof NixPsiElement parent ? parent.getScope() : Scope.EMPTY;
+            Scope result = parentScope.subScope(this);
             return CachedValueProvider.Result.create(result, this);
         });
     }
 
     @Override
-    public @NotNull AttributeMap<Collection<VariableUsage>> getUsages() {
+    public @NotNull AttributeMap<VariableUsage> getUsages() {
+        // TODO: 12.11.2023 Align with new implementation
         if (myUsages == null) {
-            AttributeMap.Builder<Collection<VariableUsage>> builder = AttributeMap.builder();
+            AttributeMap.Builder<VariableUsage> builder = AttributeMap.builder();
             VariableUsage usage = VariableUsage.by(this);
             if (usage != null) {
-                builder.set(usage.path(), List.of(usage));
+                builder.add(usage.path(), usage);
             } else {
                 for (PsiElement child : getChildren()) {
                     if (child instanceof NixPsiElement) {
-                        builder.merge(((NixPsiElement) child).getUsages(), MergeFunctions::mergeLists);
+                        builder.merge(((NixPsiElement) child).getUsages());
                     }
                 }
             }
@@ -130,7 +109,6 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
-        myDeclarations = null;
         myUsages = null;
     }
 

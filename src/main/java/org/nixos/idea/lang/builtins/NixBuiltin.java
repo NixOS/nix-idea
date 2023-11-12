@@ -4,6 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.util.NixVersion;
 
+import java.util.AbstractCollection;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -216,8 +219,32 @@ public final class NixBuiltin {
     }
 
     public static @Nullable NixBuiltin resolveGlobal(@NotNull String name) {
+        // TODO: 12.11.2023 Delete?
         NixBuiltin builtin = BUILTINS.get(name);
         return builtin != null && builtin.global ? builtin : null;
+    }
+
+    public static @NotNull Collection<NixBuiltin> getAllGlobals() {
+        return new AbstractCollection<>() {
+            @Override
+            public @NotNull Iterator<NixBuiltin> iterator() {
+                return GLOBAL_SCOPE.stream().map(NixBuiltin::resolveBuiltin).iterator();
+            }
+
+            @Override
+            public boolean contains(Object o) {
+                if (o instanceof NixBuiltin builtin) {
+                    return GLOBAL_SCOPE.contains(builtin.name);
+                } else {
+                    return false;
+                }
+            }
+
+            @Override
+            public int size() {
+                return GLOBAL_SCOPE.size();
+            }
+        };
     }
 
     //endregion

@@ -23,9 +23,12 @@
   // no one really needs to know that + - * / are expected at any offset
   consumeTokenMethod("expr_op.*")="consumeTokenFast"
 
+  // Declaration hosts
+  implements("expr_let|legacy_let|set|expr_lambda")="org.nixos.idea.psi.NixDeclarationHost"
+  mixin("expr_let|legacy_let|set|expr_lambda")="org.nixos.idea.psi.impl.AbstractNixDeclarationHost"
   // Declaration elements
-  implements("bind_attr|inherited_name|param|param_name")="org.nixos.idea.psi.NixDeclarationElement"
-  mixin("bind_attr|inherited_name|param|param_name")="org.nixos.idea.psi.impl.AbstractNixDeclarationElement"
+  implements("bind_attr|inherited_name|param_name")="org.nixos.idea.psi.NixDeclarationElement"
+  mixin("bind_attr|inherited_name|param_name")="org.nixos.idea.psi.impl.AbstractNixDeclarationElement"
 
   // Elements which support external references
   // TODO: Test UrlReferenceHost

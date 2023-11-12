@@ -2,7 +2,6 @@ package org.nixos.idea.interpretation;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.util.TriState;
 
 import java.util.AbstractCollection;
@@ -10,11 +9,12 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,7 +28,7 @@ public final class AttributeMap<V> {
     private static final AttributeMap<?> EMPTY = new AttributeMap<>(new Builder<>());
 
     private final @NotNull Map<Key, AttributeMap<V>> myChildLevels;
-    private final @Nullable V myValue;
+    private final @NotNull Collection<V> myValues;
     private final int mySize;
 
     private AttributeMap(@NotNull Builder<V> builder) {
@@ -36,8 +36,8 @@ public final class AttributeMap<V> {
                 .map(entry -> Map.entry(entry.getKey(), entry.getValue().build()))
                 .filter(entry -> entry.getValue() != EMPTY)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        myValue = builder.myValue;
-        mySize = (myValue == null ? 0 : 1) + myChildLevels.values().stream().mapToInt(AttributeMap::size).sum();
+        myValues = Set.copyOf(builder.myValues);
+        mySize = myValues.size() + myChildLevels.values().stream().mapToInt(AttributeMap::size).sum();
     }
 
     @Contract(pure = true)
@@ -93,8 +93,8 @@ public final class AttributeMap<V> {
     }
 
     private void walk(@NotNull Deque<Attribute> attributeStack, @NotNull AttributePath path, @NotNull BiConsumer<AttributePath, V> visitor) {
-        if (myValue != null) {
-            visitor.accept(AttributePath.of(attributeStack), myValue);
+        for (V value : myValues) {
+            visitor.accept(AttributePath.of(attributeStack), value);
         }
 
         if (attributeStack.size() < path.size()) {
@@ -150,7 +150,7 @@ public final class AttributeMap<V> {
     @Contract(pure = true)
     public @NotNull Stream<V> streamValues() {
         return Stream.concat(
-                Stream.ofNullable(myValue),
+                myValues.stream(),
                 myChildLevels.values().stream().flatMap(AttributeMap::streamValues));
     }
 
@@ -214,22 +214,15 @@ public final class AttributeMap<V> {
 
     public static final class Builder<V> {
         private final @NotNull Map<Key, Builder<V>> myChildLevels = new HashMap<>();
-        private @Nullable V myValue = null;
+        private final @NotNull Set<V> myValues = new HashSet<>();
 
         private Builder() {
             // Use AttributeMap.builder()
         }
 
         @Contract("_, _ -> this")
-        public Builder<V> set(@NotNull AttributePath path, V value) {
-            getOrCreate(0, path).myValue = value;
-            return this;
-        }
-
-        @Contract("_, _, _ -> this")
-        public Builder<V> merge(@NotNull AttributePath path, V value, @NotNull BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
-            Builder<V> entry = getOrCreate(0, path);
-            entry.myValue = entry.myValue == null ? value : remappingFunction.apply(entry.myValue, value);
+        public Builder<V> add(@NotNull AttributePath path, V value) {
+            getOrCreate(0, path).myValues.add(value);
             return this;
         }
 
@@ -243,30 +236,17 @@ public final class AttributeMap<V> {
         }
 
         @Contract("_ -> this")
-        public Builder<V> update(@NotNull AttributeMap<? extends V> other) {
-            if (other.myValue != null) {
-                myValue = other.myValue;
-            }
+        public Builder<V> merge(@NotNull AttributeMap<? extends V> other) {
+            myValues.addAll(other.myValues);
             for (var entry : other.myChildLevels.entrySet()) {
-                myChildLevels.computeIfAbsent(entry.getKey(), builderFactory()).update(entry.getValue());
-            }
-            return this;
-        }
-
-        @Contract("_, _ -> this")
-        public Builder<V> merge(@NotNull AttributeMap<? extends V> other, @NotNull BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
-            if (other.myValue != null) {
-                myValue = myValue == null ? other.myValue : remappingFunction.apply(myValue, other.myValue);
-            }
-            for (var entry : other.myChildLevels.entrySet()) {
-                myChildLevels.computeIfAbsent(entry.getKey(), builderFactory()).merge(entry.getValue(), remappingFunction);
+                myChildLevels.computeIfAbsent(entry.getKey(), builderFactory()).merge(entry.getValue());
             }
             return this;
         }
 
         @Contract(pure = true)
         public @NotNull AttributeMap<V> build() {
-            if (myChildLevels.isEmpty() && myValue == null) {
+            if (myChildLevels.isEmpty() && myValues.isEmpty()) {
                 return empty();
             } else {
                 return new AttributeMap<>(this);
