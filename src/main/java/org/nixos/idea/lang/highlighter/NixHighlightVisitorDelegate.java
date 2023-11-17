@@ -10,13 +10,14 @@ import org.nixos.idea.interpretation.Attribute;
 import org.nixos.idea.interpretation.AttributePath;
 import org.nixos.idea.interpretation.VariableUsage;
 import org.nixos.idea.lang.builtins.NixBuiltin;
+import org.nixos.idea.lang.navigation.scope.Scope;
+import org.nixos.idea.psi.NixDeclarationElement;
+import org.nixos.idea.psi.NixDeclarationHost;
 import org.nixos.idea.psi.NixExprLambda;
 import org.nixos.idea.psi.NixExprLet;
 import org.nixos.idea.psi.NixLegacyLet;
 import org.nixos.idea.psi.NixPsiElement;
 import org.nixos.idea.psi.NixSet;
-
-import java.util.Collection;
 
 /**
  * Delegate for the highlighting logic used by {@link NixHighlightVisitor} and {@link NixRainbowVisitor}.
@@ -46,18 +47,18 @@ abstract class NixHighlightVisitorDelegate {
     abstract void highlight(@NotNull PsiElement element, @Nullable PsiElement source, @NotNull String attrPath, @Nullable HighlightInfoType type);
 
     void visit(@NotNull PsiElement element) {
-        if (element instanceof NixPsiElement) {
-            NixPsiElement nixElement = (NixPsiElement) element;
+        if (element instanceof NixDeclarationElement declarationElement) {
+            highlight(declarationElement.getAttributePath(), declarationElement.getAttributeElements(), declarationElement.getDeclarationHost());
+        } else if (element instanceof NixPsiElement nixElement) {
             VariableUsage usage = VariableUsage.by(nixElement);
             if (usage != null) {
-                NixPsiElement source = nixElement.getScope().getOrigin(usage.path());
-                highlight(usage.path(), usage.attributeElements(), source);
-            } else {
-                for (Collection<Declaration> declarations : nixElement.getDeclarations().values()) {
-                    for (Declaration declaration : declarations) {
-                        assert declaration.scope() == element;
-                        highlight(declaration.path(), declaration.attributeElements(), declaration.scope());
-                    }
+                String variableName = usage.path().first().getName();
+                Scope.Source source = nixElement.getScope().getSource(variableName == null ? "" : variableName);
+                if (source instanceof Scope.Source.Psi) {
+                    // TODO: 17.11.2023 ...
+                    highlight(usage.path(), usage.attributeElements(), source);
+                } else if (source instanceof Scope.Source.Builtin) {
+                    //
                 }
             }
         }
@@ -76,15 +77,14 @@ abstract class NixHighlightVisitorDelegate {
     }
 
     private static @NotNull HighlightInfoType getHighlightingByBuiltin(@NotNull NixBuiltin builtin) {
-        switch (builtin.highlightingType()) {
-            case IMPORT: return IMPORT;
-            case LITERAL: return LITERAL;
-            case OTHER: return BUILTIN;
-            default: throw new IllegalStateException("unknown type: " + builtin.highlightingType());
-        }
+        return switch (builtin.highlightingType()) {
+            case IMPORT -> IMPORT;
+            case LITERAL -> LITERAL;
+            case OTHER -> BUILTIN;
+        };
     }
 
-    private void highlight(@NotNull AttributePath path, @NotNull PsiElement[] attributeElements, @Nullable NixPsiElement source) {
+    private void highlight(@NotNull AttributePath path, @NotNull PsiElement[] attributeElements, @Nullable NixDeclarationHost source) {
         StringBuilder pathStrBuilder = new StringBuilder();
         for (int i = 0; i < path.size(); i++) {
             Attribute attribute = path.get(i);
@@ -103,15 +103,13 @@ abstract class NixHighlightVisitorDelegate {
         if (!attrPath.contains(".")) {
             if (source != null) {
                 type = getHighlightingBySource(source);
-            }
-            else {
+            } else {
                 NixBuiltin builtin = NixBuiltin.resolveGlobal(attrPath);
                 if (builtin != null) {
                     type = getHighlightingByBuiltin(builtin);
                 }
             }
-        }
-        else if (attrPath.startsWith(BUILTINS_PREFIX)) {
+        } else if (attrPath.startsWith(BUILTINS_PREFIX)) {
             NixBuiltin builtin = NixBuiltin.resolveBuiltin(attrPath.substring(BUILTINS_PREFIX.length()));
             if (builtin != null) {
                 type = getHighlightingByBuiltin(builtin);
