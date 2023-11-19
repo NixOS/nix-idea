@@ -35,7 +35,6 @@ final class NixParameterSymbol extends NixSymbol
     NixParameterSymbol(@NotNull NixExprLambda owner, @NotNull String name) {
         this(owner, name, Pointer.uroborosPointer(
                 SmartPointerManager.createPointer(owner),
-                List.of(NixParameterSymbol.class, name),
                 (owner1, pointer) -> new NixParameterSymbol(owner1, name, pointer)));
     }
 

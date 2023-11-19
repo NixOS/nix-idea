@@ -35,8 +35,8 @@ public final class NixNavigationTarget implements NavigationTarget {
     @Override
     public @NotNull Pointer<NavigationTarget> createPointer() {
         if (myPointer == null) {
-            myPointer = Pointer.uroborosPointer(SmartPointerManager.createPointer(myTargetElement),
-                    NixNavigationTarget.class,
+            myPointer = Pointer.uroborosPointer(
+                    SmartPointerManager.createPointer(myTargetElement),
                     NixNavigationTarget::new);
         }
         return myPointer;

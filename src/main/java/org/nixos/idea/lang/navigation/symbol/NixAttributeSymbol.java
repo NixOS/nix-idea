@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.interpretation.Attribute;
 import org.nixos.idea.interpretation.AttributePath;
 import org.nixos.idea.lang.navigation.NixNavigationTarget;
-import org.nixos.idea.psi.NixExpr;
+import org.nixos.idea.psi.NixDeclarationHost;
 import org.nixos.idea.psi.NixExprLet;
 import org.nixos.idea.psi.NixLegacyLet;
 import org.nixos.idea.psi.NixSet;
@@ -30,22 +30,21 @@ import java.util.Objects;
 final class NixAttributeSymbol extends NixSymbol
         implements DocumentationTarget, NavigatableSymbol {
 
-    private final @NotNull NixExpr myOwner;
+    private final @NotNull NixDeclarationHost myHost;
     private final @NotNull AttributePath myPath;
     private final @NotNull Pointer<NixAttributeSymbol> myPointer;
 
-    NixAttributeSymbol(@NotNull NixExpr owner, @NotNull AttributePath path) {
-        this(owner, path, Pointer.uroborosPointer(
-                SmartPointerManager.createPointer(owner),
-                List.of(NixAttributeSymbol.class, path),
-                (owner1, pointer) -> new NixAttributeSymbol(owner1, path, pointer)));
+    NixAttributeSymbol(@NotNull NixDeclarationHost host, @NotNull AttributePath path) {
+        this(host, path, Pointer.uroborosPointer(
+                SmartPointerManager.createPointer(host),
+                (owner1, pointer) -> new NixAttributeSymbol(host, path, pointer)));
     }
 
-    private NixAttributeSymbol(@NotNull NixExpr owner, @NotNull AttributePath path, @NotNull Pointer<NixAttributeSymbol> pointer) {
-        myOwner = owner;
+    private NixAttributeSymbol(@NotNull NixDeclarationHost host, @NotNull AttributePath path, @NotNull Pointer<NixAttributeSymbol> pointer) {
+        myHost = host;
         myPath = path;
         myPointer = pointer;
-        assert owner instanceof NixSet || owner instanceof NixExprLet || owner instanceof NixLegacyLet;
+        assert host instanceof NixSet || host instanceof NixExprLet || host instanceof NixLegacyLet;
     }
 
     @Override
@@ -74,8 +73,8 @@ final class NixAttributeSymbol extends NixSymbol
 
     @Override
     public @Nullable SearchScope getMaximalSearchScope() {
-        if ((myOwner instanceof NixExprLet || myOwner instanceof NixLegacyLet) && myPath.size() == 1) {
-            return new LocalSearchScope(myOwner);
+        if ((myHost instanceof NixExprLet || myHost instanceof NixLegacyLet) && myPath.size() == 1) {
+            return new LocalSearchScope(myHost);
         } else {
             return super.getMaximalSearchScope();
         }
@@ -90,10 +89,8 @@ final class NixAttributeSymbol extends NixSymbol
     @Override
     public @NotNull Collection<? extends NavigationTarget> getNavigationTargets(@NotNull Project project) {
         List<NavigationTarget> result = new ArrayList<>();
-        myOwner.getDeclarations().walk(myPath, (attributePath, declarations) -> {
-            for (Declaration declaration : declarations) {
-                result.add(NixNavigationTarget.of(declaration.element()));
-            }
+        myHost.getDeclarations().walk(myPath, (attributePath, declaration) -> {
+            result.add(NixNavigationTarget.of(declaration));
         });
         return result;
     }
@@ -103,12 +100,12 @@ final class NixAttributeSymbol extends NixSymbol
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NixAttributeSymbol attribute = (NixAttributeSymbol) o;
-        return Objects.equals(myOwner, attribute.myOwner) && Objects.equals(myPath, attribute.myPath);
+        return Objects.equals(myHost, attribute.myHost) && Objects.equals(myPath, attribute.myPath);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(myOwner, myPath);
+        return Objects.hash(myHost, myPath);
     }
 
 }
