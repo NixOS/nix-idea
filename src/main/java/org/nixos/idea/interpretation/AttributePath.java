@@ -61,6 +61,13 @@ public final class AttributePath {
     }
 
     @Contract(pure = true)
+    public @NotNull Attribute[] rest() {
+        Attribute[] result = new Attribute[myPath.length - 1];
+        System.arraycopy(myPath, 1, result, 0, result.length);
+        return result;
+    }
+
+    @Contract(pure = true)
     public @NotNull Attribute last() {
         return myPath[myPath.length - 1];
     }

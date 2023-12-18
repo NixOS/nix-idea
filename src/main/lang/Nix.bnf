@@ -16,6 +16,7 @@
   tokenTypeClass="org.nixos.idea.psi.NixTokenType"
   // Visitor
   psiVisitorName="NixElementVisitor"
+  generate=[ visitor-value="T" ]
 
   // do not record error reporting information in recover rules and missing_semi
   consumeTokenMethod(".*_recover|missing_semi")="consumeTokenFast"
@@ -102,7 +103,7 @@ private expr0 ::=
   | expr_lambda
   | expr_op
 
-expr_assert ::= ASSERT expr SEMI expr { pin=1 }
+expr_assert ::= ASSERT expr SEMI expr { pin=1 methods=[ asserted_expr="/expr[0]" result_expr="/expr[1]" ] }
 expr_if ::= IF expr then else { pin=1 }
 private then ::= THEN expr { pin=1 }
 private else ::= ELSE expr { pin=1 }
@@ -144,22 +145,22 @@ private group_cmp ::= expr_op_lt | expr_op_le | expr_op_gt | expr_op_ge
 private group_add ::= expr_op_plus | expr_op_minus
 private group_mul ::= expr_op_mul | expr_op_div
 
-expr_op_implication ::= expr_op IMPL expr_op
-expr_op_or ::= expr_op OR expr_op
-expr_op_and ::= expr_op AND expr_op
-expr_op_eq ::= expr_op EQ expr_op
-expr_op_ne ::= expr_op NEQ expr_op
-expr_op_lt ::= expr_op LT expr_op
-expr_op_le ::= expr_op LEQ expr_op
-expr_op_gt ::= expr_op GT expr_op
-expr_op_ge ::= expr_op GEQ expr_op
-expr_op_update ::= expr_op UPDATE expr_op { rightAssociative=true }
+expr_op_implication ::= expr_op IMPL expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_or ::= expr_op OR expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_and ::= expr_op AND expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_eq ::= expr_op EQ expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_ne ::= expr_op NEQ expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_lt ::= expr_op LT expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_le ::= expr_op LEQ expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_gt ::= expr_op GT expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_ge ::= expr_op GEQ expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_update ::= expr_op UPDATE expr_op { rightAssociative=true methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
 expr_op_not ::= NOT expr_op
-expr_op_plus ::= expr_op PLUS expr_op
-expr_op_minus ::= expr_op MINUS expr_op
-expr_op_mul ::= expr_op TIMES expr_op
-expr_op_div ::= expr_op DIVIDE expr_op
-expr_op_concat ::= expr_op CONCAT expr_op { rightAssociative=true }
+expr_op_plus ::= expr_op PLUS expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_minus ::= expr_op MINUS expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_mul ::= expr_op TIMES expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_div ::= expr_op DIVIDE expr_op { methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
+expr_op_concat ::= expr_op CONCAT expr_op { rightAssociative=true methods=[ left="/expr_op[0]" right="/expr_op[1]" ] }
 expr_op_has ::= expr_op HAS attr_path
 expr_op_neg ::= MINUS expr_op
 expr_op_base ::= expr_app

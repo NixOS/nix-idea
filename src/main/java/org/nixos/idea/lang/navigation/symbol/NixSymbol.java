@@ -10,11 +10,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.interpretation.AttributePath;
 import org.nixos.idea.lang.builtins.NixBuiltin;
+import org.nixos.idea.lang.navigation.AttributeOwner;
 import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixExprLambda;
 
 @SuppressWarnings("UnstableApiUsage")
-public abstract sealed class NixSymbol implements Symbol, SearchTarget
+public abstract sealed class NixSymbol implements AttributeOwner, Symbol, SearchTarget
         permits NixAttributeSymbol, NixBuiltinSymbol, NixParameterSymbol {
 
     // TODO: Should I also implement PresentableSymbol?

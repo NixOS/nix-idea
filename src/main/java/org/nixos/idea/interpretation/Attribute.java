@@ -81,6 +81,7 @@ public final class Attribute {
     }
 
     public static @NotNull Attribute of(@NotNull NixStringAttr element) {
+        // TODO: 20.11.2023 Use InterpolatedString?
         NixAntiquotation interpolation = element.getAntiquotation();
         if (interpolation != null) {
             assert element.getStdString() == null;

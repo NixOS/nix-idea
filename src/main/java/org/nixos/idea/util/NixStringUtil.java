@@ -123,15 +123,11 @@ public final class NixStringUtil {
     }
 
     private static char unescape(char c) {
-        switch (c) {
-            case 'n':
-                return '\n';
-            case 'r':
-                return '\r';
-            case 't':
-                return '\t';
-            default:
-                return c;
-        }
+        return switch (c) {
+            case 'n' -> '\n';
+            case 'r' -> '\r';
+            case 't' -> '\t';
+            default -> c;
+        };
     }
 }

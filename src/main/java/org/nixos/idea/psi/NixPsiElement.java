@@ -9,4 +9,5 @@ import org.nixos.idea.interpretation.VariableUsage;
 public interface NixPsiElement extends PsiElement {
     @NotNull Scope getScope();
     @NotNull AttributeMap<VariableUsage> getUsages();
+    <T> T accept(@NotNull NixElementVisitor<T> visitor);
 }
