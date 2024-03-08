@@ -1,7 +1,5 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.grammarkit.tasks.GenerateLexerTask
-import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 plugins {
@@ -145,13 +143,13 @@ tasks {
         }
     }
 
-    val generateNixLexer by registering(GenerateLexerTask::class) {
+    generateLexer {
         sourceFile = file("src/main/lang/Nix.flex")
         targetOutputDir = file("src/gen/java/org/nixos/idea/lang")
         purgeOldFiles = true
     }
 
-    val generateNixParser by registering(GenerateParserTask::class) {
+    generateParser {
         sourceFile = file("src/main/lang/Nix.bnf")
         targetRootOutputDir = file("src/gen/java")
         pathToParser = "/org/nixos/idea/lang/NixParser"
@@ -162,7 +160,7 @@ tasks {
     }
 
     compileJava {
-        dependsOn(generateNixLexer, generateNixParser)
+        dependsOn(generateLexer, generateParser)
     }
 
     test {
