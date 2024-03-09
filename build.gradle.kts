@@ -4,9 +4,9 @@ import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 plugins {
     id("java")
-    id("org.jetbrains.intellij")
-    id("org.jetbrains.changelog")
-    id("org.jetbrains.grammarkit")
+    alias(libs.plugins.jetbrains.intellij)
+    alias(libs.plugins.jetbrains.changelog)
+    alias(libs.plugins.jetbrains.grammarkit)
     id("local.bump-version")
 }
 
@@ -33,9 +33,9 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+    testImplementation(platform(libs.junit5.bom))
+    testImplementation(libs.junit5.jupiter)
+    testRuntimeOnly(libs.junit5.vintage.engine)
 }
 
 // Configure gradle-intellij-plugin plugin.
