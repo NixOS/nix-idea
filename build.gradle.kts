@@ -4,11 +4,10 @@ import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 plugins {
     id("java")
-    alias(libs.plugins.jetbrains.intellij)
+    id("org.jetbrains.intellij")
     alias(libs.plugins.jetbrains.changelog)
     alias(libs.plugins.jetbrains.grammarkit)
     id("local.bump-version")
-    id("local.jbr-guidance")
 }
 
 // Import variables from gradle.properties file

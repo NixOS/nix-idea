@@ -1,21 +1,21 @@
+@file:Suppress("UnstableApiUsage")
+
 import org.gradle.kotlin.dsl.support.serviceOf
-import org.gradle.tooling.Failure
-import org.gradle.tooling.events.FailureResult
-import org.gradle.tooling.events.FinishEvent
-import org.gradle.tooling.events.OperationCompletionListener
 import org.jetbrains.intellij.tasks.RunIdeBase
 import java.util.function.Predicate
 
-val jbrHome = rootProject.file("jbr")
+val jbrHome = file("jbr")
 
-task<Exec>("jbr") {
-    description = "Create a symlink to package jetbrains.jdk"
-    group = "build setup"
-    commandLine("nix-build", "<nixpkgs>", "-A", "jetbrains.jdk", "-o", jbrHome)
+gradle.rootProject {
+    task<Exec>("jbr") {
+        description = "Create a symlink to package jetbrains.jdk"
+        group = "build setup"
+        commandLine("nix-build", "<nixpkgs>", "-A", "jetbrains.jdk", "-o", jbrHome)
+    }
 }
 
 jbrHome.resolve("bin/java").takeIf { it.exists() }
-    ?.also { jbrExecutable ->
+    ?.also { jbrExecutable -> gradle.allprojects {
         // Override JVM of gradle-intellij-plugin with JVM at `jbr/bin/java`
         // https://github.com/JetBrains/gradle-intellij-plugin/issues/1437#issuecomment-1987310948
         tasks.withType<RunIdeBase> {
@@ -31,29 +31,28 @@ jbrHome.resolve("bin/java").takeIf { it.exists() }
                 }
             }
         }
-    }
+    }}
     ?: run {
         // There is no JVM at `jbr/bin/java`. Monitor the build and provide some helpful message when it fails.
-        val service = gradle.sharedServices.registerIfAbsent("jbr-guidance", JbrGuidance::class) {}
-        serviceOf<BuildEventsListenerRegistry>().onTaskCompletion(service)
-    }
-
-abstract class JbrGuidance : BuildService<BuildServiceParameters.None>, OperationCompletionListener, AutoCloseable {
-    private val regex = Regex("""\.gradle/.*/(jbr|jbre)/.*/java\b""")
-    private val logger = Logging.getLogger("jbr-guidance")
-    private var observedJbrError = false
-
-    override fun onFinish(event: FinishEvent?) {
-        val result = event?.result as? FailureResult
-        result?.failures?.forEach { failure ->
-            if (anyCauseMatches(failure) { it.message?.contains(regex) == true }) {
-                observedJbrError = true
-            }
+        val flowScope = serviceOf<FlowScope>()
+        val flowProviders = serviceOf<FlowProviders>()
+        flowScope.always(JbrGuidance::class) {
+            parameters.buildResult = flowProviders.buildWorkResult
         }
     }
 
-    override fun close() {
-        if (observedJbrError) {
+abstract class JbrGuidance : FlowAction<JbrGuidance.Parameters> {
+    private val regex = Regex("""\.gradle/.*/(jbr|jbre)/.*/java\b""")
+    private val logger = Logging.getLogger("jbr-guidance")
+
+    interface Parameters : FlowParameters {
+        @get:Input
+        val buildResult: Property<BuildWorkResult>
+    }
+
+    override fun execute(parameters: Parameters) {
+        val result = parameters.buildResult.get()
+        if (anyCauseMatches(result.failure.orElse(null)) { it.message?.contains(regex) == true }) {
             logger.error(
                 """
                 |
@@ -72,13 +71,14 @@ abstract class JbrGuidance : BuildService<BuildServiceParameters.None>, Operatio
         }
     }
 
-    private fun anyCauseMatches(failure: Failure?, condition: Predicate<Failure>): Boolean {
-        return if (failure == null) {
-            false
-        } else if (condition.test(failure)) {
-            true
-        } else {
-            failure.causes.any { anyCauseMatches(it, condition) }
+    private fun anyCauseMatches(e: Throwable?, condition: Predicate<Throwable>): Boolean {
+        var current = e
+        while (current != null) {
+            if (condition.test(current)) {
+                return true
+            }
+            current = current.cause
         }
+        return false
     }
 }
