@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.jetbrains.changelog)
     alias(libs.plugins.jetbrains.grammarkit)
     id("local.bump-version")
+    id("local.jbr-guidance")
 }
 
 // Import variables from gradle.properties file
@@ -72,49 +73,12 @@ sourceSets {
     }
 }
 
-val tasksUsingDownloadedJbr = mutableListOf<Task>()
-// Check https://github.com/gradle/gradle/issues/20151 if an alternative for deprecated buildFinished became available.
-gradle.buildFinished {
-    val regex = Regex("""\.gradle/.*/jbr/.*/java\b""")
-    for (task in tasksUsingDownloadedJbr) {
-        if (task.state.failure?.cause?.message?.contains(regex) == true) {
-            logger.error("""
-                |
-                |! Info for users on NixOS:
-                |!
-                |! The JetBrains Runtime (JBR) downloaded by Gradle is not compatible with NixOS.
-                |! You may run the ‘:jbr’ task to configure the runtime of <nixpkgs> instead.
-                |! Alternatively, you may run the following command within the project directory.
-                |!
-                |!   nix-build '<nixpkgs>' -A jetbrains.jdk -o jbr
-                |!
-                |! This will create a symlink to the package jetbrains.jdk of nixpkgs at
-                |! ${'$'}projectDir/jbr, which is automatically detected by future builds.
-                """.trimMargin())
-            break
-        }
-    }
-}
-
 tasks {
     withType<JavaCompile> {
         options.encoding = "UTF-8"
     }
     withType<Javadoc> {
         options.encoding = "UTF-8"
-    }
-
-    task<Exec>("jbr") {
-        description = "Create a symlink to package jetbrains.jdk"
-        group = "build setup"
-        commandLine("nix-build", "<nixpkgs>", "-A", "jetbrains.jdk", "-o", "jbr")
-    }
-
-    withType<org.jetbrains.intellij.tasks.RunIdeBase> {
-        project.file("jbr/bin/java")
-            .takeIf { it.exists() }
-            ?.let { projectExecutable = it.toString() }
-            ?: tasksUsingDownloadedJbr.add(this)
     }
 
     withType<Test> {
