@@ -36,14 +36,29 @@ jbrHome.resolve("bin/java").takeIf { it.exists() }
         // There is no JVM at `jbr/bin/java`. Monitor the build and provide some helpful message when it fails.
         val service = gradle.sharedServices.registerIfAbsent("jbr-guidance", JbrGuidance::class) {}
         serviceOf<BuildEventsListenerRegistry>().onTaskCompletion(service)
+        // If the configuration cache is enabled, the JBR failure was triggered during serialization
+        // before any task gets executed. (As of gradle-intellij-plugin 1.17.2 and Gradle 8.6.)
+        // Unfortunately, only failures in tasks are reported to the JbrGuidance build service.
+        // If there are tasks scheduled, but none of them is executed, we therefore also print the message.
+        project.gradle.taskGraph.whenReady {
+            if (allTasks.isNotEmpty()) {
+                service.get().expectAtLeastOneTask()
+            }
+        }
     }
 
 abstract class JbrGuidance : BuildService<BuildServiceParameters.None>, OperationCompletionListener, AutoCloseable {
     private val regex = Regex("""\.gradle/.*/(jbr|jbre)/.*/java\b""")
     private val logger = Logging.getLogger("jbr-guidance")
+    private var taskMissing = false
     private var observedJbrError = false
 
+    fun expectAtLeastOneTask() {
+        taskMissing = true
+    }
+
     override fun onFinish(event: FinishEvent?) {
+        taskMissing = false
         val result = event?.result as? FailureResult
         result?.failures?.forEach { failure ->
             if (anyCauseMatches(failure) { it.message?.contains(regex) == true }) {
@@ -53,7 +68,7 @@ abstract class JbrGuidance : BuildService<BuildServiceParameters.None>, Operatio
     }
 
     override fun close() {
-        if (observedJbrError) {
+        if (observedJbrError || taskMissing) {
             logger.error(
                 """
                 |

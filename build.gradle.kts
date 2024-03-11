@@ -86,21 +86,19 @@ tasks {
         systemProperty("plugin.testDataPath", rootProject.rootDir.resolve("src/test/testData").path)
     }
 
-    task("metadata") {
-        outputs.upToDateWhen { false }
-        doLast {
-            val dir = project.layout.buildDirectory.dir("metadata").get().asFile
-            dir.mkdirs()
-            dir.resolve("version.txt").writeText(pluginVersion)
-            dir.resolve("zipfile.txt").writeText(buildPlugin.get().archiveFile.get().toString())
-            dir.resolve("latest_changelog.md").writeText(with(changelog) {
+    task<MetadataTask>("metadata") {
+        outputDir = layout.buildDirectory.dir("metadata")
+        file("version.txt", pluginVersion)
+        file("zipfile.txt") { buildPlugin.get().archiveFile.get().toString() }
+        file("latest_changelog.md") {
+            with(changelog) {
                 renderItem(
                     (getOrNull(pluginVersion) ?: getUnreleased())
                         .withHeader(false)
                         .withEmptySections(false),
                     Changelog.OutputType.MARKDOWN
                 )
-            })
+            }
         }
     }
 
@@ -134,15 +132,19 @@ tasks {
         untilBuild = pluginUntilBuild
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
-        pluginDescription = projectDir.resolve("README.md").readText().lines().run {
-            val start = "<!-- Plugin description -->"
-            val end = "<!-- Plugin description end -->"
-
-            if (!containsAll(listOf(start, end))) {
-                throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
-            }
-            subList(indexOf(start) + 1, indexOf(end))
-        }.joinToString("\n").run { markdownToHTML(this) }
+        pluginDescription = providers.provider {
+            projectDir.resolve("README.md").readText().lines()
+                .run {
+                    val start = "<!-- Plugin description -->"
+                    val end = "<!-- Plugin description end -->"
+                    if (!containsAll(listOf(start, end))) {
+                        throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                    }
+                    subList(indexOf(start) + 1, indexOf(end))
+                }
+                .joinToString("\n")
+                .run { markdownToHTML(this) }
+        }
 
         // Get the latest available change notes from the changelog file
         changeNotes = provider {
@@ -162,7 +164,7 @@ tasks {
     }
 
     publishPlugin {
-        token = System.getenv("JETBRAINS_TOKEN")
+        token = providers.environmentVariable("JETBRAINS_TOKEN")
         channels = listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first())
     }
 

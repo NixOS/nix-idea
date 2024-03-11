@@ -3,3 +3,5 @@ pluginManagement {
 }
 
 rootProject.name = "NixIDEA"
+
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
