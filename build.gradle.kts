@@ -165,7 +165,9 @@ tasks {
 
     publishPlugin {
         token = providers.environmentVariable("JETBRAINS_TOKEN")
-        channels = listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first())
+        // Note: `listOf("foo").first()` does not what you think on Java 21 and Gradle 8.6. (The return type is TaskProvider<Task>)
+        // See https://github.com/gradle/gradle/issues/27699 and https://youtrack.jetbrains.com/issue/KT-65235.
+        channels = listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.')[0])
     }
 
 }
