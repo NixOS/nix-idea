@@ -161,6 +161,9 @@ tasks {
 
     runPluginVerifier {
         failureLevel = RunPluginVerifierTask.FailureLevel.ALL
+        // Version 1.364 seems to be broken and always complains about supposedly missing 'plugin.xml':
+        // https://youtrack.jetbrains.com/issue/MP-6388
+        verifierVersion = "1.307"
     }
 
     publishPlugin {
