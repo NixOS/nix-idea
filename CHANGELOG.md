@@ -4,6 +4,8 @@
 
 ### Added
 
+- Plugin logo for easier recognition
+
 ### Changed
 
 ### Deprecated
