@@ -19,9 +19,9 @@ jobs:
     steps:
     # Setup environment
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: 17
         distribution: temurin
@@ -42,7 +42,7 @@ jobs:
         fi
     # Setup cache
     - name: Setup cache for Gradle and dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.gradle/caches
@@ -53,7 +53,7 @@ jobs:
           ${{hashFiles('gradle.properties', '**/*.gradle.kts')}}"
     # Update files
     - name: Obtain release notes
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           await require('.github/scripts/get-release-notes.js')({
