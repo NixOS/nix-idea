@@ -73,6 +73,11 @@ jobs:
         name: metadata
         path: build/metadata/
         if-no-files-found: error
+    # Debug output
+    - name: Disk Utilization
+      run: df -h
+    - name: Directory Sizes
+      run: du -hs ./ .gradle/ build/ ~/.gradle
 
   check-compatibility:
 
