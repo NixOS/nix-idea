@@ -4,6 +4,7 @@
 [libraries]
 junit5-bom = { module = "org.junit:junit-bom", version = "5.9.1" }
 junit5-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit5-platform-testkit = { module = "org.junit.platform:junit-platform-testkit" }
 junit5-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine" }
 
 [plugins]
