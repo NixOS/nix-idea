@@ -1,16 +1,22 @@
 {
+  // Parser classes
   parserClass="org.nixos.idea.lang.NixParser"
   parserUtilClass="org.nixos.idea.psi.impl.NixParserUtil"
-  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
-
+  // PSI element interfaces
   psiClassPrefix="Nix"
-  psiImplClassSuffix="Impl"
   psiPackage="org.nixos.idea.psi"
+  implements="org.nixos.idea.psi.NixPsiElement"
+  // PSI element implementations
+  psiImplClassSuffix="Impl"
   psiImplPackage="org.nixos.idea.psi.impl"
-
+  extends="org.nixos.idea.psi.impl.AbstractNixPsiElement"
+  // Constants (NixTypes)
   elementTypeHolderClass="org.nixos.idea.psi.NixTypes"
   elementTypeClass="org.nixos.idea.psi.NixElementType"
   tokenTypeClass="org.nixos.idea.psi.NixTokenType"
+  // Visitor
+  psiVisitorName="NixElementVisitor"
+  generate=[ visitor-value="T" ]
 
   // do not record error reporting information in recover rules and missing_semi
   consumeTokenMethod(".*_recover|missing_semi")="consumeTokenFast"
