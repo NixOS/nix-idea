@@ -16,7 +16,7 @@ import java.lang.annotation.*;
 
 /**
  * {@code @WithIdeaPlatform} can be used to set up an IDEA platform test environment.
- * This extension is an alternative for {@link BasePlatformTestCase} which can be used with JUnit 5.
+ * This extension is an alternative for {@link BasePlatformTestCase}, but for JUnit 5.
  * The extension is rather simple and does not support all the features of {@code BasePlatformTestCase}.
  *
  * <h2>Supported Parameters</h2>

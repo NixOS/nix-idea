@@ -12,9 +12,7 @@ import org.nixos.idea.psi.NixTypes;
  */
 public final class NixStringUtil {
 
-    private NixStringUtil() {
-        // Cannot be instantiated
-    }
+    private NixStringUtil() {} // Cannot be instantiated
 
     /**
      * Returns the source code for a string in the Nix Expression Language.
@@ -40,8 +38,8 @@ public final class NixStringUtil {
 
     /**
      * Escapes the given string for use in a double-quoted string expression in the Nix Expression Language.
-     * Note that it is not safe to combine the result of two method calls arbitrary inputs. For example the following
-     * code would generate a broken result.
+     * Note that it is not safe to combine the results of two method calls with arbitrary input.
+     * For example, the following code would generate a broken result.
      * <pre>{@code
      *     StringBuilder b1 = new StringBuilder(), b2 = new StringBuilder();
      *     NixStringUtil.escape(b1, "$");

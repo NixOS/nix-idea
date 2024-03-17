@@ -1,18 +1,14 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.grammarkit.tasks.GenerateLexerTask
-import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 plugins {
-    // Java support
     id("java")
-    // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij") version "1.16.0"
-    // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
-    id("org.jetbrains.changelog") version "2.2.0"
-    // grammarkit - read more: https://github.com/JetBrains/gradle-grammar-kit-plugin
-    id("org.jetbrains.grammarkit") version "2022.3.2"
+    alias(libs.plugins.jetbrains.intellij)
+    alias(libs.plugins.jetbrains.changelog)
+    alias(libs.plugins.jetbrains.grammarkit)
+    id("local.bump-version")
+    id("local.jbr-guidance")
 }
 
 // Import variables from gradle.properties file
@@ -38,10 +34,10 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.junit.platform:junit-platform-testkit")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+    testImplementation(platform(libs.junit5.bom))
+    testImplementation(libs.junit5.jupiter)
+    testImplementation(libs.junit5.platform.testkit)
+    testRuntimeOnly(libs.junit5.vintage.engine)
 }
 
 // Configure gradle-intellij-plugin plugin.
@@ -78,30 +74,6 @@ sourceSets {
     }
 }
 
-val tasksUsingDownloadedJbr = mutableListOf<Task>()
-// Check https://github.com/gradle/gradle/issues/20151 if an alternative for deprecated buildFinished became available.
-gradle.buildFinished {
-    val regex = Regex("""\.gradle/.*/jbr/.*/java\b""")
-    for (task in tasksUsingDownloadedJbr) {
-        if (task.state.failure?.cause?.message?.contains(regex) == true) {
-            logger.error("""
-                |
-                |! Info for users on NixOS:
-                |!
-                |! The JetBrains Runtime (JBR) downloaded by Gradle is not compatible with NixOS.
-                |! You may run the ‘:jbr’ task to configure the runtime of <nixpkgs> instead.
-                |! Alternatively, you may run the following command within the project directory.
-                |!
-                |!   nix-build '<nixpkgs>' -A jetbrains.jdk -o jbr
-                |!
-                |! This will create a symlink to the package jetbrains.jdk of nixpkgs at
-                |! ${'$'}projectDir/jbr, which is automatically detected by future builds.
-                """.trimMargin())
-            break
-        }
-    }
-}
-
 tasks {
     withType<JavaCompile> {
         options.encoding = "UTF-8"
@@ -110,59 +82,45 @@ tasks {
         options.encoding = "UTF-8"
     }
 
-    task<Exec>("jbr") {
-        description = "Create a symlink to package jetbrains.jdk"
-        group = "build setup"
-        commandLine("nix-build", "<nixpkgs>", "-A", "jetbrains.jdk", "-o", "jbr")
-    }
-
-    withType<org.jetbrains.intellij.tasks.RunIdeBase> {
-        project.file("jbr/bin/java")
-            .takeIf { it.exists() }
-            ?.let { projectExecutable = it.toString() }
-            ?: tasksUsingDownloadedJbr.add(this)
-    }
-
     withType<Test> {
         systemProperty("idea.test.execution.policy", "org.nixos.idea.NixTestExecutionPolicy")
         systemProperty("plugin.testDataPath", rootProject.rootDir.resolve("src/test/testData").path)
     }
 
-    task("metadata") {
-        outputs.upToDateWhen { false }
-        doLast {
-            val dir = project.layout.buildDirectory.dir("metadata").get().asFile
-            dir.mkdirs()
-            dir.resolve("version.txt").writeText(pluginVersion)
-            dir.resolve("zipfile.txt").writeText(buildPlugin.get().archiveFile.get().toString())
-            dir.resolve("latest_changelog.md").writeText(with(changelog) {
+    task<MetadataTask>("metadata") {
+        outputDir = layout.buildDirectory.dir("metadata")
+        file("version.txt", pluginVersion)
+        file("zipfile.txt") { buildPlugin.get().archiveFile.get().toString() }
+        file("latest_changelog.md") {
+            with(changelog) {
                 renderItem(
                     (getOrNull(pluginVersion) ?: getUnreleased())
                         .withHeader(false)
                         .withEmptySections(false),
                     Changelog.OutputType.MARKDOWN
                 )
-            })
+            }
         }
     }
 
-    val generateNixLexer by registering(GenerateLexerTask::class) {
+    generateLexer {
         sourceFile = file("src/main/lang/Nix.flex")
-        targetDir = "src/gen/java/org/nixos/idea/lang"
-        targetClass = "_NixLexer"
+        targetOutputDir = file("src/gen/java/org/nixos/idea/lang")
         purgeOldFiles = true
     }
 
-    val generateNixParser by registering(GenerateParserTask::class) {
+    generateParser {
         sourceFile = file("src/main/lang/Nix.bnf")
-        targetRoot = "src/gen/java"
+        targetRootOutputDir = file("src/gen/java")
         pathToParser = "/org/nixos/idea/lang/NixParser"
         pathToPsiRoot = "/org/nixos/idea/psi"
         purgeOldFiles = true
+        // Task :generateLexer deletes files generated by this task when executed afterward.
+        mustRunAfter(generateLexer)
     }
 
     compileJava {
-        dependsOn(generateNixLexer, generateNixParser)
+        dependsOn(generateLexer, generateParser)
     }
 
     test {
@@ -177,15 +135,19 @@ tasks {
         untilBuild = pluginUntilBuild
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
-        pluginDescription = projectDir.resolve("README.md").readText().lines().run {
-            val start = "<!-- Plugin description -->"
-            val end = "<!-- Plugin description end -->"
-
-            if (!containsAll(listOf(start, end))) {
-                throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
-            }
-            subList(indexOf(start) + 1, indexOf(end))
-        }.joinToString("\n").run { markdownToHTML(this) }
+        pluginDescription = providers.provider {
+            projectDir.resolve("README.md").readText().lines()
+                .run {
+                    val start = "<!-- Plugin description -->"
+                    val end = "<!-- Plugin description end -->"
+                    if (!containsAll(listOf(start, end))) {
+                        throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                    }
+                    subList(indexOf(start) + 1, indexOf(end))
+                }
+                .joinToString("\n")
+                .run { markdownToHTML(this) }
+        }
 
         // Get the latest available change notes from the changelog file
         changeNotes = provider {
@@ -202,13 +164,16 @@ tasks {
 
     runPluginVerifier {
         failureLevel = RunPluginVerifierTask.FailureLevel.ALL
+        // Version 1.364 seems to be broken and always complains about supposedly missing 'plugin.xml':
+        // https://youtrack.jetbrains.com/issue/MP-6388
+        verifierVersion = "1.307"
     }
 
     publishPlugin {
-        token = System.getenv("JETBRAINS_TOKEN")
-        channels = listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.').first())
+        token = providers.environmentVariable("JETBRAINS_TOKEN")
+        // Note: `listOf("foo").first()` does not what you think on Java 21 and Gradle 8.6. (The return type is TaskProvider<Task>)
+        // See https://github.com/gradle/gradle/issues/27699 and https://youtrack.jetbrains.com/issue/KT-65235.
+        channels = listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.')[0])
     }
 
 }
-
-apply(from = "gradle/bumpVersion.gradle.kts")

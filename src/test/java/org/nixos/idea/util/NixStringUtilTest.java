@@ -15,41 +15,39 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class NixStringUtilTest {
     @ParameterizedTest(name = "[{index}] {0} -> {1}")
-    @CsvSource({
-            "'', \"\"",
-            "abc, \"abc\"",
-            "\", \"\\\"\"",
-            "\\, \"\\\\\"",
-            "\\x, \"\\\\x\"",
-            "a${b}c, \"a\\${b}c\"",
-            "'\n',\"\\n\"",
-            "'\r',\"\\r\"",
-            "'\t',\"\\t\"",
-            // supplementary character, i.e. character form a supplementary plane,
-            // which needs surrogate pair to be represented in UTF-16
-            "\uD83C\uDF09, \"\uD83C\uDF09\"",
-
-    })
+    @CsvSource(textBlock = """
+            ''              , ""
+            abc             , "abc"
+            "               , "\\\""
+            \\              , "\\\\"
+            \\x             , "\\\\x"
+            a${b}c          , "a\\${b}c"
+            '\n'            , "\\n"
+            '\r'            , "\\r"
+            '\t'            , "\\t"
+            # supplementary character, i.e. character form a supplementary plane,
+            # which needs a surrogate pair to be represented in UTF-16
+            \uD83C\uDF09    , "\uD83C\uDF09"
+            """)
     void quote(String unescaped, String expectedResult) {
         assertEquals(expectedResult, NixStringUtil.quote(unescaped));
     }
 
     @ParameterizedTest(name = "[{index}] {0} -> {1}")
-    @CsvSource({
-            "'', ''",
-            "abc, abc",
-            "\", \\\"",
-            "\\, \\\\",
-            "\\x, \\\\x",
-            "a${b}c, a\\${b}c",
-            "'\n',\\n",
-            "'\r',\\r",
-            "'\t',\\t",
-            // supplementary character, i.e. character form a supplementary plane,
-            // which needs surrogate pair to be represented in UTF-16
-            "\uD83C\uDF09, \uD83C\uDF09",
-
-    })
+    @CsvSource(textBlock = """
+            ''              , ''
+            abc             , abc
+            "               , \\"
+            \\              , \\\\
+            \\x             , \\\\x
+            a${b}c          , a\\${b}c
+            '\n'            , \\n
+            '\r'            , \\r
+            '\t'            , \\t
+            # supplementary character, i.e. character form a supplementary plane,
+            # which needs a surrogate pair to be represented in UTF-16
+            \uD83C\uDF09    , \uD83C\uDF09
+            """)
     void escape(String unescaped, String expectedResult) {
         StringBuilder stringBuilder = new StringBuilder();
         NixStringUtil.escape(stringBuilder, unescaped);
@@ -57,34 +55,33 @@ final class NixStringUtilTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0} -> {1}")
-    @CsvSource(quoteCharacter = '|', value = {
-            "\"\", ||",
-            "\"x\", x",
-            "''abc'', abc",
-            "\"\\\"\", \"",
-            "\"\\\\\", \\",
-            "\"\\\\x\", \\x",
-            "''\\\"'', \\\"",
-            "''\\\\'', \\\\",
-            "''\\\\x'', \\\\x",
-            "''''\\\"'', \"",
-            "''''\\\\'', \\",
-            "''''\\\\x'', \\x",
-            "\"''\\\"\", ''\"",
-            "\"a\\${b}c\", a${b}c",
-            "''a''${b}c'', a${b}c",
-            "''a''\\${b}c'', a${b}c",
-            "\"a$${b}c\", a$${b}c",
-            "''a$${b}c'', a$${b}c",
-            "|\"\n\"|,|\n|",
-            "|\"\r\"|,|\r|",
-            "|\"\t\"|,|\t|",
-            // supplementary character, i.e. character form a supplementary plane,
-            // which needs surrogate pair to be represented in UTF-16
-            "\"\uD83C\uDF09\", \uD83C\uDF09",
-            "''\uD83C\uDF09'', \uD83C\uDF09",
-
-    })
+    @CsvSource(quoteCharacter = '|', textBlock = """
+            ""              , ||
+            "x"             , x
+            ''abc''         , abc
+            "\\""           , "
+            "\\\\"          , \\
+            "\\\\x"         , \\x
+            ''\\"''         , \\"
+            ''\\\\''        , \\\\
+            ''\\\\x''       , \\\\x
+            ''''\\"''       , "
+            ''''\\\\''      , \\
+            ''''\\\\x''     , \\x
+            "''\\""         , ''"
+            "a\\${b}c"      , a${b}c
+            ''a''${b}c''    , a${b}c
+            ''a''\\${b}c''  , a${b}c
+            "a$${b}c"       , a$${b}c
+            ''a$${b}c''     , a$${b}c
+            |"\n"|          , |\n|
+            |"\r"|          , |\r|
+            |"\t"|          , |\t|
+            # supplementary character, i.e. character form a supplementary plane,
+            # which needs a surrogate pair to be represented in UTF-16
+            "\uD83C\uDF09"  , \uD83C\uDF09
+            ''\uD83C\uDF09'', \uD83C\uDF09
+            """)
     @WithIdeaPlatform.OnEdt
     void parse(String code, String expectedResult, Project project) {
         NixString string = NixElementFactory.createString(project, code);

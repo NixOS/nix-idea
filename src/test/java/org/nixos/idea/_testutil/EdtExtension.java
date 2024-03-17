@@ -59,18 +59,18 @@ final class EdtExtension implements InvocationInterceptor {
         runAndWait(invocation);
     }
 
-    private static void runAndWait(Invocation<?> invocation) throws Throwable {
-        ThrowableCollector uncaughtExceptions = new ThrowableCollector(TestAbortedException.class::isInstance);
-        try (var ignored = wrap(uncaughtExceptions)) {
-            uncaughtExceptions.execute(() -> EdtTestUtil.runInEdtAndWait(invocation::proceed));
-        }
-    }
-
     private static <T> T runAndGet(Invocation<T> invocation) throws Throwable {
         @SuppressWarnings("unchecked")
         T[] result = (T[]) new Object[1];
         runAndWait(() -> result[0] = invocation.proceed());
         return result[0];
+    }
+
+    private static void runAndWait(Invocation<?> invocation) throws Throwable {
+        ThrowableCollector uncaughtExceptions = new ThrowableCollector(TestAbortedException.class::isInstance);
+        try (var ignored = wrap(uncaughtExceptions)) {
+            uncaughtExceptions.execute(() -> EdtTestUtil.runInEdtAndWait(invocation::proceed));
+        }
     }
 
     private static AutoCloseable wrap(ThrowableCollector uncaughtExceptions) {
@@ -88,7 +88,7 @@ final class EdtExtension implements InvocationInterceptor {
             } finally {
                 edt.setUncaughtExceptionHandler(previousExceptionHandler);
             }
-            // Re-throw any exception which might have been thrown by a deferred task
+            // Re-throw any exception which might have been thrown by deferred tasks
             uncaughtExceptions.assertEmpty();
         };
     }
