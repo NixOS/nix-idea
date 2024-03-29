@@ -1,18 +1,11 @@
-import java.util.regex.Pattern
-
-val GRADLE_PROPERTIES = "gradle.properties"
 val VERSION_PROPERTY = "pluginVersion"
 
-task("bumpVersion") {
+tasks.register<ChangePropertyTask>("bumpVersion") {
     description = "Bumps the version of the project"
+    oldValue = providers.gradleProperty(VERSION_PROPERTY)
+    newValue = oldValue.map { PluginVersions.increment(it) }
+    propertyName = VERSION_PROPERTY
     dependsOn("patchChangelog")
-    outputs.upToDateWhen { false }
-
-    doLast {
-        val prevVersion = project.property(VERSION_PROPERTY) as String
-        val nextVersion = incrementVersion(prevVersion)
-        replaceInProperties(prevVersion, nextVersion)
-    }
 }
 
 tasks.named("patchChangelog") {
@@ -23,34 +16,5 @@ tasks.named("patchChangelog") {
         if (releaseNote is String) {
             setProperty("releaseNote", releaseNote.replace("\r\n", "\n"))
         }
-    }
-}
-
-/**
- * Replaces the [prevVersion] with [nextVersion] for the `pluginVersion` property in `gradle.properties`.
- */
-fun replaceInProperties(prevVersion: String, nextVersion: String): Unit {
-    val pProperty = Regex.escape(VERSION_PROPERTY)
-    val pVersion = Regex.escape(prevVersion)
-    val rVersion = Regex.escapeReplacement(nextVersion)
-
-    val file = file(GRADLE_PROPERTIES)
-    val previousContent = file.readText()
-    file.writeText(previousContent.replace(
-            Regex("^(\\s*$pProperty\\s*=\\s*)$pVersion(\\s*)$", RegexOption.MULTILINE),
-            "$1${rVersion}$2"))
-}
-
-/**
- * Increments the last integer within the given string.
- */
-fun incrementVersion(previous: String): String {
-    val matcher = Pattern.compile("(.*[^\\d])(\\d+)([^\\d]*)").matcher(previous)
-    if (matcher.matches()) {
-        val incrementedNumber = Integer.parseInt(matcher.group(2)) + 1
-        return matcher.group(1) + incrementedNumber + matcher.group(3)
-    }
-    else {
-        throw GradleException("Unsupported version: " + previous)
     }
 }
