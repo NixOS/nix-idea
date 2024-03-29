@@ -4,19 +4,25 @@
 
 ### Added
 
-- Support for IDEA 2024.1
-
 ### Changed
 
 ### Deprecated
 
 ### Removed
 
-- Support for IDEA 2022.3
-
 ### Fixed
 
 ### Security
+
+## [0.4.0.12] - 2024-03-29
+
+### Added
+
+- Support for IDEA 2024.1
+
+### Removed
+
+- Support for IDEA 2022.3
 
 ## [0.4.0.11] - 2023-10-22
 
@@ -196,7 +202,7 @@ the plugin.
 
 - Update project to build for recent IJ versions
 
-[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.11...HEAD
+[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.12...HEAD
 [0.3.0.0]: https://github.com/NixOS/nix-idea/commits/v0.3.0.0
 [0.3.0.3]: https://github.com/NixOS/nix-idea/compare/v0.3.0.0...v0.3.0.3
 [0.3.0.4]: https://github.com/NixOS/nix-idea/compare/v0.3.0.3...v0.3.0.4
@@ -206,6 +212,7 @@ the plugin.
 [0.4.0.1]: https://github.com/NixOS/nix-idea/compare/v0.4.0.0...v0.4.0.1
 [0.4.0.10]: https://github.com/NixOS/nix-idea/compare/v0.4.0.9...v0.4.0.10
 [0.4.0.11]: https://github.com/NixOS/nix-idea/compare/v0.4.0.10...v0.4.0.11
+[0.4.0.12]: https://github.com/NixOS/nix-idea/compare/v0.4.0.11...v0.4.0.12
 [0.4.0.2]: https://github.com/NixOS/nix-idea/compare/v0.4.0.1...v0.4.0.2
 [0.4.0.3]: https://github.com/NixOS/nix-idea/compare/v0.4.0.2...v0.4.0.3
 [0.4.0.4]: https://github.com/NixOS/nix-idea/compare/v0.4.0.3...v0.4.0.4
