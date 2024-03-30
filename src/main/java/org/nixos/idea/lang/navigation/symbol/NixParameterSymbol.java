@@ -16,13 +16,11 @@ import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.interpretation.Attribute;
 import org.nixos.idea.lang.navigation.NixNavigationTarget;
 import org.nixos.idea.psi.NixExprLambda;
-import org.nixos.idea.psi.NixParam;
+import org.nixos.idea.psi.NixPsiUtil;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
 final class NixParameterSymbol extends NixSymbol
@@ -82,11 +80,7 @@ final class NixParameterSymbol extends NixSymbol
     @Override
     public @NotNull Collection<? extends NavigationTarget> getNavigationTargets(@NotNull Project project) {
         assert myOwner.getProject().equals(project);
-        return Stream.concat(
-                        Stream.ofNullable(myOwner.getParamName()),
-                        Stream.ofNullable(myOwner.getParamsInSet())
-                                .flatMap(Collection::stream)
-                                .map(NixParam::getParamName))
+        return NixPsiUtil.getParameters(myOwner).stream()
                 .filter(paramName -> myName.equals(paramName.getAttributePath().get(0).getName()))
                 .map(NixNavigationTarget::of)
                 .collect(Collectors.toUnmodifiableList());

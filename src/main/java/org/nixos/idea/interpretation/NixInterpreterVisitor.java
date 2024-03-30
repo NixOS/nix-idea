@@ -10,9 +10,12 @@ import org.nixos.idea.psi.NixElementVisitor;
 import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixExprApp;
 import org.nixos.idea.psi.NixExprAssert;
+import org.nixos.idea.psi.NixExprAttrs;
 import org.nixos.idea.psi.NixExprIf;
 import org.nixos.idea.psi.NixExprLambda;
 import org.nixos.idea.psi.NixExprLet;
+import org.nixos.idea.psi.NixExprList;
+import org.nixos.idea.psi.NixExprNumber;
 import org.nixos.idea.psi.NixExprOpAnd;
 import org.nixos.idea.psi.NixExprOpConcat;
 import org.nixos.idea.psi.NixExprOpDiv;
@@ -31,18 +34,15 @@ import org.nixos.idea.psi.NixExprOpNot;
 import org.nixos.idea.psi.NixExprOpOr;
 import org.nixos.idea.psi.NixExprOpPlus;
 import org.nixos.idea.psi.NixExprOpUpdate;
+import org.nixos.idea.psi.NixExprParens;
+import org.nixos.idea.psi.NixExprPath;
 import org.nixos.idea.psi.NixExprSelect;
+import org.nixos.idea.psi.NixExprUri;
+import org.nixos.idea.psi.NixExprVar;
 import org.nixos.idea.psi.NixExprWith;
 import org.nixos.idea.psi.NixLegacyAppOr;
-import org.nixos.idea.psi.NixLegacyLet;
-import org.nixos.idea.psi.NixList;
-import org.nixos.idea.psi.NixLiteral;
-import org.nixos.idea.psi.NixParens;
-import org.nixos.idea.psi.NixPath;
-import org.nixos.idea.psi.NixSet;
 import org.nixos.idea.psi.NixString;
 import org.nixos.idea.psi.NixTypes;
-import org.nixos.idea.psi.NixVariableAccess;
 import org.nixos.idea.util.InterpolatedString;
 
 import java.util.Arrays;
@@ -247,33 +247,33 @@ final class NixInterpreterVisitor<V> extends NixElementVisitor<V> {
     }
 
     @Override
-    public AnticipatedValue visitLegacyLet(@NotNull NixLegacyLet o) {
-        return super.visitLegacyLet(o);
+    public AnticipatedValue visitExprList(@NotNull NixExprList o) {
+        return super.visitExprList(o);
     }
 
     @Override
-    public AnticipatedValue visitList(@NotNull NixList o) {
-        return super.visitList(o);
+    public AnticipatedValue visitExprNumber(@NotNull NixExprNumber o) {
+        return super.visitExprNumber(o);
     }
 
     @Override
-    public AnticipatedValue visitLiteral(@NotNull NixLiteral o) {
-        return super.visitLiteral(o);
+    public AnticipatedValue visitExprUri(@NotNull NixExprUri o) {
+        return super.visitExprUri(o);
     }
 
     @Override
-    public AnticipatedValue visitParens(@NotNull NixParens o) {
-        return super.visitParens(o);
+    public AnticipatedValue visitExprParens(@NotNull NixExprParens o) {
+        return super.visitExprParens(o);
     }
 
     @Override
-    public AnticipatedValue visitPath(@NotNull NixPath o) {
-        return super.visitPath(o);
+    public AnticipatedValue visitExprPath(@NotNull NixExprPath o) {
+        return super.visitExprPath(o);
     }
 
     @Override
-    public AnticipatedValue visitSet(@NotNull NixSet o) {
-        return super.visitSet(o);
+    public AnticipatedValue visitExprAttrs(@NotNull NixExprAttrs o) {
+        return super.visitExprAttrs(o);
     }
 
     @Override
@@ -286,7 +286,7 @@ final class NixInterpreterVisitor<V> extends NixElementVisitor<V> {
     }
 
     @Override
-    public V visitVariableAccess(@NotNull NixVariableAccess o) {
+    public V visitExprVar(@NotNull NixExprVar o) {
         return myInterpreter.readVariable(o.getText());
     }
 

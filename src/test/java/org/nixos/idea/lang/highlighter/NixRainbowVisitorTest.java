@@ -12,124 +12,152 @@ public final class NixRainbowVisitorTest extends BasePlatformTestCase {
     }
 
     public void testSelectExpression() {
-        doTest("let\n" +
-                "  <rainbow color='ff000004'>x</rainbow> = null;\n" +
-                "in [\n" +
-                "  <rainbow color='ff000004'>x</rainbow>\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow>\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000003'>z</rainbow>\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.\"no-highlighting-for-string-attributes\"\n" +
-                "]");
+        doTest("""
+                let
+                  <rainbow color='ff000004'>x</rainbow> = null;
+                in [
+                  <rainbow color='ff000004'>x</rainbow>
+                  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>
+                  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow>
+                  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000003'>z</rainbow>
+                  <rainbow color='ff000004'>x</rainbow>."no-highlighting-for-string-attributes"
+                ]""");
     }
 
     public void testInheritExpression() {
-        doTest("let\n" +
-                "  <rainbow color='ff000004'>x</rainbow> = null;\n" +
-                "  <rainbow color='ff000002'>y</rainbow> = null;\n" +
-                "in {\n" +
-                "  inherit <rainbow color='ff000004'>x</rainbow>;\n" +
-                "  inherit <rainbow color='ff000004'>x</rainbow> <rainbow color='ff000002'>y</rainbow>;\n" +
-                "}");
+        doTest("""
+                let
+                  <rainbow color='ff000004'>x</rainbow> = null;
+                  <rainbow color='ff000002'>y</rainbow> = null;
+                in {
+                  inherit <rainbow color='ff000004'>x</rainbow>;
+                  inherit <rainbow color='ff000004'>x</rainbow> <rainbow color='ff000002'>y</rainbow>;
+                  inherit "no-highlighting-for-string-attributes";
+                  inherit ({}) not-a-variable;
+                }""");
+    }
+
+    public void testInheritExpressionInNestedLetExpression() {
+        doTest("""
+                let
+                  <rainbow color='ff000003'>b</rainbow> = null;
+                  <rainbow color='ff000001'>c</rainbow> = null;
+                in
+                  let
+                    inherit <rainbow color='ff000001'>c</rainbow>;
+                    inherit ({}) <rainbow color='ff000003'>a</rainbow> <rainbow color='ff000004'>b</rainbow>;
+                  in [
+                    <rainbow color='ff000003'>a</rainbow>
+                    <rainbow color='ff000004'>b</rainbow>
+                    <rainbow color='ff000001'>c</rainbow>
+                  ]""");
     }
 
     public void testLetExpression() {
-        doTest("let\n" +
-                "  inherit (null) \"no-highlighting-for-string-attributes\" <rainbow color='ff000004'>x</rainbow>;\n" +
-                "  <rainbow color='ff000004'>x</rainbow> = null;\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow> = null;\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow> = null;\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.\"no-highlighting-for-string-attributes\" = null;\n" +
-                "  <rainbow color='ff000003'>copy</rainbow> = <rainbow color='ff000004'>x</rainbow>;\n" +
-                "in [\n" +
-                "  <rainbow color='ff000004'>x</rainbow>\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow>\n" +
-                "]");
+        doTest("""
+                let
+                  inherit (null) "no-highlighting-for-string-attributes" <rainbow color='ff000004'>x</rainbow>;
+                  <rainbow color='ff000004'>x</rainbow> = null;
+                  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow> = null;
+                  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow> = null;
+                  <rainbow color='ff000004'>x</rainbow>."no-highlighting-for-string-attributes" = null;
+                  <rainbow color='ff000003'>copy</rainbow> = <rainbow color='ff000004'>x</rainbow>;
+                in [
+                  <rainbow color='ff000004'>x</rainbow>
+                  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>
+                  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow>
+                ]""");
     }
 
     public void testLegacyLetExpression() {
-        doTest("let {\n" +
-                "  inherit (null) \"no-highlighting-for-string-attributes\" <rainbow color='ff000004'>x</rainbow>;\n" +
-                "  <rainbow color='ff000004'>x</rainbow> = null;\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow> = null;\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow> = null;\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.\"no-highlighting-for-string-attributes\" = null;\n" +
-                "  <rainbow color='ff000003'>body</rainbow> = [\n" +
-                "    <rainbow color='ff000004'>x</rainbow>\n" +
-                "    <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>\n" +
-                "    <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow>\n" +
-                "  ];\n" +
-                "}");
+        doTest("""
+                let {
+                  inherit (null) "no-highlighting-for-string-attributes" <rainbow color='ff000004'>x</rainbow>;
+                  <rainbow color='ff000004'>x</rainbow> = null;
+                  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow> = null;
+                  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow> = null;
+                  <rainbow color='ff000004'>x</rainbow>."no-highlighting-for-string-attributes" = null;
+                  <rainbow color='ff000003'>body</rainbow> = [
+                    <rainbow color='ff000004'>x</rainbow>
+                    <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>
+                    <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow>
+                  ];
+                }""");
     }
 
     public void testRecursiveSet() {
-        doTest("rec {\n" +
-                "  inherit (null) \"no-highlighting-for-string-attributes\" <rainbow color='ff000004'>x</rainbow>;\n" +
-                "  <rainbow color='ff000004'>x</rainbow> = null;\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow> = null;\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow> = null;\n" +
-                "  <rainbow color='ff000004'>x</rainbow>.\"no-highlighting-for-string-attributes\" = null;\n" +
-                "  <rainbow color='ff000003'>body</rainbow> = [\n" +
-                "    <rainbow color='ff000004'>x</rainbow>\n" +
-                "    <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>\n" +
-                "    <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow>\n" +
-                "  ];\n" +
-                "}");
+        doTest("""
+                rec {
+                  inherit (null) "no-highlighting-for-string-attributes" <rainbow color='ff000004'>x</rainbow>;
+                  <rainbow color='ff000004'>x</rainbow> = null;
+                  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow> = null;
+                  <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow> = null;
+                  <rainbow color='ff000004'>x</rainbow>."no-highlighting-for-string-attributes" = null;
+                  <rainbow color='ff000003'>body</rainbow> = [
+                    <rainbow color='ff000004'>x</rainbow>
+                    <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>
+                    <rainbow color='ff000004'>x</rainbow>.<rainbow color='ff000001'>y</rainbow>.<rainbow color='ff000002'>z</rainbow>
+                  ];
+                }""");
     }
 
     public void testNoHighlightingForNonRecursiveSet() {
-        doTest("{\n" +
-                "  inherit (null) \"no-highlighting-for-string-attributes\" x;\n" +
-                "  x = null;\n" +
-                "  x.y = null;\n" +
-                "  x.\"no-highlighting-for-string-attributes\" = null;\n" +
-                "}");
+        doTest("""
+                {
+                  inherit (null) "no-highlighting-for-string-attributes" x;
+                  x = null;
+                  x.y = null;
+                  x."no-highlighting-for-string-attributes" = null;
+                }""");
     }
 
     public void testLambda() {
         // TODO: Ideally, za should have the same color as z.za.
-        doTest("<rainbow color='ff000004'>x</rainbow>:\n" +
-                "{<rainbow color='ff000002'>y</rainbow>}:\n" +
-                "<rainbow color='ff000003'>z</rainbow>@{<rainbow color='ff000001'>za</rainbow>, ...}: [\n" +
-                "  <rainbow color='ff000004'>x</rainbow>\n" +
-                "  <rainbow color='ff000002'>y</rainbow>\n" +
-                "  <rainbow color='ff000003'>z</rainbow>\n" +
-                "  <rainbow color='ff000001'>za</rainbow>\n" +
-                "]");
+        doTest("""
+                <rainbow color='ff000004'>x</rainbow>:
+                {<rainbow color='ff000002'>y</rainbow>}:
+                <rainbow color='ff000003'>z</rainbow>@{<rainbow color='ff000001'>za</rainbow>, ...}: [
+                  <rainbow color='ff000004'>x</rainbow>
+                  <rainbow color='ff000002'>y</rainbow>
+                  <rainbow color='ff000003'>z</rainbow>
+                  <rainbow color='ff000001'>za</rainbow>
+                ]""");
     }
 
     public void testUnknownSource() {
-        doTest("[\n" +
-                "  <rainbow color='ff000004'>x</rainbow>\n" +
-                "  <rainbow color='ff000001'>compareVersions</rainbow>\n" +
-                "]");
+        doTest("""
+                [
+                  <rainbow color='ff000004'>x</rainbow>
+                  <rainbow color='ff000001'>compareVersions</rainbow>
+                ]""");
     }
 
     public void testNoRainbowForBuiltins() {
-        doTest("[\n" +
-                "  null\n" +
-                "  true\n" +
-                "  false\n" +
-                "  import\n" +
-                "  map\n" +
-                "  builtins.null\n" +
-                "  builtins.map\n" +
-                "  builtins.compareVersions\n" +
-                "]");
+        doTest("""
+                [
+                  null
+                  true
+                  false
+                  import
+                  map
+                  builtins.null
+                  builtins.map
+                  builtins.compareVersions
+                ]""");
     }
 
     // TODO: Ideally, hidden elements should have a different color then the elements hiding them. Unfortunately,
     //  I haven't found a good way to implement this.
     @SuppressWarnings("unused")
     public void ignoreTestHidingChangesColor() {
-        doTest("{<rainbow color='ff000004'>f</rainbow>, <rainbow color='ff000002'>hidden</rainbow>}: [\n" +
-                "  <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000002'>hidden</rainbow>\n" +
-                "  (let <rainbow color='ff000001'>hidden</rainbow> = null; in <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000001'>hidden</rainbow>)\n" +
-                "  (let { <rainbow color='ff000001'>hidden</rainbow> = null; <rainbow color='ff000003'>body</rainbow> = <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000001'>hidden</rainbow>; })\n" +
-                "  (rec { <rainbow color='ff000001'>hidden</rainbow> = null; <rainbow color='ff000003'>body</rainbow> = <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000001'>hidden</rainbow>; })\n" +
-                "  (<rainbow color='ff000001'>hidden</rainbow>: <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000001'>hidden</rainbow>)\n" +
-                "]");
+        doTest("""
+                {<rainbow color='ff000004'>f</rainbow>, <rainbow color='ff000002'>hidden</rainbow>}: [
+                  <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000002'>hidden</rainbow>
+                  (let <rainbow color='ff000001'>hidden</rainbow> = null; in <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000001'>hidden</rainbow>)
+                  (let { <rainbow color='ff000001'>hidden</rainbow> = null; <rainbow color='ff000003'>body</rainbow> = <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000001'>hidden</rainbow>; })
+                  (rec { <rainbow color='ff000001'>hidden</rainbow> = null; <rainbow color='ff000003'>body</rainbow> = <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000001'>hidden</rainbow>; })
+                  (<rainbow color='ff000001'>hidden</rainbow>: <rainbow color='ff000004'>f</rainbow> <rainbow color='ff000001'>hidden</rainbow>)
+                ]""");
     }
 
     private void doTest(@NotNull String code) {

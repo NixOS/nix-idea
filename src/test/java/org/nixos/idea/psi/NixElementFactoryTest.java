@@ -63,22 +63,22 @@ final class NixElementFactoryTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"x"})
-    void createParamName(String code) {
-        NixParamName result = NixElementFactory.createParamName(myProject, code);
+    void createParameterName(String code) {
+        NixIdentifier result = NixElementFactory.createParameterName(myProject, code);
         assertEquals(code, result.getText());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"", "x.y", "x@", "@"})
-    void createParamNameFail(String code) {
+    void createParameterNameFail(String code) {
         assertThrows(RuntimeException.class,
-                () -> NixElementFactory.createParamName(myProject, code));
+                () -> NixElementFactory.createParameterName(myProject, code));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"x"})
     void createVariableAccess(String code) {
-        NixVariableAccess result = NixElementFactory.createVariableAccess(myProject, code);
+        NixExprVar result = NixElementFactory.createVariableAccess(myProject, code);
         assertEquals(code, result.getText());
     }
 
@@ -106,16 +106,16 @@ final class NixElementFactoryTest {
     @ParameterizedTest
     @CsvSource({
             "IND_STRING, ''abc''",
-            "VARIABLE_ACCESS, x",
+            "EXPR_VAR, x",
             "EXPR_SELECT, x.y",
-            "LIST, []",
-            "LIST, [x y z]",
-            "SET, {}",
-            "SET, {x = y; y = z;}",
+            "EXPR_LIST, []",
+            "EXPR_LIST, [x y z]",
+            "EXPR_ATTRS, {}",
+            "EXPR_ATTRS, {x = y; y = z;}",
             "EXPR_IF, if x then y else z",
             "EXPR_LAMBDA, x: x",
             "EXPR_LET, let x = y; y = z; in x",
-            "LEGACY_LET, let { x = y; body = x; }",
+            "EXPR_ATTRS, let { x = y; body = x; }",
             "EXPR_OP_PLUS, 2 + 2",
             "EXPR_WITH, with x; y",
     })

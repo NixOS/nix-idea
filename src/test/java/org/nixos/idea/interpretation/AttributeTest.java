@@ -25,7 +25,7 @@ final class AttributeTest {
 
     @Test
     void testIsIdentifierForIdentifier() {
-        NixIdentifier identifier1 = NixElementFactory.createParamName(myProject, "x");
+        NixIdentifier identifier1 = NixElementFactory.createParameterName(myProject, "x");
         NixIdentifier identifier2 = NixElementFactory.createVariableAccess(myProject, "abc");
         assertTrue(Attribute.of(identifier1).isIdentifier());
         assertTrue(Attribute.of(identifier2).isIdentifier());
@@ -46,7 +46,7 @@ final class AttributeTest {
 
     @Test
     void testHasQuotesForIdentifier() {
-        NixIdentifier identifier1 = NixElementFactory.createParamName(myProject, "x");
+        NixIdentifier identifier1 = NixElementFactory.createParameterName(myProject, "x");
         NixIdentifier identifier2 = NixElementFactory.createVariableAccess(myProject, "abc");
         assertFalse(Attribute.of(identifier1).hasQuotes());
         assertFalse(Attribute.of(identifier2).hasQuotes());
@@ -69,7 +69,7 @@ final class AttributeTest {
 
     @Test
     void testIsDynamicForIdentifier() {
-        NixIdentifier identifier1 = NixElementFactory.createParamName(myProject, "x");
+        NixIdentifier identifier1 = NixElementFactory.createParameterName(myProject, "x");
         NixIdentifier identifier2 = NixElementFactory.createVariableAccess(myProject, "abc");
         assertFalse(Attribute.of(identifier1).isDynamic());
         assertFalse(Attribute.of(identifier2).isDynamic());
@@ -93,7 +93,7 @@ final class AttributeTest {
 
     @Test
     void testGetNameForIdentifier() {
-        NixIdentifier identifier1 = NixElementFactory.createParamName(myProject, "x");
+        NixIdentifier identifier1 = NixElementFactory.createParameterName(myProject, "x");
         NixIdentifier identifier2 = NixElementFactory.createVariableAccess(myProject, "abc");
         assertEquals("x", Attribute.of(identifier1).getName());
         assertEquals("abc", Attribute.of(identifier2).getName());

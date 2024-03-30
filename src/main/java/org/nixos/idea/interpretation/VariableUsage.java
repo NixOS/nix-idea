@@ -8,9 +8,9 @@ import org.nixos.idea.psi.NixAttrPath;
 import org.nixos.idea.psi.NixBindInheritVar;
 import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixExprSelect;
+import org.nixos.idea.psi.NixExprVar;
 import org.nixos.idea.psi.NixInheritedName;
 import org.nixos.idea.psi.NixPsiElement;
-import org.nixos.idea.psi.NixVariableAccess;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +39,7 @@ public final class VariableUsage {
      * The returned element may be one of the following types:
      * <ul>
      *     <li>{@link NixExprSelect}
-     *     <li>{@link NixVariableAccess} when it is not part of {@link NixExprSelect}
+     *     <li>{@link NixExprVar} when it is not part of {@link NixExprSelect}
      *     <li>{@link NixInheritedName} as part of {@link NixBindInheritVar}
      * </ul>
      *
@@ -47,7 +47,7 @@ public final class VariableUsage {
      */
     @Contract(pure = true)
     public @NotNull NixPsiElement element() {
-        assert myElement instanceof NixExprSelect || myElement instanceof NixVariableAccess ||
+        assert myElement instanceof NixExprSelect || myElement instanceof NixExprVar ||
                 myElement instanceof NixInheritedName && myElement.getParent() instanceof NixBindInheritVar
                 : "element type does not match Javadoc: " + myElement.getClass();
         return myElement;
@@ -66,14 +66,14 @@ public final class VariableUsage {
 
     /**
      * The elements defining the individual attributes ot the {@linkplain #path() attribute path}.
-     * The first element may have the type {@link NixVariableAccess} or {@link NixAttr}.
+     * The first element may have the type {@link NixExprVar} or {@link NixAttr}.
      * The remaining elements all have the type {@link NixAttr}.
      *
      * @return The elements defining the individual attributes.
      */
     @Contract(pure = true)
     public @NotNull NixPsiElement @NotNull [] attributeElements() {
-        assert myAttributeElements[0] instanceof NixVariableAccess || myAttributeElements[0] instanceof NixAttr
+        assert myAttributeElements[0] instanceof NixExprVar || myAttributeElements[0] instanceof NixAttr
                 : "element type does not match Javadoc: " + myAttributeElements[0].getClass();
         assert Arrays.stream(myAttributeElements).skip(1).allMatch(el -> el instanceof NixAttr)
                 : "element type does not match Javadoc";
@@ -90,8 +90,8 @@ public final class VariableUsage {
      */
     @Contract(pure = true)
     public static @Nullable VariableUsage by(@NotNull NixPsiElement element) {
-        if (element instanceof NixVariableAccess && !(element.getParent() instanceof NixExprSelect)) {
-            NixVariableAccess value = (NixVariableAccess) element;
+        if (element instanceof NixExprVar && !(element.getParent() instanceof NixExprSelect)) {
+            NixExprVar value = (NixExprVar) element;
             return new Builder(value)
                     .addAttribute(value)
                     .build();
@@ -99,8 +99,8 @@ public final class VariableUsage {
             NixExprSelect expr = (NixExprSelect) element;
             NixExpr value = expr.getValue();
             NixAttrPath attrPath = expr.getAttrPath();
-            if (attrPath != null && value instanceof NixVariableAccess) {
-                Builder builder = new Builder(expr).addAttribute((NixVariableAccess) value);
+            if (attrPath != null && value instanceof NixExprVar) {
+                Builder builder = new Builder(expr).addAttribute((NixExprVar) value);
                 for (NixAttr attr : attrPath.getAttrList()) {
                     builder.addAttribute(attr);
                 }
@@ -124,7 +124,7 @@ public final class VariableUsage {
         }
 
         @Contract("_ -> this")
-        private @NotNull Builder addAttribute(@NotNull NixVariableAccess element) {
+        private @NotNull Builder addAttribute(@NotNull NixExprVar element) {
             return addAttribute(Attribute.of(element), element);
         }
 

@@ -17,9 +17,9 @@ import org.nixos.idea.interpretation.Attribute;
 import org.nixos.idea.interpretation.AttributePath;
 import org.nixos.idea.lang.navigation.NixNavigationTarget;
 import org.nixos.idea.psi.NixDeclarationHost;
+import org.nixos.idea.psi.NixExprAttrs;
 import org.nixos.idea.psi.NixExprLet;
-import org.nixos.idea.psi.NixLegacyLet;
-import org.nixos.idea.psi.NixSet;
+import org.nixos.idea.psi.NixTypes;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,7 +44,7 @@ final class NixAttributeSymbol extends NixSymbol
         myHost = host;
         myPath = path;
         myPointer = pointer;
-        assert host instanceof NixSet || host instanceof NixExprLet || host instanceof NixLegacyLet;
+        assert host instanceof NixExprAttrs || host instanceof NixExprLet;
     }
 
     @Override
@@ -73,7 +73,7 @@ final class NixAttributeSymbol extends NixSymbol
 
     @Override
     public @Nullable SearchScope getMaximalSearchScope() {
-        if ((myHost instanceof NixExprLet || myHost instanceof NixLegacyLet) && myPath.size() == 1) {
+        if ((myHost instanceof NixExprLet || myHost instanceof NixExprAttrs && myHost.getNode().findChildByType(NixTypes.LET) != null) && myPath.size() == 1) {
             return new LocalSearchScope(myHost);
         } else {
             return super.getMaximalSearchScope();

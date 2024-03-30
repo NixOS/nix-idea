@@ -21,8 +21,9 @@ import org.nixos.idea.psi.NixDeclarationElement;
 import org.nixos.idea.psi.NixDeclarationHost;
 import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixExprLambda;
+import org.nixos.idea.psi.NixIdentifier;
 import org.nixos.idea.psi.NixInheritedName;
-import org.nixos.idea.psi.NixParamName;
+import org.nixos.idea.psi.NixParameter;
 import org.nixos.idea.psi.NixPsiElement;
 import org.nixos.idea.util.TextRangeFactory;
 
@@ -47,7 +48,7 @@ abstract class AbstractNixDeclarationElement extends AbstractNixPsiElement imple
 
     AbstractNixDeclarationElement(@NotNull ASTNode node) {
         super(node);
-        if (!(this instanceof NixParamName) && !(this instanceof NixBindAttr) && !(this instanceof NixInheritedName)) {
+        if (!(this instanceof NixParameter) && !(this instanceof NixBindAttr) && !(this instanceof NixInheritedName)) {
             LOG.error("Unknown subclass: " + getClass());
         }
     }
@@ -90,9 +91,10 @@ abstract class AbstractNixDeclarationElement extends AbstractNixPsiElement imple
     private void processAttributes() {
         AttributePath attributePath;
         NixPsiElement[] attributeElements;
-        if (this instanceof NixParamName paramName) {
-            attributePath = AttributePath.of(Attribute.of(paramName));
-            attributeElements = new NixPsiElement[]{paramName};
+        if (this instanceof NixParameter parameter) {
+            NixIdentifier identifier = parameter.getIdentifier();
+            attributePath = AttributePath.of(Attribute.of(identifier));
+            attributeElements = new NixPsiElement[]{identifier};
         } else if (this instanceof NixBindAttr bindAttr) {
             NixAttr[] elements = bindAttr.getAttrPath().getAttrList().toArray(NixAttr[]::new);
             attributeElements = elements;
@@ -119,7 +121,7 @@ abstract class AbstractNixDeclarationElement extends AbstractNixPsiElement imple
 
             // TODO: 12.11.2023 Review symbol creation process!
             NixSymbol symbol;
-            if (this instanceof NixParamName) {
+            if (this instanceof NixParameter) {
                 assert path.size() == 1;
                 symbol = NixSymbol.parameter(findParent(NixExprLambda.class), Objects.requireNonNull(path.get(0).getName()));
             } else {

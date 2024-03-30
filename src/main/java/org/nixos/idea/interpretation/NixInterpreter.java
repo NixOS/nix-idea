@@ -5,8 +5,9 @@ import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.psi.NixAntiquotation;
 import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixExprLambda;
-import org.nixos.idea.psi.NixLiteral;
-import org.nixos.idea.psi.NixPath;
+import org.nixos.idea.psi.NixExprNumber;
+import org.nixos.idea.psi.NixExprStdPath;
+import org.nixos.idea.psi.NixExprUri;
 import org.nixos.idea.psi.NixString;
 import org.nixos.idea.psi.NixStringPart;
 
@@ -26,11 +27,11 @@ public interface NixInterpreter<V> {
         return unknown();
     }
 
-    default V number(@NotNull NixLiteral literal) {
+    default V number(@NotNull NixExprNumber literal) {
         return unknown(NixValueType.NUMBER);
     }
 
-    default V uri(@NotNull NixLiteral literal) {
+    default V uri(@NotNull NixExprUri literal) {
         return unknown(NixValueType.STRING);
     }
 
@@ -46,7 +47,7 @@ public interface NixInterpreter<V> {
         return unknown(NixValueType.STRING);
     }
 
-    default V path(@NotNull NixPath path) {
+    default V path(@NotNull NixExprStdPath path) {
         for (NixAntiquotation interpolation : path.getAntiquotationList()) {
             NixExpr expr = interpolation.getExpr();
             if (expr != null) {

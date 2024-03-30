@@ -13,11 +13,10 @@ import org.nixos.idea.lang.builtins.NixBuiltin;
 import org.nixos.idea.lang.navigation.scope.Scope;
 import org.nixos.idea.psi.NixDeclarationElement;
 import org.nixos.idea.psi.NixDeclarationHost;
+import org.nixos.idea.psi.NixExprAttrs;
 import org.nixos.idea.psi.NixExprLambda;
 import org.nixos.idea.psi.NixExprLet;
-import org.nixos.idea.psi.NixLegacyLet;
 import org.nixos.idea.psi.NixPsiElement;
-import org.nixos.idea.psi.NixSet;
 
 /**
  * Delegate for the highlighting logic used by {@link NixHighlightVisitor} and {@link NixRainbowVisitor}.
@@ -66,8 +65,7 @@ abstract class NixHighlightVisitorDelegate {
 
     private static @NotNull HighlightInfoType getHighlightingBySource(@NotNull PsiElement source) {
         if (source instanceof NixExprLet ||
-                source instanceof NixLegacyLet ||
-                source instanceof NixSet) {
+                source instanceof NixExprAttrs) {
             return LOCAL_VARIABLE;
         } else if (source instanceof NixExprLambda) {
             return PARAMETER;

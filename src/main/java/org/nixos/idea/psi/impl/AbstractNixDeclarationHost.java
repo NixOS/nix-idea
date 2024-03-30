@@ -10,15 +10,12 @@ import org.nixos.idea.psi.NixBindAttr;
 import org.nixos.idea.psi.NixBindInherit;
 import org.nixos.idea.psi.NixDeclarationElement;
 import org.nixos.idea.psi.NixDeclarationHost;
+import org.nixos.idea.psi.NixExprAttrs;
 import org.nixos.idea.psi.NixExprLambda;
 import org.nixos.idea.psi.NixExprLet;
 import org.nixos.idea.psi.NixInheritedName;
-import org.nixos.idea.psi.NixLegacyLet;
-import org.nixos.idea.psi.NixParam;
-import org.nixos.idea.psi.NixParamName;
-import org.nixos.idea.psi.NixParamSet;
-import org.nixos.idea.psi.NixSet;
-import org.nixos.idea.psi.NixTypes;
+import org.nixos.idea.psi.NixParameter;
+import org.nixos.idea.psi.NixPsiUtil;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -36,17 +33,17 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
 
     AbstractNixDeclarationHost(@NotNull ASTNode node) {
         super(node);
-        if (!(this instanceof NixExprLet) && !(this instanceof NixLegacyLet) && !(this instanceof NixSet) && !(this instanceof NixExprLambda)) {
+        if (!(this instanceof NixExprLet) && !(this instanceof NixExprAttrs) && !(this instanceof NixExprLambda)) {
             LOG.error("Unknown subclass: " + getClass());
         }
     }
 
     @Override
     public boolean isExpandingScope() {
-        if (this instanceof NixExprLet || this instanceof NixLegacyLet || this instanceof NixExprLambda) {
+        if (this instanceof NixExprLet || this instanceof NixExprLambda) {
             return true;
-        } else if (this instanceof NixSet set) {
-            return set.getNode().findChildByType(NixTypes.REC) != null;
+        } else if (this instanceof NixExprAttrs set) {
+            return NixPsiUtil.isRecursive(set);
         } else {
             LOG.error("Unknown subclass: " + getClass());
             return false;
@@ -70,23 +67,13 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
     private @NotNull AttributeMap<NixDeclarationElement> findDeclarations() {
         if (this instanceof NixExprLet let) {
             return collectBindDeclarations(let.getBindList());
-        } else if (this instanceof NixLegacyLet let) {
-            return collectBindDeclarations(let.getBindList());
-        } else if (this instanceof NixSet set) {
+        } else if (this instanceof NixExprAttrs set) {
             return collectBindDeclarations(set.getBindList());
         } else if (this instanceof NixExprLambda lambda) {
             AttributeMap.Builder<NixDeclarationElement> builder = AttributeMap.builder();
-            NixParamName mainParam = lambda.getParamName();
-            if (mainParam != null) {
-                checkDeclarationHost(mainParam);
-                builder.add(mainParam.getAttributePath(), mainParam);
-            }
-            NixParamSet paramSet = lambda.getParamSet();
-            if (paramSet != null) {
-                for (NixParam param : paramSet.getParamList()) {
-                    checkDeclarationHost(param.getParamName());
-                    builder.add(param.getParamName().getAttributePath(), param.getParamName());
-                }
+            for (NixParameter parameter : NixPsiUtil.getParameters(lambda)) {
+                checkDeclarationHost(parameter);
+                builder.add(parameter.getAttributePath(), parameter);
             }
             return builder.build();
         } else {

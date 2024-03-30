@@ -22,9 +22,9 @@ import org.nixos.idea.psi.NixAttrPath;
 import org.nixos.idea.psi.NixBindInherit;
 import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixExprSelect;
+import org.nixos.idea.psi.NixExprVar;
 import org.nixos.idea.psi.NixInheritedName;
 import org.nixos.idea.psi.NixPsiElement;
-import org.nixos.idea.psi.NixVariableAccess;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -75,7 +75,7 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
     @Override
     @SuppressWarnings("UnstableApiUsage")
     public @NotNull Collection<? extends @NotNull PsiSymbolReference> getOwnReferences() {
-        if (this instanceof NixVariableAccess) {
+        if (this instanceof NixExprVar) {
             return List.of(new NixScopeReference(this, getText()));
         } else if (this instanceof NixExprSelect) {
             NixExprSelect typedThis = (NixExprSelect) this;

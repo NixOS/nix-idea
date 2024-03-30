@@ -28,12 +28,12 @@ public final class NixElementFactory {
         return createElement(project, NixAttrPath.class, "x.", code, "");
     }
 
-    public static @NotNull NixParamName createParamName(@NotNull Project project, @NotNull String code) {
-        return createElement(project, NixParamName.class, "", code, ": null");
+    public static @NotNull NixIdentifier createParameterName(@NotNull Project project, @NotNull String code) {
+        return createElement(project, NixIdentifier.class, "", code, ": null");
     }
 
-    public static @NotNull NixVariableAccess createVariableAccess(@NotNull Project project, @NotNull String code) {
-        return createElement(project, NixVariableAccess.class, "", code, "");
+    public static @NotNull NixExprVar createVariableAccess(@NotNull Project project, @NotNull String code) {
+        return createElement(project, NixExprVar.class, "", code, "");
     }
 
     public static @NotNull NixBind createBind(@NotNull Project project, @NotNull String code) {

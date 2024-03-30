@@ -25,15 +25,15 @@
   consumeTokenMethod("expr_op.*")="consumeTokenFast"
 
   // Declaration hosts
-  implements("expr_let|legacy_let|set|expr_lambda")="org.nixos.idea.psi.NixDeclarationHost"
-  mixin("expr_let|legacy_let|set|expr_lambda")="org.nixos.idea.psi.impl.AbstractNixDeclarationHost"
+  implements("expr_let|expr_attrs|expr_lambda")="org.nixos.idea.psi.NixDeclarationHost"
+  mixin("expr_let|expr_attrs|expr_lambda")="org.nixos.idea.psi.impl.AbstractNixDeclarationHost"
   // Declaration elements
-  implements("bind_attr|inherited_name|param_name")="org.nixos.idea.psi.NixDeclarationElement"
-  mixin("bind_attr|inherited_name|param_name")="org.nixos.idea.psi.impl.AbstractNixDeclarationElement"
+  implements("bind_attr|inherited_name|parameter")="org.nixos.idea.psi.NixDeclarationElement"
+  mixin("bind_attr|inherited_name|parameter|argument|formal")="org.nixos.idea.psi.impl.AbstractNixDeclarationElement"
 
   // Elements which support external references
   // TODO: Test UrlReferenceHost
-  implements("variable_access|expr_select")="com.intellij.model.psi.PsiExternalReferenceHost"
+  implements("expr_var|expr_select")="com.intellij.model.psi.PsiExternalReferenceHost"
   implements("string_text")="com.intellij.model.psi.UrlReferenceHost"
 
   tokens = [
@@ -112,14 +112,15 @@ expr_with ::= WITH expr SEMI expr { pin=1 }
 private recover_let ::= { recoverWhile=let_recover }
 private let_recover ::= braces_recover !(ASSERT | SEMI | IF | THEN | ELSE | LET | IN | WITH) !bind
 
-expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 methods=[ params_in_set="/param_set/param" ] }
-private lambda_params ::= param_name [ !missing_semi AT param_set ] | param_set [ !missing_semi AT param_name ]
-param_set ::= LCURLY ( param COMMA )* [ ( ELLIPSIS | param ) ] recover_param_set RCURLY { pin=1 }
-param ::= param_name [ param_has ] { pin=2 recoverWhile=param_recover }
-param_name ::= ID { implements=identifier }
-private param_has ::= HAS expr { pin=1 }
-private param_recover ::= curly_recover !COMMA
-private recover_param_set ::= { recoverWhile=curly_recover }
+expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 methods=[ formal_list="/formals/formal" ] }
+private lambda_params ::= argument [ !missing_semi AT formals ] | formals [ !missing_semi AT argument ]
+argument ::= <<identifier ID>> { implements=parameter }
+formals ::= LCURLY ( formal COMMA )* [ ( ELLIPSIS | formal ) ] recover_formals RCURLY { pin=1 }
+formal ::= <<identifier ID>> [ formal_has ] { pin=2 recoverWhile=formal_recover implements=parameter }
+private formal_has ::= HAS expr { pin=1 }
+private formal_recover ::= curly_recover !COMMA
+private recover_formals ::= { recoverWhile=curly_recover }
+fake parameter ::= identifier
 
 // Note that the rules for expr_op.* use a special processing mode of
 // Grammar-Kit. Left recursion would not be possible otherwise.
@@ -178,24 +179,30 @@ private select_default ::= OR_KW expr_select { pin=1 }
 //  https://github.com/JetBrains/Grammar-Kit/issues/257
 upper legacy_app_or ::= OR_KW { extends=expr_app }
 
-;{ extends("variable_access|literal|string|parens|set|list|legacy_let")=expr_simple }
+;{ extends("expr_var|expr_number|expr_string|expr_path|expr_parens|expr_attrs|expr_list")=expr_simple }
 expr_simple ::=
-    variable_access
-  | literal
-  | std_string
-  | ind_string
-  | parens
-  | set
-  | list
-  | legacy_let
-variable_access ::= ID { implements=identifier }
-literal ::= INT | FLOAT | URI | path
-;{ extends("path")=literal }
-path ::= SPATH | PATH_SEGMENT (PATH_SEGMENT | antiquotation)* PATH_END
-parens ::= LPAREN expr recover_parens RPAREN { pin=1 }
-set ::= [ REC ] LCURLY recover_set (bind recover_set)* RCURLY { pin=2 }
-list ::= LBRAC recover_list (expr_select recover_list)* RBRAC { pin=1 }
-legacy_let ::= LET LCURLY recover_set (bind recover_set)* RCURLY { pin=2 }
+    expr_var
+  | expr_number
+  | expr_string
+  | expr_path
+  | expr_parens
+  | expr_attrs
+  | expr_list
+expr_var ::= ID { implements=identifier }
+;{ extends("expr_int|expr_float")=expr_number }
+expr_number ::= expr_int | expr_float
+expr_int ::= INT
+expr_float ::= FLOAT
+;{ extends("expr_uri|string")=expr_string }
+expr_string ::= expr_uri | std_string | ind_string
+expr_uri ::= URI
+;{ extends("expr_lookup_path|expr_std_path")=expr_path }
+expr_path ::= expr_lookup_path | expr_std_path
+expr_lookup_path ::= SPATH
+expr_std_path ::= PATH_SEGMENT (PATH_SEGMENT | antiquotation)* PATH_END
+expr_parens ::= LPAREN expr recover_parens RPAREN { pin=1 }
+expr_attrs ::= [ REC | LET ] LCURLY recover_set (bind recover_set)* RCURLY { pin=2 }
+expr_list ::= LBRAC recover_list (expr_select recover_list)* RBRAC { pin=1 }
 private recover_parens ::= { recoverWhile=paren_recover }
 private recover_set ::= { recoverWhile=set_recover }
 private recover_list ::= { recoverWhile=list_recover }
@@ -234,8 +241,9 @@ string_attr ::= std_string | antiquotation
 
 attr_path ::= attr ( DOT attr )* { methods=[ firstAttr="/attr[0]" ] }
 
+
 // Interface for identifiers.
-fake identifier ::= ID | OR_KW;
+meta identifier ::= <<p>>
 
 // The lexer uses curly braces to determine its state. To avoid inconsistencies
 // between the parser and lexer (i.e. the lexer sees a string where the parser
