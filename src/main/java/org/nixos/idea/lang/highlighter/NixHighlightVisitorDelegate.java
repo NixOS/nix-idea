@@ -58,8 +58,7 @@ abstract class NixHighlightVisitorDelegate {
             String identifier = value.getText();
             PsiElement source = findSource(element, identifier);
             highlight(value, source, identifier);
-        } else if (element instanceof NixExprSelect) {
-            NixExprSelect expr = (NixExprSelect) element;
+        } else if (element instanceof NixExprSelect expr) {
             NixExpr value = expr.getValue();
             NixAttrPath attrPath = expr.getAttrPath();
             if (attrPath != null && value instanceof NixExprVar) {
@@ -112,8 +111,7 @@ abstract class NixHighlightVisitorDelegate {
 
     private static boolean iterateVariables(@NotNull List<NixBind> bindList, boolean fullPath, @NotNull BiPredicate<PsiElement, String> action) {
         for (NixBind bind : bindList) {
-            if (bind instanceof NixBindAttr) {
-                NixBindAttr bindAttr = (NixBindAttr) bind;
+            if (bind instanceof NixBindAttr bindAttr) {
                 if (fullPath) {
                     List<NixAttr> attrs = bindAttr.getAttrPath().getAttrList();
                     NixAttr first = attrs.get(0);
@@ -138,8 +136,8 @@ abstract class NixHighlightVisitorDelegate {
                         return true;
                     }
                 }
-            } else if (bind instanceof NixBindInherit) {
-                for (NixAttr attr : ((NixBindInherit) bind).getAttrList()) {
+            } else if (bind instanceof NixBindInherit bindInherit) {
+                for (NixAttr attr : bindInherit.getAttrList()) {
                     if (attr instanceof NixStdAttr && action.test(attr, fullPath ? attr.getText() : null)) {
                         return true;
                     }
@@ -163,12 +161,11 @@ abstract class NixHighlightVisitorDelegate {
     }
 
     private static @NotNull HighlightInfoType getHighlightingByBuiltin(@NotNull NixBuiltin builtin) {
-        switch (builtin.highlightingType()) {
-            case IMPORT: return IMPORT;
-            case LITERAL: return LITERAL;
-            case OTHER: return BUILTIN;
-            default: throw new IllegalStateException("unknown type: " + builtin.highlightingType());
-        }
+        return switch (builtin.highlightingType()) {
+            case IMPORT -> IMPORT;
+            case LITERAL -> LITERAL;
+            case OTHER -> BUILTIN;
+        };
     }
 
     private void highlight(@NotNull PsiElement element, @Nullable PsiElement source, @NotNull String attrPath) {
