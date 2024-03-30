@@ -62,14 +62,14 @@ final class NixElementFactoryTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"x"})
+    @ValueSource(strings = {"x", "or_", "_or"})
     void createParameterName(String code) {
         NixIdentifier result = NixElementFactory.createParameterName(myProject, code);
         assertEquals(code, result.getText());
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "x.y", "x@", "@"})
+    @ValueSource(strings = {"", "x.y", "x@", "@", "or"})
     void createParameterNameFail(String code) {
         assertThrows(RuntimeException.class,
                 () -> NixElementFactory.createParameterName(myProject, code));
