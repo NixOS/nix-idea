@@ -1,5 +1,5 @@
 Nix File(0,104)
-  NixListImpl(LIST)(0,104)
+  NixExprListImpl(EXPR_LIST)(0,104)
     PsiElement([)('[')(0,1)
     PsiWhiteSpace('\n')(1,2)
     NixIndStringImpl(IND_STRING)(2,9)

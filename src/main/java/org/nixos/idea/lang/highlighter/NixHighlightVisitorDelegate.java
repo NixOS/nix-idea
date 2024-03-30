@@ -14,14 +14,14 @@ import org.nixos.idea.psi.NixBind;
 import org.nixos.idea.psi.NixBindAttr;
 import org.nixos.idea.psi.NixBindInherit;
 import org.nixos.idea.psi.NixExpr;
+import org.nixos.idea.psi.NixExprAttrs;
 import org.nixos.idea.psi.NixExprLambda;
 import org.nixos.idea.psi.NixExprLet;
 import org.nixos.idea.psi.NixExprSelect;
-import org.nixos.idea.psi.NixIdentifier;
-import org.nixos.idea.psi.NixLegacyLet;
-import org.nixos.idea.psi.NixParam;
-import org.nixos.idea.psi.NixParamSet;
-import org.nixos.idea.psi.NixSet;
+import org.nixos.idea.psi.NixExprVar;
+import org.nixos.idea.psi.NixFormal;
+import org.nixos.idea.psi.NixFormals;
+import org.nixos.idea.psi.NixPsiUtil;
 import org.nixos.idea.psi.NixStdAttr;
 import org.nixos.idea.psi.NixTypes;
 
@@ -56,8 +56,7 @@ abstract class NixHighlightVisitorDelegate {
     abstract void highlight(@NotNull PsiElement element, @Nullable PsiElement source, @NotNull String attrPath, @Nullable HighlightInfoType type);
 
     void visit(@NotNull PsiElement element) {
-        if (element instanceof NixIdentifier) {
-            NixExpr value = (NixIdentifier) element;
+        if (element instanceof NixExprVar value) {
             String identifier = value.getText();
             PsiElement source = findSource(element, identifier);
             highlight(value, source, identifier);
@@ -65,7 +64,7 @@ abstract class NixHighlightVisitorDelegate {
             NixExprSelect expr = (NixExprSelect) element;
             NixExpr value = expr.getValue();
             NixAttrPath attrPath = expr.getAttrPath();
-            if (attrPath != null && value instanceof NixIdentifier) {
+            if (attrPath != null && value instanceof NixExprVar) {
                 String identifier = value.getText();
                 PsiElement source = findSource(element, identifier);
                 String pathStr = identifier;
@@ -100,12 +99,8 @@ abstract class NixHighlightVisitorDelegate {
         if (element instanceof NixExprLet) {
             NixExprLet let = (NixExprLet) element;
             return iterateVariables(let.getBindList(), fullPath, action);
-        } else if (element instanceof NixLegacyLet) {
-            NixLegacyLet let = (NixLegacyLet) element;
-            return iterateVariables(let.getBindList(), fullPath, action);
-        } else if (element instanceof NixSet) {
-            NixSet set = (NixSet) element;
-            return set.getNode().findChildByType(NixTypes.REC) != null &&
+        } else if (element instanceof NixExprAttrs set) {
+            return NixPsiUtil.isRecursive(set) &&
                     iterateVariables(set.getBindList(), fullPath, action);
         } else if (element instanceof NixExprLambda) {
             NixExprLambda lambda = (NixExprLambda) element;
@@ -113,9 +108,9 @@ abstract class NixHighlightVisitorDelegate {
             if (mainParam != null && action.test(mainParam.getPsi(), fullPath ? mainParam.getText() : null)) {
                 return true;
             }
-            NixParamSet paramSet = lambda.getParamSet();
+            NixFormals paramSet = lambda.getFormals();
             if (paramSet != null) {
-                for (NixParam param : paramSet.getParamList()) {
+                for (NixFormal param : paramSet.getFormalList()) {
                     ASTNode paramName = param.getNode().findChildByType(NixTypes.ID);
                     if (paramName != null && action.test(paramName.getPsi(), fullPath ? paramName.getText() : null)) {
                         return true;
@@ -169,8 +164,7 @@ abstract class NixHighlightVisitorDelegate {
 
     private static @NotNull HighlightInfoType getHighlightingBySource(@NotNull PsiElement source) {
         if (source instanceof NixExprLet ||
-                source instanceof NixLegacyLet ||
-                source instanceof NixSet) {
+                source instanceof NixExprAttrs) {
             return LOCAL_VARIABLE;
         } else if (source instanceof NixExprLambda) {
             return PARAMETER;

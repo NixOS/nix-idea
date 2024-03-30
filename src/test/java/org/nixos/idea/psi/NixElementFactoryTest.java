@@ -78,16 +78,16 @@ final class NixElementFactoryTest {
     @ParameterizedTest
     @CsvSource({
             "IND_STRING, ''abc''",
-            "IDENTIFIER, x",
+            "EXPR_VAR, x",
             "EXPR_SELECT, x.y",
-            "LIST, []",
-            "LIST, [x y z]",
-            "SET, {}",
-            "SET, {x = y; y = z;}",
+            "EXPR_LIST, []",
+            "EXPR_LIST, [x y z]",
+            "EXPR_ATTRS, {}",
+            "EXPR_ATTRS, {x = y; y = z;}",
             "EXPR_IF, if x then y else z",
             "EXPR_LAMBDA, x: x",
             "EXPR_LET, let x = y; y = z; in x",
-            "LEGACY_LET, let { x = y; body = x; }",
+            "EXPR_ATTRS, let { x = y; body = x; }",
             "EXPR_OP_PLUS, 2 + 2",
             "EXPR_WITH, with x; y",
     })
