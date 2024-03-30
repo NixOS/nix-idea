@@ -18,135 +18,145 @@ public final class NixHighlightVisitorTest extends BasePlatformTestCase {
 
     public void testSelectExpression() {
         // TODO: Highlight x.y as a local variable
-        doTest("let\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\" = some_value;\n" +
-                "in [\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.z\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\"\n" +
-                "]");
+        doTest("""
+                let
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName> = some_value;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>.y = some_value;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>."no-highlighting-for-string-attributes" = some_value;
+                in [
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>.y
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>.y.z
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>.z
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>."no-highlighting-for-string-attributes"
+                ]""");
     }
 
     public void testInheritExpression() {
-        doTest("let\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">y</symbolName> = some_value;\n" +
-                "in {\n" +
-                "  inherit <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
-                "  inherit <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> <symbolName type=\"LOCAL_VARIABLE\">y</symbolName>;\n" +
-                "  inherit \"no-highlighting-for-string-attributes\";\n" +
-                "  inherit ({}) not-a-variable;\n" +
-                "}");
+        doTest("""
+                let
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName> = some_value;
+                  <symbolName type="LOCAL_VARIABLE">y</symbolName> = some_value;
+                in {
+                  inherit <symbolName type="LOCAL_VARIABLE">x</symbolName>;
+                  inherit <symbolName type="LOCAL_VARIABLE">x</symbolName> <symbolName type="LOCAL_VARIABLE">y</symbolName>;
+                  inherit "no-highlighting-for-string-attributes";
+                  inherit ({}) not-a-variable;
+                }""");
     }
 
     public void testBuiltins() {
-        doTest("[\n" +
-                "  <symbolName type=\"LITERAL\">null</symbolName>\n" +
-                "  <symbolName type=\"LITERAL\">true</symbolName>\n" +
-                "  <symbolName type=\"LITERAL\">false</symbolName>\n" +
-                "  <symbolName type=\"IMPORT\">import</symbolName>\n" +
-                "  <symbolName type=\"BUILTIN\">map</symbolName>\n" +
-                "  <symbolName type=\"BUILTIN\">builtins</symbolName>.<symbolName type=\"LITERAL\">null</symbolName>\n" +
-                "  <symbolName type=\"BUILTIN\">builtins</symbolName>.<symbolName type=\"BUILTIN\">map</symbolName>\n" +
-                "  <symbolName type=\"BUILTIN\">builtins</symbolName>.<symbolName type=\"BUILTIN\">compareVersions</symbolName>\n" +
-                "  compareVersions\n" +
-                "]");
+        doTest("""
+                [
+                  <symbolName type="LITERAL">null</symbolName>
+                  <symbolName type="LITERAL">true</symbolName>
+                  <symbolName type="LITERAL">false</symbolName>
+                  <symbolName type="IMPORT">import</symbolName>
+                  <symbolName type="BUILTIN">map</symbolName>
+                  <symbolName type="BUILTIN">builtins</symbolName>.<symbolName type="LITERAL">null</symbolName>
+                  <symbolName type="BUILTIN">builtins</symbolName>.<symbolName type="BUILTIN">map</symbolName>
+                  <symbolName type="BUILTIN">builtins</symbolName>.<symbolName type="BUILTIN">compareVersions</symbolName>
+                  compareVersions
+                ]""");
     }
 
     public void testLetExpression() {
-        doTest("let\n" +
-                "  inherit (some_value) \"no-highlighting-for-string-attributes\" <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\" = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">copy</symbolName> = <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
-                "in [\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z\n" +
-                "]");
+        doTest("""
+                let
+                  inherit (some_value) "no-highlighting-for-string-attributes" <symbolName type="LOCAL_VARIABLE">x</symbolName>;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName> = some_value;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>.y = some_value;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>.y.z = some_value;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>."no-highlighting-for-string-attributes" = some_value;
+                  <symbolName type="LOCAL_VARIABLE">copy</symbolName> = <symbolName type="LOCAL_VARIABLE">x</symbolName>;
+                in [
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>.y
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>.y.z
+                ]""");
     }
 
     public void testLegacyLetExpression() {
-        doTest("let {\n" +
-                "  inherit (some_value) \"no-highlighting-for-string-attributes\" <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\" = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">body</symbolName> = [\n" +
-                "    <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>\n" +
-                "    <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y\n" +
-                "    <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z\n" +
-                "  ];\n" +
-                "}");
+        doTest("""
+                let {
+                  inherit (some_value) "no-highlighting-for-string-attributes" <symbolName type="LOCAL_VARIABLE">x</symbolName>;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName> = some_value;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>.y = some_value;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>.y.z = some_value;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>."no-highlighting-for-string-attributes" = some_value;
+                  <symbolName type="LOCAL_VARIABLE">body</symbolName> = [
+                    <symbolName type="LOCAL_VARIABLE">x</symbolName>
+                    <symbolName type="LOCAL_VARIABLE">x</symbolName>.y
+                    <symbolName type="LOCAL_VARIABLE">x</symbolName>.y.z
+                  ];
+                }""");
     }
 
     public void testRecursiveSet() {
-        doTest("rec {\n" +
-                "  inherit (some_value) \"no-highlighting-for-string-attributes\" <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.\"no-highlighting-for-string-attributes\" = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">body</symbolName> = [\n" +
-                "    <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>\n" +
-                "    <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y\n" +
-                "    <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>.y.z\n" +
-                "  ];\n" +
-                "}");
+        doTest("""
+                rec {
+                  inherit (some_value) "no-highlighting-for-string-attributes" <symbolName type="LOCAL_VARIABLE">x</symbolName>;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName> = some_value;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>.y = some_value;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>.y.z = some_value;
+                  <symbolName type="LOCAL_VARIABLE">x</symbolName>."no-highlighting-for-string-attributes" = some_value;
+                  <symbolName type="LOCAL_VARIABLE">body</symbolName> = [
+                    <symbolName type="LOCAL_VARIABLE">x</symbolName>
+                    <symbolName type="LOCAL_VARIABLE">x</symbolName>.y
+                    <symbolName type="LOCAL_VARIABLE">x</symbolName>.y.z
+                  ];
+                }""");
     }
 
     public void testNoHighlightingForNonRecursiveSet() {
-        doTest("{\n" +
-                "  inherit (some_value) \"no-highlighting-for-string-attributes\" x;\n" +
-                "  x = some_value;\n" +
-                "  x.y = some_value;\n" +
-                "  x.\"no-highlighting-for-string-attributes\" = some_value;\n" +
-                "}");
+        doTest("""
+                {
+                  inherit (some_value) "no-highlighting-for-string-attributes" x;
+                  x = some_value;
+                  x.y = some_value;
+                  x."no-highlighting-for-string-attributes" = some_value;
+                }""");
     }
 
     public void testLambda() {
-        doTest("<symbolName type=\"PARAMETER\">x</symbolName>:\n" +
-                "{<symbolName type=\"PARAMETER\">y</symbolName>}:\n" +
-                "<symbolName type=\"PARAMETER\">z</symbolName>@{<symbolName type=\"PARAMETER\">za</symbolName>, ...}: [\n" +
-                "  <symbolName type=\"PARAMETER\">x</symbolName>\n" +
-                "  <symbolName type=\"PARAMETER\">y</symbolName>\n" +
-                "  <symbolName type=\"PARAMETER\">z</symbolName>\n" +
-                "  <symbolName type=\"PARAMETER\">za</symbolName>\n" +
-                "]");
+        doTest("""
+                <symbolName type="PARAMETER">x</symbolName>:
+                {<symbolName type="PARAMETER">y</symbolName>}:
+                <symbolName type="PARAMETER">z</symbolName>@{<symbolName type="PARAMETER">za</symbolName>, ...}: [
+                  <symbolName type="PARAMETER">x</symbolName>
+                  <symbolName type="PARAMETER">y</symbolName>
+                  <symbolName type="PARAMETER">z</symbolName>
+                  <symbolName type="PARAMETER">za</symbolName>
+                ]""");
     }
 
     public void testVariableHidesParameter() {
-        doTest("{<symbolName type=\"PARAMETER\">f</symbolName>, <symbolName type=\"PARAMETER\">hidden</symbolName>}: [\n" +
-                "  <symbolName type=\"PARAMETER\">f</symbolName> <symbolName type=\"PARAMETER\">hidden</symbolName>\n" +
-                "  (\n" +
-                "    let <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName> = some_value;\n" +
-                "    in <symbolName type=\"PARAMETER\">f</symbolName> <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName>\n" +
-                "  )\n" +
-                "  (let {\n" +
-                "    <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName> = some_value;\n" +
-                "    <symbolName type=\"LOCAL_VARIABLE\">body</symbolName> = <symbolName type=\"PARAMETER\">f</symbolName> <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName>;\n" +
-                "  })\n" +
-                "  (rec {\n" +
-                "    <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName> = some_value;\n" +
-                "    <symbolName type=\"LOCAL_VARIABLE\">body</symbolName> = <symbolName type=\"PARAMETER\">f</symbolName> <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName>;\n" +
-                "  })\n" +
-                "]");
+        doTest("""
+                {<symbolName type="PARAMETER">f</symbolName>, <symbolName type="PARAMETER">hidden</symbolName>}: [
+                  <symbolName type="PARAMETER">f</symbolName> <symbolName type="PARAMETER">hidden</symbolName>
+                  (
+                    let <symbolName type="LOCAL_VARIABLE">hidden</symbolName> = some_value;
+                    in <symbolName type="PARAMETER">f</symbolName> <symbolName type="LOCAL_VARIABLE">hidden</symbolName>
+                  )
+                  (let {
+                    <symbolName type="LOCAL_VARIABLE">hidden</symbolName> = some_value;
+                    <symbolName type="LOCAL_VARIABLE">body</symbolName> = <symbolName type="PARAMETER">f</symbolName> <symbolName type="LOCAL_VARIABLE">hidden</symbolName>;
+                  })
+                  (rec {
+                    <symbolName type="LOCAL_VARIABLE">hidden</symbolName> = some_value;
+                    <symbolName type="LOCAL_VARIABLE">body</symbolName> = <symbolName type="PARAMETER">f</symbolName> <symbolName type="LOCAL_VARIABLE">hidden</symbolName>;
+                  })
+                ]""");
     }
 
     public void testParameterHidesVariable() {
-        doTest("let\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">f</symbolName> = some_value;\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">hidden</symbolName> = some_value;\n" +
-                "in\n" +
-                "  <symbolName type=\"PARAMETER\">hidden</symbolName>:\n" +
-                "  <symbolName type=\"LOCAL_VARIABLE\">f</symbolName> <symbolName type=\"PARAMETER\">hidden</symbolName>");
+        doTest("""
+                let
+                  <symbolName type="LOCAL_VARIABLE">f</symbolName> = some_value;
+                  <symbolName type="LOCAL_VARIABLE">hidden</symbolName> = some_value;
+                in
+                  <symbolName type="PARAMETER">hidden</symbolName>:
+                  <symbolName type="LOCAL_VARIABLE">f</symbolName> <symbolName type="PARAMETER">hidden</symbolName>""");
     }
 
     private void doTest(@NotNull String code) {

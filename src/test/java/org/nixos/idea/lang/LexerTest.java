@@ -7,16 +7,17 @@ public final class LexerTest extends LexerTestCase {
   public void testRestartabilityWithAntiquotations() {
     // Checks that the lexer is restartable. See
     // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360010305800
-    checkCorrectRestart(
-        "''\n" +
-        "  ${\n" +
-        "    [\n" +
-        "      \"pure string\",\n" +
-        "      \"string with ${antiquotation}\",\n" +
-        "      ''ind string with ${multiple} ${antiquotations}''\n" +
-        "    ]\n" +
-        "  }\n" +
-        "''\n");
+    checkCorrectRestart("""
+            ''
+              ${
+                [
+                  "pure string",
+                  "string with ${antiquotation}",
+                  ''ind string with ${multiple} ${antiquotations}''
+                ]
+              }
+            ''
+            """);
   }
 
   @Override

@@ -79,27 +79,28 @@ public final class NixColorSettingsPage implements RainbowColorSettingsPage {
 
     @Override
     public @NonNls @NotNull String getDemoText() {
-        return "/* This code demonstrates the syntax highlighting for the Nix Expression Language */\n" +
-                "let\n" +
-                "    <variable>literals</variable>.null = <literal>null</literal>;\n" +
-                "    <variable>literals</variable>.boolean = <literal>true</literal>;\n" +
-                "    <variable>literals</variable>.number = 42;\n" +
-                "    <variable>literals</variable>.string1 = \"This is a normal string\";\n" +
-                "    <variable>literals</variable>.string2 = ''\n" +
-                "        Broken escape sequence:  \\${<variable>literals</variable>.number}\n" +
-                "        Escaped interpolation:   ''${<variable>literals</variable>.number}\n" +
-                "        Generic escape sequence: $''\\{<variable>literals</variable>.number}\n" +
-                "        '';\n" +
-                "    <variable>literals</variable>.paths = [/etc/gitconfig ~/.gitconfig .git/config];\n" +
-                "    # Note that unquoted URIs were deperecated by RFC 45\n" +
-                "    <variable>literals</variable>.uri = https://github.com/NixOS/rfcs/pull/45;\n" +
-                "in {\n" +
-                "    inherit (<variable>literals</variable>) number string1 string2 paths uri;\n" +
-                "    nixpkgs = <import>import</import> <nixpkgs>;\n" +
-                "    baseNames = <builtin>map</builtin> <builtin>baseNameOf</builtin> <variable>literals</variable>.paths;\n" +
-                "    f = { <parameter>multiply</parameter> ? 1, <parameter>add</parameter> ? 0, ... }@<parameter>args</parameter>:\n" +
-                "        <builtin>builtins</builtin>.<builtin>mapAttrs</builtin> (<parameter>name</parameter>: <parameter>value</parameter>: <parameter>multiply</parameter> * <parameter>value</parameter> + <parameter>add</parameter>) <parameter>args</parameter>;\n" +
-                "}";
+        return """
+                /* This code demonstrates the syntax highlighting for the Nix Expression Language */
+                let
+                    <variable>literals</variable>.null = <literal>null</literal>;
+                    <variable>literals</variable>.boolean = <literal>true</literal>;
+                    <variable>literals</variable>.number = 42;
+                    <variable>literals</variable>.string1 = "This is a normal string";
+                    <variable>literals</variable>.string2 = ''
+                        Broken escape sequence:  \\${<variable>literals</variable>.number}
+                        Escaped interpolation:   ''${<variable>literals</variable>.number}
+                        Generic escape sequence: $''\\{<variable>literals</variable>.number}
+                        '';
+                    <variable>literals</variable>.paths = [/etc/gitconfig ~/.gitconfig .git/config];
+                    # Note that unquoted URIs were deperecated by RFC 45
+                    <variable>literals</variable>.uri = https://github.com/NixOS/rfcs/pull/45;
+                in {
+                    inherit (<variable>literals</variable>) number string1 string2 paths uri;
+                    nixpkgs = <import>import</import> <nixpkgs>;
+                    baseNames = <builtin>map</builtin> <builtin>baseNameOf</builtin> <variable>literals</variable>.paths;
+                    f = { <parameter>multiply</parameter> ? 1, <parameter>add</parameter> ? 0, ... }@<parameter>args</parameter>:
+                        <builtin>builtins</builtin>.<builtin>mapAttrs</builtin> (<parameter>name</parameter>: <parameter>value</parameter>: <parameter>multiply</parameter> * <parameter>value</parameter> + <parameter>add</parameter>) <parameter>args</parameter>;
+                }""";
     }
 
     @Override
