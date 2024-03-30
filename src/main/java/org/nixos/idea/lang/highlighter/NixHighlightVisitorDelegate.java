@@ -1,7 +1,6 @@
 package org.nixos.idea.lang.highlighter;
 
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType;
-import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
@@ -19,11 +18,10 @@ import org.nixos.idea.psi.NixExprLambda;
 import org.nixos.idea.psi.NixExprLet;
 import org.nixos.idea.psi.NixExprSelect;
 import org.nixos.idea.psi.NixExprVar;
-import org.nixos.idea.psi.NixFormal;
-import org.nixos.idea.psi.NixFormals;
+import org.nixos.idea.psi.NixIdentifier;
+import org.nixos.idea.psi.NixParameter;
 import org.nixos.idea.psi.NixPsiUtil;
 import org.nixos.idea.psi.NixStdAttr;
-import org.nixos.idea.psi.NixTypes;
 
 import java.util.List;
 import java.util.function.BiPredicate;
@@ -96,25 +94,16 @@ abstract class NixHighlightVisitorDelegate {
     }
 
     private static boolean iterateVariables(@NotNull PsiElement element, boolean fullPath, @NotNull BiPredicate<PsiElement, String> action) {
-        if (element instanceof NixExprLet) {
-            NixExprLet let = (NixExprLet) element;
+        if (element instanceof NixExprLet let) {
             return iterateVariables(let.getBindList(), fullPath, action);
         } else if (element instanceof NixExprAttrs set) {
             return NixPsiUtil.isRecursive(set) &&
                     iterateVariables(set.getBindList(), fullPath, action);
-        } else if (element instanceof NixExprLambda) {
-            NixExprLambda lambda = (NixExprLambda) element;
-            ASTNode mainParam = lambda.getNode().findChildByType(NixTypes.ID);
-            if (mainParam != null && action.test(mainParam.getPsi(), fullPath ? mainParam.getText() : null)) {
-                return true;
-            }
-            NixFormals paramSet = lambda.getFormals();
-            if (paramSet != null) {
-                for (NixFormal param : paramSet.getFormalList()) {
-                    ASTNode paramName = param.getNode().findChildByType(NixTypes.ID);
-                    if (paramName != null && action.test(paramName.getPsi(), fullPath ? paramName.getText() : null)) {
-                        return true;
-                    }
+        } else if (element instanceof NixExprLambda lambda) {
+            for (NixParameter parameter : NixPsiUtil.getParameters(lambda)) {
+                NixIdentifier identifier = parameter.getIdentifier();
+                if (action.test(identifier, fullPath ? identifier.getText() : null)) {
+                    return true;
                 }
             }
         }
