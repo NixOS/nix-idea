@@ -11,7 +11,6 @@
 ### Removed
 
 ### Fixed
-- Variables behind `inherit` keyword not correctly resolved during highlighting
 
 - Variables behind `inherit` keyword not correctly resolved during highlighting
 
