@@ -31,6 +31,18 @@ public final class NixHighlightVisitorTest extends BasePlatformTestCase {
                 "]");
     }
 
+    public void testInheritExpression() {
+        doTest("let\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> = some_value;\n" +
+                "  <symbolName type=\"LOCAL_VARIABLE\">y</symbolName> = some_value;\n" +
+                "in {\n" +
+                "  inherit <symbolName type=\"LOCAL_VARIABLE\">x</symbolName>;\n" +
+                "  inherit <symbolName type=\"LOCAL_VARIABLE\">x</symbolName> <symbolName type=\"LOCAL_VARIABLE\">y</symbolName>;\n" +
+                "  inherit \"no-highlighting-for-string-attributes\";\n" +
+                "  inherit ({}) not-a-variable;\n" +
+                "}");
+    }
+
     public void testBuiltins() {
         doTest("[\n" +
                 "  <symbolName type=\"LITERAL\">null</symbolName>\n" +

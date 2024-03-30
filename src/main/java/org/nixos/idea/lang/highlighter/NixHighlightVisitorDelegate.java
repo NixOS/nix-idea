@@ -73,6 +73,12 @@ abstract class NixHighlightVisitorDelegate {
                     highlight(nixAttr, source, pathStr);
                 }
             }
+        } else if (element instanceof NixStdAttr attr &&
+                attr.getParent() instanceof NixBindInherit bindInherit &&
+                bindInherit.getExpr() == null) {
+            String identifier = attr.getText();
+            PsiElement source = findSource(attr, identifier);
+            highlight(attr, source, identifier);
         } else {
             iterateVariables(element, true, (var, path) -> {
                 highlight(var, element, path);
@@ -137,9 +143,12 @@ abstract class NixHighlightVisitorDelegate {
                     }
                 }
             } else if (bind instanceof NixBindInherit bindInherit) {
-                for (NixAttr attr : bindInherit.getAttrList()) {
-                    if (attr instanceof NixStdAttr && action.test(attr, fullPath ? attr.getText() : null)) {
-                        return true;
+                // `let { inherit x; } in ...` does not actually introduce a new variable
+                if (bindInherit.getExpr() != null) {
+                    for (NixAttr attr : bindInherit.getAttrList()) {
+                        if (attr instanceof NixStdAttr && action.test(attr, fullPath ? attr.getText() : null)) {
+                            return true;
+                        }
                     }
                 }
             } else {
@@ -173,15 +182,13 @@ abstract class NixHighlightVisitorDelegate {
         if (!attrPath.contains(".")) {
             if (source != null) {
                 type = getHighlightingBySource(source);
-            }
-            else {
+            } else {
                 NixBuiltin builtin = NixBuiltin.resolveGlobal(attrPath);
                 if (builtin != null) {
                     type = getHighlightingByBuiltin(builtin);
                 }
             }
-        }
-        else if (attrPath.startsWith(BUILTINS_PREFIX)) {
+        } else if (attrPath.startsWith(BUILTINS_PREFIX)) {
             NixBuiltin builtin = NixBuiltin.resolveBuiltin(attrPath.substring(BUILTINS_PREFIX.length()));
             if (builtin != null) {
                 type = getHighlightingByBuiltin(builtin);

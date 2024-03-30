@@ -23,6 +23,33 @@ public final class NixRainbowVisitorTest extends BasePlatformTestCase {
                 "]");
     }
 
+    public void testInheritExpression() {
+        doTest("let\n" +
+                "  <rainbow color='ff000004'>x</rainbow> = null;\n" +
+                "  <rainbow color='ff000002'>y</rainbow> = null;\n" +
+                "in {\n" +
+                "  inherit <rainbow color='ff000004'>x</rainbow>;\n" +
+                "  inherit <rainbow color='ff000004'>x</rainbow> <rainbow color='ff000002'>y</rainbow>;\n" +
+                "  inherit \"no-highlighting-for-string-attributes\";\n" +
+                "  inherit ({}) not-a-variable;\n" +
+                "}");
+    }
+
+    public void testInheritExpressionInNestedLetExpression() {
+        doTest("let\n" +
+                "  <rainbow color='ff000003'>b</rainbow> = null;\n" +
+                "  <rainbow color='ff000001'>c</rainbow> = null;\n" +
+                "in\n" +
+                "  let\n" +
+                "    inherit <rainbow color='ff000001'>c</rainbow>;\n" +
+                "    inherit ({}) <rainbow color='ff000003'>a</rainbow> <rainbow color='ff000004'>b</rainbow>;\n" +
+                "  in [\n" +
+                "    <rainbow color='ff000003'>a</rainbow>\n" +
+                "    <rainbow color='ff000004'>b</rainbow>\n" +
+                "    <rainbow color='ff000001'>c</rainbow>\n" +
+                "  ]");
+    }
+
     public void testLetExpression() {
         doTest("let\n" +
                 "  inherit (null) \"no-highlighting-for-string-attributes\" <rainbow color='ff000004'>x</rainbow>;\n" +

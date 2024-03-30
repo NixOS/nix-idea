@@ -12,6 +12,8 @@
 
 ### Fixed
 
+- Variables behind `inherit` keyword not correctly resolved during highlighting
+
 ### Security
 
 ## [0.4.0.12] - 2024-03-29
