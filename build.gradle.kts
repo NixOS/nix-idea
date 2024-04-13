@@ -58,11 +58,13 @@ changelog {
 }
 
 grammarKit {
-    // version of IntelliJ patched JFlex (see bintray link below), Default is 1.7.0-1
-    jflexRelease = "1.7.0-1"
+    // version of IntelliJ patched JFlex
+    // -> https://github.com/JetBrains/intellij-deps-jflex
+    jflexRelease = "1.9.2"
 
-    // tag or short commit hash of Grammar-Kit to use (see link below). Default is 2020.1
-    grammarKitRelease = "2021.1.2"
+    // tag or short commit hash of Grammar-Kit to use
+    // -> https://github.com/JetBrains/Grammar-Kit
+    grammarKitRelease = "2022.3.2"
 }
 
 val lexerSource = layout.buildDirectory.dir("generated/sources/lexer/java/main")

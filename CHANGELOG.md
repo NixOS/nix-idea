@@ -6,6 +6,9 @@
 
 ### Changed
 
+- Update Grammar-Kit: 2021.1.2 -> 2022.3.2
+- Update JetBrains' fork of JFlex: 1.7.0-1 -> 1.9.2
+
 ### Deprecated
 
 ### Removed
