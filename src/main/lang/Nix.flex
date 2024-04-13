@@ -38,6 +38,7 @@ import static org.nixos.idea.psi.NixTypes.*;
   }
 %}
 
+%abstract
 %class _NixLexer
 %implements FlexLexer
 %function advance
