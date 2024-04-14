@@ -1,0 +1,19 @@
+License Notice
+
+   NIX SNOWFLAKE
+
+   This project contains variants of the Nix Snowflake (the logo of NixOS).
+   The Nix Snowflake is designed by Tim Cuthbertson (@timbertson) and is
+   made available under a CC-BY license.
+
+   Origin:  https://github.com/NixOS/nixos-artwork/tree/master/logo
+   License: https://creativecommons.org/licenses/by/4.0/
+
+   The image files within this repository may have been modified to comply
+   with JetBrains' Guidelines. The modifications may include resizing the
+   image, refitting the image, and compressing the image by removing
+   invisible elements.
+
+   src/main/resources/META-INF/pluginIcon.svg
+   src/main/resources/META-INF/pluginIcon_dark.svg
+   src/main/resources/org/nixos/idea/icon/nixos-icon.png

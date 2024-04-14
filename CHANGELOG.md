@@ -4,6 +4,8 @@
 
 ### Added
 
+- Plugin logo for easier recognition
+
 ### Changed
 
 - Update Grammar-Kit: 2021.1.2 -> 2022.3.2

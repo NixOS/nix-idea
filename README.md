@@ -66,6 +66,12 @@ running the `build` task in Gradle.
 You should then find the plugin at
 `build/distributions/NixIDEA-<version>.zip`.
 
+## Credits
+
+The *Nix Snowflake* (logo of NixOS) is designed by Tim Cuthbertson (@timbertson).
+It is made available under [CC-BY license](https://creativecommons.org/licenses/by/4.0/)
+at [NixOS/nixos-artwork](https://github.com/NixOS/nixos-artwork/tree/master/logo).
+The variants used by this plugin may have been modified to comply with JetBrains' Guidelines.
 
 [build-status]:
 <https://github.com/NixOS/nix-idea/actions/workflows/build.yml?query=branch%3Amaster>
