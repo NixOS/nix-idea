@@ -16,4 +16,5 @@ License Notice
 
    src/main/resources/META-INF/pluginIcon.svg
    src/main/resources/META-INF/pluginIcon_dark.svg
-   src/main/resources/icons/nixos-icon.png
+   src/main/resources/icons/nixSnowflake.svg
+   src/main/resources/icons/nixSnowflake_dark.svg
