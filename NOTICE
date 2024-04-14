@@ -16,4 +16,4 @@ License Notice
 
    src/main/resources/META-INF/pluginIcon.svg
    src/main/resources/META-INF/pluginIcon_dark.svg
-   src/main/resources/org/nixos/idea/icon/nixos-icon.png
+   src/main/resources/icons/nixos-icon.png

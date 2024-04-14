@@ -26,8 +26,8 @@
         <highlightVisitor implementation="org.nixos.idea.lang.highlighter.NixHighlightVisitor" />
         <highlightVisitor implementation="org.nixos.idea.lang.highlighter.NixRainbowVisitor" />
 
-        <additionalTextAttributes scheme="Default" file="org/nixos/idea/colorSchemes/NixDefault.xml"/>
-        <additionalTextAttributes scheme="Darcula" file="org/nixos/idea/colorSchemes/NixDarcula.xml"/>
+        <additionalTextAttributes scheme="Default" file="colorSchemes/NixDefault.xml"/>
+        <additionalTextAttributes scheme="Darcula" file="colorSchemes/NixDarcula.xml"/>
 
         <lang.braceMatcher
                 language="Nix"
