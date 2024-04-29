@@ -5,6 +5,8 @@
 ### Added
 
 - Plugin logo for easier recognition
+- Experimental Language Server support using IDEA's LSP API (#68)  
+  [(Only works for paid versions of IDEA 😞)](https://blog.jetbrains.com/platform/2023/07/lsp-for-plugin-developers/#supported-ides)
 
 ### Changed
 
@@ -16,6 +18,8 @@
 ### Deprecated
 
 ### Removed
+
+- Support for IDEA 2023.1
 
 ### Fixed
 

@@ -1,0 +1,17 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+
+        <applicationService
+                serviceImplementation="org.nixos.idea.lsp.NixLspSettings"/>
+
+        <applicationConfigurable
+                parentId="language"
+                displayName="Nix Language Server (LSP)"
+                id="org.nixos.idea.lsp.NixLspSettingsConfigurable"
+                instance="org.nixos.idea.lsp.NixLspSettingsConfigurable"/>
+
+        <platform.lsp.serverSupportProvider
+                implementation="org.nixos.idea.lsp.NixLspServerSupportProvider"/>
+
+    </extensions>
+</idea-plugin>

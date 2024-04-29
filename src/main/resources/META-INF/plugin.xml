@@ -5,6 +5,7 @@
     <vendor>NixOS</vendor>
 
     <depends>com.intellij.modules.lang</depends>
+    <depends optional="true" config-file="nix-idea-ultimate.xml">com.intellij.modules.ultimate</depends>
 
     <extensions defaultExtensionNs="com.intellij">
 
@@ -38,7 +39,7 @@
                 implementationClass="org.nixos.idea.lang.NixCommenter"/>
 
         <projectConfigurable
-                groupId="build"
+                parentId="build"
                 displayName="NixIDEA Settings"
                 id="org.nixos.idea.settings.NixIDEASettings"
                 instance="org.nixos.idea.settings.NixIDEASettings" />

@@ -1,6 +1,7 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.intellij.tasks.RunPluginVerifierTask
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
+import java.util.EnumSet
 
 plugins {
     id("java")
@@ -167,7 +168,13 @@ tasks {
     }
 
     runPluginVerifier {
-        failureLevel = RunPluginVerifierTask.FailureLevel.ALL
+        failureLevel = EnumSet.complementOf(
+            EnumSet.of(
+                FailureLevel.DEPRECATED_API_USAGES,
+                FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES,
+                FailureLevel.EXPERIMENTAL_API_USAGES,
+            )
+        )
         // Version 1.364 seems to be broken and always complains about supposedly missing 'plugin.xml':
         // https://youtrack.jetbrains.com/issue/MP-6388
         verifierVersion = "1.307"
