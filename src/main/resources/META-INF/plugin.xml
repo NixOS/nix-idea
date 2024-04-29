@@ -4,6 +4,7 @@
     <name>NixIDEA</name>
     <vendor>NixOS</vendor>
 
+    <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends optional="true" config-file="nix-idea-ultimate.xml">com.intellij.modules.ultimate</depends>
 
