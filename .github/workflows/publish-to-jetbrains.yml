@@ -25,17 +25,10 @@ jobs:
       with:
         java-version: 17
         distribution: temurin
-    # Setup cache
-    - name: Setup cache for Gradle and dependencies
-      uses: actions/cache@v4
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v3
       with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: "gradle-\
-          ${{runner.os}}-\
-          ${{hashFiles('gradle/wrapper/gradle-wrapper.properties')}}-\
-          ${{hashFiles('gradle.properties', '**/*.gradle.kts')}}"
+        cache-read-only: true
     # Build and publish
     - name: Obtain release notes
       uses: actions/github-script@v7

@@ -41,17 +41,11 @@ jobs:
       with:
         java-version: ${{ matrix.jdk }}
         distribution: temurin
-    # Setup caches and collect metadata
-    - name: Setup cache for Gradle and dependencies
-      uses: actions/cache@v4
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v3
       with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: "gradle-\
-          ${{runner.os}}-\
-          ${{hashFiles('gradle/wrapper/gradle-wrapper.properties')}}-\
-          ${{hashFiles('gradle.properties', '**/*.gradle.kts')}}"
+        gradle-home-cache-cleanup: true
+    # Collect metadata and setup caches for Plugin Verifier
     - name: Collect metadata for upcoming steps and jobs
       run: ./gradlew --stacktrace metadata listProductsReleases
     - name: Setup cache for IntelliJ Plugin Verifier
