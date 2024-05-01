@@ -5,6 +5,7 @@ import java.util.EnumSet
 
 plugins {
     id("java")
+    kotlin("jvm") version embeddedKotlinVersion
     alias(libs.plugins.jetbrains.intellij)
     alias(libs.plugins.jetbrains.changelog)
     alias(libs.plugins.jetbrains.grammarkit)
@@ -26,7 +27,10 @@ group = pluginGroup
 version = pluginVersion
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        // Set JVM version targeted by Java and Kotlin
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 // Configure project's dependencies
@@ -124,6 +128,11 @@ tasks {
     }
 
     compileJava {
+        dependsOn(generateLexer)
+        // dependency to generateParser is implicitly detected by Gradle
+    }
+
+    compileKotlin {
         dependsOn(generateLexer)
         // dependency to generateParser is implicitly detected by Gradle
     }
