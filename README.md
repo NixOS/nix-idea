@@ -1,6 +1,6 @@
 # NixIDEA - A Nix language plugin for IntelliJ IDEA
 
-[![Build Status](https://github.com/NixOS/nix-idea/actions/workflows/build.yml/badge.svg?branch=master)][build-status]
+[![Build Status](https://github.com/NixOS/nix-idea/actions/workflows/build-main-branch.yml/badge.svg)][build-status]
 [![Version](https://img.shields.io/jetbrains/plugin/v/nix-idea)][marketplace]
 
 <!-- Plugin description -->
