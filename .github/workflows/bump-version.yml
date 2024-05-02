@@ -20,15 +20,8 @@ jobs:
     # Setup environment
     - name: Checkout repository
       uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: 17
-        distribution: temurin
-    - name: Set up Gradle
-      uses: gradle/actions/setup-gradle@v3
-      with:
-        cache-read-only: true
+    - name: Set up build tools
+      uses: ./.github/actions/setup-tools
     # Fail if the release was not triggered from the master branch
     - name: Verify branch
       if: github.event_name == 'release'
