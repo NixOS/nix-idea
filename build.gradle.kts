@@ -177,6 +177,7 @@ tasks {
     }
 
     runPluginVerifier {
+        ideVersions = providers.gradleProperty("verifierIdeVersionOverride").map { listOf(it) }.orElse(listOf())
         failureLevel = EnumSet.complementOf(
             EnumSet.of(
                 FailureLevel.DEPRECATED_API_USAGES,
