@@ -1,9 +1,15 @@
 name: Build
 
 on:
-  push:
-    branches: [ 'master' ]
   pull_request:
+  workflow_call:
+    outputs:
+      metadata-artifact:
+        description: The name of the artifact containing the result of the metadata task
+        value: metadata
+      build-artifact:
+        description: The name of the artifact containing the build result
+        value: build-result
   workflow_dispatch:
 
 jobs:
@@ -114,111 +120,3 @@ jobs:
         name: compatibility-reports-${{ matrix.idea-release }}
         path: build/reports/
         if-no-files-found: ignore
-
-  release-draft:
-
-    name: Update drafts for GitHub releases
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    needs: [ build, check-compatibility ]
-
-    steps:
-    # Remove old release drafts
-    - name: Remove old release drafts
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const owner = context.repo.owner;
-          const repo = context.repo.repo;
-          const response = await github.rest.repos.listReleases({owner, repo});
-          for (const draft of response.data.filter(r => r.draft)) {
-            core.info(`Delete draft for '${draft.name}' (${draft.id})`);
-            await github.rest.repos.deleteRelease({owner, repo, release_id: draft.id});
-          }
-    # Download build artifacts
-    - name: Download build result
-      uses: actions/download-artifact@v4
-      with:
-        name: build-result
-        path: build/distributions/
-    - name: Download metadata
-      uses: actions/download-artifact@v4
-      with:
-        name: metadata
-        path: build/metadata/
-    # Read metadata
-    - name: Read metadata
-      id: metadata
-      run: |
-        echo "version=$(cat build/metadata/version.txt)" >> "$GITHUB_OUTPUT"
-        echo "zipfile=$(cat build/metadata/zipfile.txt)" >> "$GITHUB_OUTPUT"
-        echo "zipname=$(basename "$(cat build/metadata/zipfile.txt)")" >> "$GITHUB_OUTPUT"
-    # Fail job if the release tag already exists and points to a different commit
-    - name: Check release tag
-      uses: actions/github-script@v7
-      env:
-        TAG_NAME: v${{ steps.metadata.outputs.version }}
-      with:
-        script: |
-          const owner = context.repo.owner;
-          const repo = context.repo.repo;
-          const tagname = process.env.TAG_NAME;
-          try {
-            const ref = `tags/${tagname}`
-            const response = await github.rest.git.getRef({owner, repo, ref});
-            if (response.data.object.sha === context.sha) {
-              core.info(`Tag '${tagname}' is already defined and points to the right commit.`);
-              core.info(`Commit: ${context.sha}`);
-            }
-            else {
-              core.setFailed(
-                  `Tag '${tagname}' already exists but points to a different commit.\n` +
-                  `You probably need to bump the version number.\n` +
-                  `Tag points to:  ${response.data.object.sha}\n` +
-                  `Release commit: ${context.sha}`);
-            }
-          }
-          catch (e) {
-            if (e.status === 404) {
-              core.info(`Tag '${tagname}' is not yet defined.`);
-            }
-            else {
-              throw e;
-            }
-          }
-    # Create GitHub release draft
-    - name: Create GitHub release draft
-      uses: actions/github-script@v7
-      env:
-        TAG_NAME: v${{ steps.metadata.outputs.version }}
-        ZIP_FILE: ${{ steps.metadata.outputs.zipfile }}
-        ZIP_NAME: ${{ steps.metadata.outputs.zipname }}
-      with:
-        script: |
-          const fs = require('fs');
-          const owner = context.repo.owner;
-          const repo = context.repo.repo;
-          const { TAG_NAME, ZIP_FILE, ZIP_NAME } = process.env;
-
-          core.info(`Create new draft for '${TAG_NAME}'`);
-          const createResponse = await github.rest.repos.createRelease({
-            owner,
-            repo,
-            name: TAG_NAME,
-            tag_name: TAG_NAME,
-            target_commitish: context.sha,
-            body: fs.readFileSync('build/metadata/latest_changelog.md', 'utf8'),
-            draft: true,
-          });
-
-          core.info(`Upload build result; upload_url: ${createResponse.data.upload_url}`);
-          const uploadResponse = await github.rest.repos.uploadReleaseAsset({
-            url: createResponse.data.upload_url,
-            headers: {'Content-Type': 'application/zip'},
-            name: ZIP_NAME,
-            label: ZIP_NAME,
-            data: fs.readFileSync(ZIP_FILE),
-          });
-
-          core.info(`Upload complete; download_url: ${uploadResponse.data.browser_download_url}`);
-          core.info(`You can find the release draft at ${createResponse.data.html_url}`);
