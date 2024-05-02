@@ -61,6 +61,7 @@ dependencies {
     intellijPlatform {
         create(platformType, platformVersion)
         testFramework(TestFrameworkType.Platform)
+        //testFramework(TestFrameworkType.JUnit5)
         instrumentationTools()
         // Version 1.364 seems to be broken and always complains about supposedly missing 'plugin.xml':
         // https://youtrack.jetbrains.com/issue/MP-6388

@@ -3,6 +3,7 @@ plugins {
 }
 
 repositories {
+    // TODO remove the following line when we don't need the SNAPSHOT anymore
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
     gradlePluginPortal()
 }
