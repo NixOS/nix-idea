@@ -95,7 +95,7 @@ jobs:
     - name: Set up cache for IntelliJ Plugin Verifier
       uses: actions/cache@v4
       with:
-        path: ~/.pluginVerifier/ides
+        path: ~/.cache/pluginVerifier/ides
         key: pluginVerifier-${{ matrix.idea-release }}-${{ runner.os }}
     # Run checks
     - name: Check plugin compatibility
