@@ -12,9 +12,30 @@
 
 ### Fixed
 
-- Variables behind `inherit` keyword not correctly resolved during highlighting
-
 ### Security
+
+## [0.4.0.13] - 2024-04-29
+
+### Added
+
+- Plugin logo for easier recognition
+- Experimental Language Server support using IDEA's LSP API (#68)  
+  [(Only works for paid versions of IDEA 😞)](https://blog.jetbrains.com/platform/2023/07/lsp-for-plugin-developers/#supported-ides)
+
+### Changed
+
+- Icon of `*.nix` files is now using SVG format
+- Icon of `*.nix` files got a separate variant for dark backgrounds
+- Update Grammar-Kit: 2021.1.2 -> 2022.3.2
+- Update JetBrains' fork of JFlex: 1.7.0-1 -> 1.9.2
+
+### Removed
+
+- Support for IDEA 2023.1
+
+### Fixed
+
+- Variables behind `inherit` keyword not correctly resolved during highlighting
 
 ## [0.4.0.12] - 2024-03-29
 
@@ -204,7 +225,7 @@ the plugin.
 
 - Update project to build for recent IJ versions
 
-[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.12...HEAD
+[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.13...HEAD
 [0.3.0.0]: https://github.com/NixOS/nix-idea/commits/v0.3.0.0
 [0.3.0.3]: https://github.com/NixOS/nix-idea/compare/v0.3.0.0...v0.3.0.3
 [0.3.0.4]: https://github.com/NixOS/nix-idea/compare/v0.3.0.3...v0.3.0.4
@@ -215,6 +236,7 @@ the plugin.
 [0.4.0.10]: https://github.com/NixOS/nix-idea/compare/v0.4.0.9...v0.4.0.10
 [0.4.0.11]: https://github.com/NixOS/nix-idea/compare/v0.4.0.10...v0.4.0.11
 [0.4.0.12]: https://github.com/NixOS/nix-idea/compare/v0.4.0.11...v0.4.0.12
+[0.4.0.13]: https://github.com/NixOS/nix-idea/compare/v0.4.0.12...v0.4.0.13
 [0.4.0.2]: https://github.com/NixOS/nix-idea/compare/v0.4.0.1...v0.4.0.2
 [0.4.0.3]: https://github.com/NixOS/nix-idea/compare/v0.4.0.2...v0.4.0.3
 [0.4.0.4]: https://github.com/NixOS/nix-idea/compare/v0.4.0.3...v0.4.0.4

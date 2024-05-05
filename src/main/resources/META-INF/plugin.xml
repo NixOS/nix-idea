@@ -4,7 +4,9 @@
     <name>NixIDEA</name>
     <vendor>NixOS</vendor>
 
+    <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
+    <depends optional="true" config-file="nix-idea-ultimate.xml">com.intellij.modules.ultimate</depends>
 
     <extensions defaultExtensionNs="com.intellij">
 
@@ -26,8 +28,8 @@
         <highlightVisitor implementation="org.nixos.idea.lang.highlighter.NixHighlightVisitor" />
         <highlightVisitor implementation="org.nixos.idea.lang.highlighter.NixRainbowVisitor" />
 
-        <additionalTextAttributes scheme="Default" file="org/nixos/idea/colorSchemes/NixDefault.xml"/>
-        <additionalTextAttributes scheme="Darcula" file="org/nixos/idea/colorSchemes/NixDarcula.xml"/>
+        <additionalTextAttributes scheme="Default" file="colorSchemes/NixDefault.xml"/>
+        <additionalTextAttributes scheme="Darcula" file="colorSchemes/NixDarcula.xml"/>
 
         <lang.braceMatcher
                 language="Nix"
@@ -64,7 +66,7 @@
                 -->
 
         <projectConfigurable
-                groupId="build"
+                parentId="build"
                 displayName="NixIDEA Settings"
                 id="org.nixos.idea.settings.NixIDEASettings"
                 instance="org.nixos.idea.settings.NixIDEASettings" />
