@@ -8,6 +8,7 @@ import com.intellij.psi.search.SearchScope;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.nixos.idea.interpretation.Attribute;
 import org.nixos.idea.interpretation.AttributePath;
 import org.nixos.idea.lang.builtins.NixBuiltin;
 import org.nixos.idea.lang.navigation.AttributeOwner;
@@ -52,5 +53,11 @@ public abstract sealed class NixSymbol implements AttributeOwner, Symbol, Search
     @Override
     public @NotNull UsageHandler getUsageHandler() {
         return UsageHandler.createEmptyUsageHandler(presentation().getPresentableText());
+    }
+
+    @Override
+    public @Nullable NixSymbol resolveFast(@NotNull Attribute attribute) {
+        // TODO: Implement
+        return null;
     }
 }

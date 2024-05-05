@@ -1,9 +1,9 @@
 package org.nixos.idea.lang.navigation.symbol;
 
-import com.intellij.lang.documentation.DocumentationResult;
-import com.intellij.lang.documentation.DocumentationTarget;
 import com.intellij.model.Pointer;
-import com.intellij.navigation.TargetPresentation;
+import com.intellij.platform.backend.documentation.DocumentationResult;
+import com.intellij.platform.backend.documentation.DocumentationTarget;
+import com.intellij.platform.backend.presentation.TargetPresentation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.interpretation.Attribute;
@@ -40,6 +40,11 @@ final class NixBuiltinSymbol extends NixSymbol
     public @NotNull TargetPresentation presentation() {
         // TODO: Implement
         return TargetPresentation.builder(myBuiltin.name()).presentation();
+    }
+
+    @Override
+    public @NotNull TargetPresentation computePresentation() {
+        return presentation();
     }
 
     @Override

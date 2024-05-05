@@ -1,9 +1,9 @@
 package org.nixos.idea.lang.navigation;
 
 import com.intellij.model.Pointer;
-import com.intellij.navigation.NavigationRequest;
-import com.intellij.navigation.NavigationTarget;
-import com.intellij.navigation.TargetPresentation;
+import com.intellij.platform.backend.navigation.NavigationRequest;
+import com.intellij.platform.backend.navigation.NavigationTarget;
+import com.intellij.platform.backend.presentation.TargetPresentation;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.SmartPointerManager;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +43,7 @@ public final class NixNavigationTarget implements NavigationTarget {
     }
 
     @Override
-    public @NotNull TargetPresentation presentation() {
+    public @NotNull TargetPresentation computePresentation() {
         return TargetPresentation.builder(myTargetElement.getText())
                 .presentation();
     }

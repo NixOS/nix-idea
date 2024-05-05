@@ -1,13 +1,13 @@
 package org.nixos.idea.lang.navigation.symbol;
 
-import com.intellij.lang.documentation.DocumentationResult;
-import com.intellij.lang.documentation.DocumentationTarget;
 import com.intellij.model.Pointer;
 import com.intellij.model.search.SearchRequest;
 import com.intellij.navigation.NavigatableSymbol;
-import com.intellij.navigation.NavigationTarget;
-import com.intellij.navigation.TargetPresentation;
 import com.intellij.openapi.project.Project;
+import com.intellij.platform.backend.documentation.DocumentationResult;
+import com.intellij.platform.backend.documentation.DocumentationTarget;
+import com.intellij.platform.backend.navigation.NavigationTarget;
+import com.intellij.platform.backend.presentation.TargetPresentation;
 import com.intellij.psi.SmartPointerManager;
 import com.intellij.psi.search.LocalSearchScope;
 import com.intellij.psi.search.SearchScope;
@@ -63,6 +63,11 @@ final class NixAttributeSymbol extends NixSymbol
         // TODO: Implement
         return TargetPresentation.builder(myPath.last().toString())
                 .presentation();
+    }
+
+    @Override
+    public @NotNull TargetPresentation computePresentation() {
+        return presentation();
     }
 
     @Override
