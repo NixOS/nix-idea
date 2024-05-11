@@ -67,6 +67,16 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
         } else if (this instanceof NixExprSelect) {
             // TODO: Attribute reference support
             return List.of();
+            //List<NixAttributeReference> result = new ArrayList<>();
+            //NixAttrPath attrPath = exprSelect.getAttrPath();
+            //if (attrPath != null) {
+            //    AttributePath.Builder pathBuilder = AttributePath.builder();
+            //    for (NixAttr attr : attrPath.getAttrList()) {
+            //        pathBuilder.add(Attribute.of(attr));
+            //        result.add(new NixAttributeReference(this, exprSelect.getValue(), pathBuilder.build(), attr));
+            //    }
+            //}
+            //return List.copyOf(result);
         } else if (this instanceof NixBindInherit bindInherit) {
             NixExpr accessedObject = bindInherit.getExpr();
             if (accessedObject == null) {
@@ -81,6 +91,10 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
             } else {
                 // TODO: Attribute reference support
                 return List.of();
+                //return bindInherit.getAttrList().stream().flatMap(attr -> {
+                //    AttributePath path = AttributePath.of(Attribute.of(attr));
+                //    return List.of(new NixAttributeReference(this, accessedObject, path, attr));
+                //}).toList();
             }
         } else {
             return List.of();

@@ -23,6 +23,8 @@ import java.util.List;
 @SuppressWarnings("UnstableApiUsage")
 public final class NixUsageSearcher implements UsageSearcher, LeafOccurrenceMapper.Parameterized<NixSymbol, Usage> {
 
+    // TODO: Check out PsiSymbolReferenceSearcher
+
     @Override
     public @NotNull Collection<? extends Usage> collectImmediateResults(@NotNull UsageSearchParameters parameters) {
         if (!NixSymbolSettings.getInstance().getEnabled()) {

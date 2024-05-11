@@ -11,7 +11,7 @@ import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
 final class NixBuiltinSymbol extends NixSymbol
-        implements Pointer<NixBuiltinSymbol> {
+        implements /*DocumentationTarget, */Pointer<NixBuiltinSymbol> {
 
     private final @NotNull NixBuiltin myBuiltin;
 
@@ -39,6 +39,22 @@ final class NixBuiltinSymbol extends NixSymbol
         return Commons.buildPresentation(myBuiltin.name(), AllIcons.Nodes.Padlock, NixTextAttributes.BUILTIN)
                 .presentation();
     }
+
+//    @Override
+//    public @NotNull TargetPresentation computePresentation() {
+//        return presentation();
+//    }
+//
+//    @Override
+//    public @Nullable String computeDocumentationHint() {
+//        return myBuiltin.name();
+//    }
+//
+//    @Override
+//    public @Nullable DocumentationResult computeDocumentation() {
+//        // TODO: Implement
+//        return DocumentationResult.documentation(myBuiltin.name());
+//    }
 
     @Override
     public boolean equals(Object o) {

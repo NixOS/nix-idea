@@ -9,6 +9,8 @@ import java.util.Collection;
 @SuppressWarnings("UnstableApiUsage")
 public final class NixScopeReference extends NixSymbolReference {
 
+    // TODO: Implement PsiCompletableReference?
+
     public NixScopeReference(@NotNull NixPsiElement element, @NotNull NixPsiElement identifier, @NotNull String variableName) {
         super(element, identifier, variableName);
     }

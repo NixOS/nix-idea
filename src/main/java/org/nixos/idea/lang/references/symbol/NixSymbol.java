@@ -25,6 +25,9 @@ public abstract sealed class NixSymbol implements Symbol, SearchTarget
     @Override
     public abstract @NotNull Pointer<? extends NixSymbol> createPointer();
 
+//    @Contract(pure = true)
+//    public abstract @Nullable NixSymbol resolve(@NotNull String attribute);
+
     @Override
     public @NotNull UsageHandler getUsageHandler() {
         return UsageHandler.createEmptyUsageHandler(getName());

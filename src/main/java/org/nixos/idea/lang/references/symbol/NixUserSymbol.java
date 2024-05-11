@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class NixUserSymbol extends NixSymbol
-        implements NavigatableSymbol {
+        implements /*DocumentationTarget, */NavigatableSymbol {
 
     private final @NotNull NixDeclarationHost myHost;
     private final @NotNull List<String> myPath;
@@ -51,6 +51,11 @@ public final class NixUserSymbol extends NixSymbol
     public @NotNull Collection<NixSymbolDeclaration> getDeclarations() {
         return myHost.getDeclarations(myPath);
     }
+
+//    @Override
+//    public @Nullable NixUserSymbol resolve(@NotNull String attribute) {
+//        return myHost.getSymbol(ImmutableLists.append(myPath, attribute));
+//    }
 
     @Override
     public @NotNull Pointer<NixUserSymbol> createPointer() {
@@ -81,6 +86,32 @@ public final class NixUserSymbol extends NixSymbol
                 .locationText(file == null ? null : file.getName(), file == null ? null : file.getIcon(0))
                 .presentation();
     }
+
+//    @Override
+//    public @NotNull TargetPresentation computePresentation() {
+//    }
+//
+//    @Override
+//    public @Nullable String computeDocumentationHint() {
+//        return getName();
+//    }
+//
+//    @Override
+//    public @Nullable DocumentationResult computeDocumentation() {
+//        // TODO: QuickDocHighlightingHelper seems to exist in newer versions?
+//        // TODO: Implement
+//        StringBuilder builder = new StringBuilder();
+//
+//        builder.append(DocumentationMarkup.DEFINITION_START);
+//        builder.append(HtmlChunk.text(getName()));
+//        builder.append(DocumentationMarkup.DEFINITION_END);
+//
+//        builder.append(DocumentationMarkup.CONTENT_START);
+//        builder.append("CONTENT");
+//        builder.append(DocumentationMarkup.CONTENT_END);
+//
+//        return DocumentationResult.documentation(builder.toString());
+//    }
 
     @Override
     public @Nullable SearchScope getMaximalSearchScope() {
