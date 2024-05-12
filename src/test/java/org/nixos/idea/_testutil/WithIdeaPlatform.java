@@ -8,11 +8,17 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.testFramework.EdtTestUtil;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.ResourceLock;
+import org.nixos.idea.NixTestExecutionPolicy;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * {@code @WithIdeaPlatform} can be used to set up an IDEA platform test environment.
@@ -56,4 +62,22 @@ public @interface WithIdeaPlatform {
     @ExtendWith(EdtExtension.class)
     @WithIdeaPlatform
     @interface OnEdt {}
+
+    /**
+     * Enables the use of {@link CodeInsightTestFixture}.
+     * This annotation inherits {@link WithIdeaPlatform}, so you don't have to add it separately.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE})
+    @Inherited
+    @WithIdeaPlatform
+    @interface CodeInsight {
+        /**
+         * Specifies the path to the test data relative to {@link NixTestExecutionPolicy#getHomePath()}.
+         * This is equivalent to the {@code getBasePath()} method in {@link BasePlatformTestCase}.
+         *
+         * @return Relative path to the test data used by this test.
+         */
+        String basePath() default "";
+    }
 }
