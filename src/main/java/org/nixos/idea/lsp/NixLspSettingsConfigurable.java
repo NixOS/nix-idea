@@ -26,7 +26,7 @@ public class NixLspSettingsConfigurable implements SearchableConfigurable, Confi
 
     @Override
     public @NotNull @NonNls String getId() {
-        return "org.nixos.idea.lsp.NixLspSettings";
+        return "org.nixos.idea.lsp.NixLspSettingsConfigurable";
     }
 
     @Override
