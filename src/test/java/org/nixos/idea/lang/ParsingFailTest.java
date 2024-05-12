@@ -3,6 +3,9 @@ package org.nixos.idea.lang;
 import com.intellij.lang.LanguageBraceMatching;
 import com.intellij.testFramework.ParsingTestCase;
 import com.intellij.testFramework.TestDataPath;
+import com.intellij.testFramework.fixtures.IdeaTestExecutionPolicy;
+
+import java.util.Objects;
 
 @TestDataPath("$PROJECT_ROOT/src/test/testData/ParsingFailTest")
 public final class ParsingFailTest extends ParsingTestCase {
@@ -99,7 +102,7 @@ public final class ParsingFailTest extends ParsingTestCase {
 
   @Override
   protected String getTestDataPath() {
-    return "src/test/testData";
+    return Objects.requireNonNull(IdeaTestExecutionPolicy.current()).getHomePath();
   }
 
   @Override

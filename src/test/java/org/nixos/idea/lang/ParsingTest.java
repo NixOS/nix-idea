@@ -2,7 +2,9 @@ package org.nixos.idea.lang;
 
 import com.intellij.testFramework.ParsingTestCase;
 import com.intellij.testFramework.TestDataPath;
-import org.nixos.idea.lang.NixParserDefinition;
+import com.intellij.testFramework.fixtures.IdeaTestExecutionPolicy;
+
+import java.util.Objects;
 
 @TestDataPath("$PROJECT_ROOT/src/test/testData/ParsingTest")
 public final class ParsingTest extends ParsingTestCase {
@@ -156,7 +158,7 @@ public final class ParsingTest extends ParsingTestCase {
 
   @Override
   protected String getTestDataPath() {
-    return "src/test/testData";
+    return Objects.requireNonNull(IdeaTestExecutionPolicy.current()).getHomePath();
   }
 
   @Override
