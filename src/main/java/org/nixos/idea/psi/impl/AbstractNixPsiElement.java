@@ -18,6 +18,7 @@ import org.nixos.idea.psi.NixExprSelect;
 import org.nixos.idea.psi.NixExprVar;
 import org.nixos.idea.psi.NixPsiElement;
 import org.nixos.idea.psi.NixPsiUtil;
+import org.nixos.idea.settings.NixSymbolSettings;
 
 import java.util.Collection;
 import java.util.List;
@@ -59,7 +60,9 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
     @Override
     @SuppressWarnings("UnstableApiUsage")
     public final @NotNull Collection<? extends NixSymbolReference> getOwnReferences() {
-        if (this instanceof NixExprVar) {
+        if (!NixSymbolSettings.getInstance().getEnabled()) {
+            return List.of();
+        } else if (this instanceof NixExprVar) {
             return List.of(new NixScopeReference(this, this, getText()));
         } else if (this instanceof NixExprSelect) {
             // TODO: Attribute reference support

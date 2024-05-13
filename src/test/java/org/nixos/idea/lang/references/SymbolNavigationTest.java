@@ -19,6 +19,7 @@ import com.intellij.testFramework.PsiTestUtil;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
@@ -29,6 +30,7 @@ import org.nixos.idea.lang.builtins.NixBuiltin;
 import org.nixos.idea.lang.references.symbol.NixSymbol;
 import org.nixos.idea.lang.references.symbol.NixUserSymbol;
 import org.nixos.idea.psi.NixDeclarationHost;
+import org.nixos.idea.settings.NixSymbolSettings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,6 +54,11 @@ final class SymbolNavigationTest {
 
     SymbolNavigationTest(@NotNull CodeInsightTestFixture fixture) {
         myFixture = fixture;
+    }
+
+    @BeforeEach
+    void setUp() {
+        NixSymbolSettings.getInstance().setJumpToFirstDeclaration(false);
     }
 
     @TestFactory

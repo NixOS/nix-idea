@@ -48,6 +48,15 @@
                 id="org.nixos.idea.settings.NixIDEASettings"
                 instance="org.nixos.idea.settings.NixIDEASettings" />
 
+        <applicationService
+                serviceImplementation="org.nixos.idea.settings.NixSymbolSettings"/>
+
+        <applicationConfigurable
+                parentId="language"
+                displayName="Nix Symbols"
+                id="org.nixos.idea.settings.NixSymbolConfigurable"
+                instance="org.nixos.idea.settings.NixSymbolConfigurable"/>
+
         <colorSettingsPage
                 implementation="org.nixos.idea.settings.NixColorSettingsPage" />
 

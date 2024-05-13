@@ -18,6 +18,7 @@ import org.nixos.idea.psi.NixIdentifier;
 import org.nixos.idea.psi.NixParameter;
 import org.nixos.idea.psi.NixPsiElement;
 import org.nixos.idea.psi.NixPsiUtil;
+import org.nixos.idea.settings.NixSymbolSettings;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -84,16 +85,20 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
     }
 
     private @NotNull Symbols getSymbols() {
-        if (mySymbols == null) {
-            MY_SYMBOLS.compareAndSet(this, null, initSymbols());
+        NixSymbolSettings settings = NixSymbolSettings.getInstance();
+        Symbols symbols = mySymbols;
+        if (symbols == null || symbols.isOutdated(settings)) {
+            MY_SYMBOLS.compareAndSet(this, symbols, initSymbols(settings));
             Objects.requireNonNull(mySymbols, "initSymbols() must not return null");
         }
         return mySymbols;
     }
 
-    private @NotNull Symbols initSymbols() {
-        Symbols symbols = new Symbols();
-        if (this instanceof NixExprLet let) {
+    private @NotNull Symbols initSymbols(@NotNull NixSymbolSettings settings) {
+        Symbols symbols = new Symbols(settings);
+        if (!NixSymbolSettings.getInstance().getEnabled()) {
+            return symbols;
+        } else if (this instanceof NixExprLet let) {
             collectBindDeclarations(symbols, let.getBindList(), true);
         } else if (this instanceof NixExprAttrs attrs) {
             collectBindDeclarations(symbols, attrs.getBindList(), NixPsiUtil.isLegacyLet(attrs));
@@ -140,6 +145,15 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
         private final @NotNull Map<List<String>, List<NixSymbolDeclaration>> myDeclarationsBySymbol = new HashMap<>();
         private final @NotNull Map<NixPsiElement, List<NixSymbolDeclaration>> myDeclarationsByElement = new HashMap<>();
         private final @NotNull Set<String> myVariables = new HashSet<>();
+        private final long mySettingsModificationCount;
+
+        private Symbols(@NotNull NixSymbolSettings settings) {
+            mySettingsModificationCount = settings.getStateModificationCount();
+        }
+
+        private boolean isOutdated(@NotNull NixSymbolSettings settings) {
+            return mySettingsModificationCount != settings.getStateModificationCount();
+        }
 
         private void addBindAttr(@NotNull NixPsiElement element, @NotNull NixAttrPath attrPath, @NotNull NixUserSymbol.Type type) {
             if (!checkDeclarationHost(element)) {

@@ -1,0 +1,30 @@
+package org.nixos.idea.settings
+
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.BaseState
+import com.intellij.openapi.components.SimplePersistentStateComponent
+import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
+import org.nixos.idea.settings.SimplePersistentStateComponentHelper.delegate
+
+@State(name = "NixSymbolSettings", storages = [Storage("nix-idea.xml")])
+class NixSymbolSettings : SimplePersistentStateComponent<NixSymbolSettings.State>(State()) {
+
+    class State : BaseState() {
+        var enabled by property(true)
+        var jumpToFirstDeclaration by property(true)
+        var showDeclarationsAsUsages by property(false)
+    }
+
+    companion object {
+        @JvmStatic
+        fun getInstance(): NixSymbolSettings {
+            return ApplicationManager.getApplication().getService(NixSymbolSettings::class.java)
+        }
+    }
+
+    var enabled: Boolean by delegate(State::enabled)
+    var jumpToFirstDeclaration by delegate(State::jumpToFirstDeclaration)
+    var showDeclarationsAsUsages: Boolean by delegate(State::showDeclarationsAsUsages)
+
+}

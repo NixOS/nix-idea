@@ -1,6 +1,5 @@
 package org.nixos.idea.lang.references;
 
-import com.intellij.find.usages.api.SearchTarget;
 import com.intellij.find.usages.api.Usage;
 import com.intellij.find.usages.api.UsageSearchParameters;
 import com.intellij.find.usages.api.UsageSearcher;
@@ -16,6 +15,7 @@ import org.nixos.idea.lang.NixLanguage;
 import org.nixos.idea.lang.references.symbol.NixSymbol;
 import org.nixos.idea.lang.references.symbol.NixUserSymbol;
 import org.nixos.idea.psi.NixPsiElement;
+import org.nixos.idea.settings.NixSymbolSettings;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +25,9 @@ public final class NixUsageSearcher implements UsageSearcher, LeafOccurrenceMapp
 
     @Override
     public @NotNull Collection<? extends Usage> collectImmediateResults(@NotNull UsageSearchParameters parameters) {
-        if (parameters.getTarget() instanceof NixUserSymbol symbol) {
+        if (!NixSymbolSettings.getInstance().getEnabled()) {
+            return List.of();
+        } else if (parameters.getTarget() instanceof NixUserSymbol symbol) {
             return symbol.getDeclarations().stream().map(NixUsage::new).toList();
         } else {
             return List.of();
@@ -34,8 +36,9 @@ public final class NixUsageSearcher implements UsageSearcher, LeafOccurrenceMapp
 
     @Override
     public @Nullable Query<? extends Usage> collectSearchRequest(@NotNull UsageSearchParameters parameters) {
-        SearchTarget target = parameters.getTarget();
-        if (target instanceof NixSymbol symbol) {
+        if (!NixSymbolSettings.getInstance().getEnabled()) {
+            return null;
+        } else if (parameters.getTarget() instanceof NixSymbol symbol) {
             String name = symbol.getName();
             return SearchService.getInstance()
                     .searchWord(parameters.getProject(), name)

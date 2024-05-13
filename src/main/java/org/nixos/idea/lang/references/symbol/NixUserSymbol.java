@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.lang.highlighter.NixTextAttributes;
 import org.nixos.idea.lang.references.NixSymbolDeclaration;
 import org.nixos.idea.psi.NixDeclarationHost;
+import org.nixos.idea.settings.NixSymbolSettings;
 
 import javax.swing.Icon;
 import java.lang.invoke.MethodHandles;
@@ -23,6 +24,7 @@ import java.lang.invoke.VarHandle;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class NixUserSymbol extends NixSymbol
@@ -93,7 +95,12 @@ public final class NixUserSymbol extends NixSymbol
     @Override
     public @NotNull Collection<? extends NavigationTarget> getNavigationTargets(@NotNull Project project) {
         assert myHost.getProject().equals(project);
-        return myHost.getDeclarations(myPath).stream().map(NixSymbolDeclaration::navigationTarget).toList();
+        Stream<NavigationTarget> targets = myHost.getDeclarations(myPath).stream().map(NixSymbolDeclaration::navigationTarget);
+        if (NixSymbolSettings.getInstance().getJumpToFirstDeclaration()) {
+            return targets.findFirst().map(List::of).orElse(List.of());
+        } else {
+            return targets.toList();
+        }
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.intellij.psi.SmartPointerManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.psi.NixPsiElement;
+import org.nixos.idea.settings.NixSymbolSettings;
 
 @SuppressWarnings("UnstableApiUsage")
 final class NixUsage implements PsiUsage, ReadWriteUsage {
@@ -57,7 +58,8 @@ final class NixUsage implements PsiUsage, ReadWriteUsage {
 
     @Override
     public boolean getDeclaration() {
-        return myIsDeclaration;
+        // IDEA removes all instances which return true from the result of the usage search
+        return !NixSymbolSettings.getInstance().getShowDeclarationsAsUsages() && myIsDeclaration;
     }
 
     @Override
