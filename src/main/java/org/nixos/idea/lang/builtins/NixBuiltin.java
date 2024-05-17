@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.util.NixVersion;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public final class NixBuiltin {
@@ -210,6 +211,8 @@ public final class NixBuiltin {
 
     //endregion
     //region Static members
+
+    public static final @NotNull NixBuiltin ROOT = Objects.requireNonNull(resolveBuiltin("builtins"));
 
     public static @Nullable NixBuiltin resolveBuiltin(@NotNull String name) {
         return BUILTINS.get(name);

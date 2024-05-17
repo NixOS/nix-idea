@@ -108,7 +108,7 @@ expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 }
 private lambda_params ::= argument [ !missing_semi AT formals ] | formals [ !missing_semi AT argument ]
 argument ::= <<identifier ID>> { implements=parameter }
 formals ::= LCURLY ( formal COMMA )* [ ( ELLIPSIS | formal ) ] recover_formals RCURLY { pin=1 }
-formal ::= <<identifier ID>> [ formal_has ] { pin=2 recoverWhile=formal_recover implements=parameter }
+formal ::= <<identifier ID>> [ formal_has ] { pin=2 recoverWhile=formal_recover implements=parameter methods=[ default_value="expr" ] }
 private formal_has ::= HAS expr { pin=1 }
 private formal_recover ::= curly_recover !COMMA
 private recover_formals ::= { recoverWhile=curly_recover }

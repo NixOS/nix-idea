@@ -3,6 +3,7 @@ package org.nixos.idea.psi;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.lang.references.NixSymbolDeclaration;
+import org.nixos.idea.lang.references.NixSymbolResolver;
 import org.nixos.idea.lang.references.symbol.NixUserSymbol;
 
 import java.util.Collection;
@@ -51,4 +52,6 @@ public interface NixDeclarationHost extends NixPsiElement {
     @Nullable NixUserSymbol getSymbol(@NotNull List<String> attributePath);
 
     @NotNull Collection<NixSymbolDeclaration> getDeclarations(@NotNull List<String> attributePath);
+
+    @NotNull Collection<NixSymbolResolver> getFullDeclarations(@NotNull List<String> attributePath);
 }

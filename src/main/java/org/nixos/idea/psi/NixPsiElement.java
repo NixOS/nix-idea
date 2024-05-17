@@ -7,6 +7,7 @@ import org.nixos.idea.lang.references.NixSymbolReference;
 import org.nixos.idea.lang.references.Scope;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface NixPsiElement extends PsiElement {
 
@@ -18,7 +19,7 @@ public interface NixPsiElement extends PsiElement {
 
     @Override
     @SuppressWarnings("UnstableApiUsage")
-    @NotNull Collection<? extends NixSymbolReference> getOwnReferences();
+    @NotNull List<? extends NixSymbolReference> getOwnReferences();
 
     <T> T accept(@NotNull NixElementVisitor<T> visitor);
 }

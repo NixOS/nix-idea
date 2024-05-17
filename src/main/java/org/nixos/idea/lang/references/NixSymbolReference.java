@@ -9,15 +9,17 @@ import org.nixos.idea.lang.references.symbol.NixSymbol;
 import org.nixos.idea.psi.NixPsiElement;
 import org.nixos.idea.util.TextRangeFactory;
 
+import java.util.Collection;
+
 @SuppressWarnings("UnstableApiUsage")
 public abstract class NixSymbolReference implements PsiSymbolReference {
 
-    protected final @NotNull NixPsiElement myElement;
+    protected final @NotNull NixPsiElement myOwner;
     protected final @NotNull NixPsiElement myIdentifier;
     protected final @NotNull String myName;
 
-    protected NixSymbolReference(@NotNull NixPsiElement element, @NotNull NixPsiElement identifier, @NotNull String name) {
-        myElement = element;
+    protected NixSymbolReference(@NotNull NixPsiElement owner, @NotNull NixPsiElement identifier, @NotNull String name) {
+        myOwner = owner;
         myIdentifier = identifier;
         myName = name;
     }
@@ -28,13 +30,16 @@ public abstract class NixSymbolReference implements PsiSymbolReference {
 
     @Override
     public @NotNull PsiElement getElement() {
-        return myElement;
+        return myOwner;
     }
 
     @Override
     public @NotNull TextRange getRangeInElement() {
-        return TextRangeFactory.relative(myIdentifier, myElement);
+        return TextRangeFactory.relative(myIdentifier, myOwner);
     }
+
+    @Override
+    public abstract @NotNull Collection<NixSymbol> resolveReference();
 
     @Override
     public boolean resolvesTo(@NotNull Symbol target) {

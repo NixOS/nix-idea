@@ -184,6 +184,26 @@ final class SymbolNavigationTest {
     }
 
     @TestFactory
+    Stream<DynamicNode> string_attribute() {
+        return createTests("""
+                let x.<decl>"my very special variable ⇐"</decl> = "..."; in
+                <ref>x."my very special variable ⇐"</ref>
+                """, "my very special variable ⇐");
+    }
+
+    @TestFactory
+    Stream<DynamicNode> merged_attribute_sets_part_1() {
+        return createTests("""
+                let
+                  x = { <decl>y</decl> = "a"; };
+                  x.<decl>y</decl> = "b";
+                  x = { <decl>y</decl> = "c"; };
+                in
+                  x.<ref>y</ref>
+                """, "y");
+    }
+
+    @TestFactory
     Stream<DynamicNode> builtin() {
         return createTests("""
                 [ <ref>builtins</ref> <ref>builtins</ref>.abc ]

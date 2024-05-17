@@ -1,12 +1,13 @@
 package org.nixos.idea.lang.references.symbol;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.model.Pointer;
 import com.intellij.platform.backend.presentation.TargetPresentation;
 import org.jetbrains.annotations.NotNull;
 import org.nixos.idea.lang.builtins.NixBuiltin;
 import org.nixos.idea.lang.highlighter.NixTextAttributes;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -35,8 +36,14 @@ final class NixBuiltinSymbol extends NixSymbol
     }
 
     @Override
+    public @NotNull Collection<NixSymbol> resolve(@NotNull String attributeName) {
+        NixBuiltin builtin = myBuiltin == NixBuiltin.ROOT ? NixBuiltin.resolveBuiltin(attributeName) : null;
+        return List.of(builtin == null ? new NixAdHocSymbol(this, attributeName) : new NixBuiltinSymbol(builtin));
+    }
+
+    @Override
     public @NotNull TargetPresentation presentation() {
-        return Commons.buildPresentation(myBuiltin.name(), AllIcons.Nodes.Padlock, NixTextAttributes.BUILTIN)
+        return Commons.buildPresentation(myBuiltin.name(), Commons.ICON_BUILTIN, NixTextAttributes.BUILTIN)
                 .presentation();
     }
 

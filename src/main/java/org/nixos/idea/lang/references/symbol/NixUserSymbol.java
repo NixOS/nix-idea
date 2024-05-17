@@ -1,6 +1,5 @@
 package org.nixos.idea.lang.references.symbol;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.model.Pointer;
 import com.intellij.navigation.NavigatableSymbol;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
@@ -11,6 +10,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.SmartPointerManager;
 import com.intellij.psi.search.LocalSearchScope;
 import com.intellij.psi.search.SearchScope;
+import com.intellij.util.containers.ContainerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.lang.highlighter.NixTextAttributes;
@@ -50,6 +50,16 @@ public final class NixUserSymbol extends NixSymbol
 
     public @NotNull Collection<NixSymbolDeclaration> getDeclarations() {
         return myHost.getDeclarations(myPath);
+    }
+
+    @Override
+    public @NotNull Collection<NixSymbol> resolve(@NotNull String attributeName) {
+        List<NixSymbol> symbols = Stream.concat(
+                ContainerUtil.createMaybeSingletonList(myHost.getSymbol(ContainerUtil.append(myPath, attributeName))).stream(),
+                myHost.getFullDeclarations(myPath).stream()
+                        .flatMap(resolver -> resolver.resolve(attributeName).stream())
+        ).toList();
+        return symbols.isEmpty() ? List.of(new NixAdHocSymbol(this, attributeName)) : symbols;
     }
 
     @Override
@@ -117,9 +127,9 @@ public final class NixUserSymbol extends NixSymbol
     }
 
     public enum Type {
-        ATTRIBUTE(AllIcons.Nodes.Property, NixTextAttributes.IDENTIFIER, null),
-        PARAMETER(AllIcons.Nodes.Parameter, NixTextAttributes.PARAMETER, "Scope of Parameter"),
-        VARIABLE(AllIcons.Nodes.Variable, NixTextAttributes.LOCAL_VARIABLE, "Scope of Variable"),
+        ATTRIBUTE(Commons.ICON_ATTRIBUTE, NixTextAttributes.IDENTIFIER, null),
+        PARAMETER(Commons.ICON_PARAMETER, NixTextAttributes.PARAMETER, "Scope of Parameter"),
+        VARIABLE(Commons.ICON_VARIABLE, NixTextAttributes.LOCAL_VARIABLE, "Scope of Variable"),
 
         ;
 

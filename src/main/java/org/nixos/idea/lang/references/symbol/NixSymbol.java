@@ -7,10 +7,13 @@ import com.intellij.model.Symbol;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.nixos.idea.lang.builtins.NixBuiltin;
+import org.nixos.idea.lang.references.NixSymbolResolver;
+
+import java.util.Collection;
 
 @SuppressWarnings("UnstableApiUsage")
-public abstract sealed class NixSymbol implements Symbol, SearchTarget
-        permits NixBuiltinSymbol, NixUserSymbol {
+public abstract sealed class NixSymbol implements Symbol, SearchTarget, NixSymbolResolver
+        permits NixAdHocSymbol, NixBuiltinSymbol, NixUserSymbol {
 
     NixSymbol() {} // Can only be implemented within this package
 
@@ -24,6 +27,9 @@ public abstract sealed class NixSymbol implements Symbol, SearchTarget
 
     @Override
     public abstract @NotNull Pointer<? extends NixSymbol> createPointer();
+
+    @Contract(pure = true)
+    public abstract @NotNull Collection<NixSymbol> resolve(@NotNull String attributeName);
 
     @Override
     public @NotNull UsageHandler getUsageHandler() {
