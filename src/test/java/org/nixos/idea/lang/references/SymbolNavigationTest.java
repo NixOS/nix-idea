@@ -1,20 +1,8 @@
 package org.nixos.idea.lang.references;
 
 import com.intellij.find.usages.api.PsiUsage;
-import com.intellij.find.usages.api.SearchTarget;
 import com.intellij.find.usages.api.Usage;
-import com.intellij.find.usages.api.UsageSearchParameters;
-import com.intellij.model.psi.PsiSymbolDeclaration;
-import com.intellij.model.search.SearchService;
-import com.intellij.navigation.SymbolNavigationService;
-import com.intellij.openapi.application.ReadAction;
-import com.intellij.openapi.project.Project;
-import com.intellij.platform.backend.navigation.NavigationTarget;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.search.LocalSearchScope;
-import com.intellij.psi.search.SearchScope;
-import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.psi.util.PsiTreeUtilKt;
 import com.intellij.testFramework.PsiTestUtil;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import org.intellij.lang.annotations.Language;
@@ -28,8 +16,6 @@ import org.nixos.idea._testutil.WithIdeaPlatform;
 import org.nixos.idea.file.NixFileType;
 import org.nixos.idea.lang.builtins.NixBuiltin;
 import org.nixos.idea.lang.references.symbol.NixSymbol;
-import org.nixos.idea.lang.references.symbol.NixUserSymbol;
-import org.nixos.idea.psi.NixDeclarationHost;
 import org.nixos.idea.settings.NixSymbolSettings;
 
 import java.util.ArrayList;
@@ -39,8 +25,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 @WithIdeaPlatform.OnEdt
@@ -51,9 +35,11 @@ final class SymbolNavigationTest {
     private static final @NotNull Markers.TagName TAG_DECL = Markers.tagName("decl");
 
     private final @NotNull CodeInsightTestFixture myFixture;
+    private final @NotNull SymbolTestHelper mySymbolHelper;
 
     SymbolNavigationTest(@NotNull CodeInsightTestFixture fixture) {
         myFixture = fixture;
+        mySymbolHelper = new SymbolTestHelper(fixture);
     }
 
     @BeforeEach
@@ -258,32 +244,17 @@ final class SymbolNavigationTest {
         return new Input(file, markers.unmarkedText(), markers, symbolName);
     }
 
-    @SuppressWarnings({"UnstableApiUsage", "OverrideOnly"})
+    @SuppressWarnings({"UnstableApiUsage"})
     private void resolveSymbolFromDeclaration(@NotNull Input input, @NotNull Markers.Marker declarationMarker) {
         NixSymbol expectedSymbol = getSymbol(input);
-
-        List<PsiSymbolDeclaration> allDeclarations = new ArrayList<>();
-        PsiTreeUtilKt.elementsAtOffsetUp(input.file, declarationMarker.start())
-                .forEachRemaining(element -> allDeclarations.addAll(element.getFirst().getOwnDeclarations()));
-        List<PsiSymbolDeclaration> filteredDeclarations = allDeclarations.stream()
-                .filter(declaration -> declaration.getAbsoluteRange().contains(declarationMarker.start()))
-                .toList();
-        if (filteredDeclarations.isEmpty()) {
-            fail("No declaration found");
-        } else if (filteredDeclarations.size() > 1) {
-            fail("Multiple declarations found: " + filteredDeclarations);
-        }
-
-        PsiSymbolDeclaration declaration = filteredDeclarations.get(0);
+        NixSymbolDeclaration declaration = mySymbolHelper.findDeclaration(NixSymbolDeclaration.class, input.file, declarationMarker.start());
         assertEquals(declarationMarker.range(), declaration.getAbsoluteRange());
         assertEquals(expectedSymbol, declaration.getSymbol());
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private void resolveSymbolFromReference(@NotNull Input input, @NotNull Markers.Marker referenceMarker) {
         NixSymbol expectedSymbol = getSymbol(input);
-        myFixture.getEditor().getCaretModel().moveToOffset(referenceMarker.start());
-        NixScopeReference reference = assertInstanceOf(NixScopeReference.class, ReadAction.compute(myFixture::findSingleReferenceAtCaret));
+        NixScopeReference reference = mySymbolHelper.findReference(NixScopeReference.class, input.file, referenceMarker.start());
 
         assertEquals(referenceMarker.range(), reference.getElement().getTextRange().cutOut(reference.getRangeInElement()));
 
@@ -292,44 +263,21 @@ final class SymbolNavigationTest {
         assertEquals(input.symbolName, symbols.iterator().next().getName());
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private void findDeclarations(@NotNull Input input) {
         NixSymbol symbol = getSymbol(input);
-        Collection<? extends NavigationTarget> navigationTargets = SymbolNavigationService.getInstance()
-                .getNavigationTargets(myFixture.getProject(), symbol);
+        Collection<NixNavigationTarget> navigationTargets = mySymbolHelper.findNavigationTargets(NixNavigationTarget.class, symbol);
         assertEquals(
                 input.markers.markers(TAG_DECL),
-                Markers.create(input.code, navigationTargets.stream().map(target -> {
-                    NixNavigationTarget nixTarget = assertInstanceOf(NixNavigationTarget.class, target);
-                    return Markers.marker(TAG_DECL, nixTarget.getRangeInFile());
-                }), TAG_DECL)
+                Markers.create(input.code, navigationTargets.stream().map(
+                        target -> Markers.marker(TAG_DECL, target.getRangeInFile())
+                ), TAG_DECL)
         );
     }
 
     @SuppressWarnings("UnstableApiUsage")
     private void findUsages(@NotNull Input input) {
         NixSymbol symbol = getSymbol(input);
-        Collection<Usage> usages = SearchService.getInstance().searchParameters(new UsageSearchParameters() {
-            @Override
-            public @NotNull SearchTarget getTarget() {
-                return symbol;
-            }
-
-            @Override
-            public @NotNull SearchScope getSearchScope() {
-                return new LocalSearchScope(input.file);
-            }
-
-            @Override
-            public @NotNull Project getProject() {
-                return myFixture.getProject();
-            }
-
-            @Override
-            public boolean areValid() {
-                return true;
-            }
-        }).findAll();
+        Collection<Usage> usages = mySymbolHelper.findUsages(symbol, input.file);
 
         assertEquals(
                 input.markers.markers(TAG_DECL, TAG_REF),
@@ -342,17 +290,11 @@ final class SymbolNavigationTest {
     }
 
     private @NotNull NixSymbol getSymbol(@NotNull Input input) {
-        List<NixDeclarationHost> hosts = input.markers.ranges(TAG_DECL).stream()
-                .map(textRange -> PsiTreeUtil.findElementOfClassAtOffset(input.file, textRange.getStartOffset(), NixDeclarationHost.class, false))
-                .distinct().toList();
-        if (hosts.isEmpty()) {
+        return input.markers.ranges(TAG_DECL).stream().findFirst().map(declaration -> {
+            return mySymbolHelper.findSymbol(input.file, input.symbolName, declaration.getStartOffset());
+        }).orElseGet(() -> {
             NixBuiltin builtin = NixBuiltin.resolveGlobal(input.symbolName);
             return NixSymbol.builtin(Objects.requireNonNull(builtin, "Builtin not found: " + input.symbolName));
-        } else if (hosts.size() == 1) {
-            NixUserSymbol symbol = hosts.get(0).getSymbol(List.of(input.symbolName));
-            return Objects.requireNonNull(symbol, "Symbol not found: " + input.symbolName);
-        } else {
-            throw new IllegalStateException("Declarations are spread over multiple declaration hosts: " + hosts);
-        }
+        });
     }
 }
