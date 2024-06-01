@@ -58,7 +58,6 @@ public class NixLangSettingsConfigurable implements SearchableConfigurable, Conf
         ).install();
 
 
-
         return FormBuilder.createFormBuilder()
                 .addComponent(new TitledSeparator("Formatter Configuration"))
                 .addComponent(myTextArea)
