@@ -16,12 +16,12 @@ import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.file.NixFile;
 import org.nixos.idea.settings.NixLangSettings;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
 
 public final class NixExternalFormatter extends AsyncDocumentFormattingService {
