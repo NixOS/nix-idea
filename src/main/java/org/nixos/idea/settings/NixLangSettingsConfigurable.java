@@ -1,39 +1,37 @@
-package org.nixos.idea.lsp;
+package org.nixos.idea.settings;
 
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.NlsContexts;
-import com.intellij.platform.lsp.api.LspServerManager;
 import com.intellij.ui.RawCommandLineEditor;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBCheckBox;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.lsp.ui.CommandSuggestionsPopup;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
+import javax.swing.*;
 import java.util.List;
 
-public class NixLspSettingsConfigurable implements SearchableConfigurable, Configurable.Beta {
+public class NixLangSettingsConfigurable implements SearchableConfigurable, Configurable.Beta {
     private static final List<CommandSuggestionsPopup.Suggestion> BUILTIN_SUGGESTIONS = List.of(
-            CommandSuggestionsPopup.Suggestion.builtin("<html>Use <b>nil</b> from nixpkgs</html>",
-                    "nix --extra-experimental-features \"nix-command flakes\" run nixpkgs#nil"),
-            CommandSuggestionsPopup.Suggestion.builtin("<html>Use <b>nixd</b> from nixpkgs</html>",
-                    "nix --extra-experimental-features \"nix-command flakes\" run nixpkgs#nixd")
+            CommandSuggestionsPopup.Suggestion.builtin("<html>Use <b>nixpkgs-fmt</b> from nixpkgs</html>",
+                    "nix --extra-experimental-features \"nix-command flakes\" run nixpkgs#nixpkgs-fmt")
     );
 
     private @Nullable JBCheckBox myEnabled;
     private @Nullable RawCommandLineEditor myCommand;
+    private @Nullable JBLabel myTextArea;
 
     @Override
     public @NotNull @NonNls String getId() {
-        return "org.nixos.idea.lsp.NixLspSettingsConfigurable";
+        return "org.nixos.idea.lsp.NixLangSettingsConfigurable";
     }
 
     @Override
@@ -43,18 +41,28 @@ public class NixLspSettingsConfigurable implements SearchableConfigurable, Confi
 
     @Override
     public @Nullable JComponent createComponent() {
-        myEnabled = new JBCheckBox("Enable language server");
+        myEnabled = new JBCheckBox("Enable external formatter");
         myEnabled.addChangeListener(e -> updateUiState());
 
         myCommand = new RawCommandLineEditor();
-        myCommand.getEditorField().getEmptyText().setText("Command to start Language Server");
-        myCommand.getEditorField().getAccessibleContext().setAccessibleName("Command to start Language Server");
-        myCommand.getEditorField().setMargin(myEnabled.getMargin());
-        new CommandSuggestionsPopup(myCommand, NixLspSettings.getInstance().getCommandHistory(), BUILTIN_SUGGESTIONS).install();
+        myCommand.getEditorField().getEmptyText().setText("Command to execute for formatting");
+        myCommand.getEditorField().getAccessibleContext().setAccessibleName("Command to execute for formatting");
+
+        myTextArea = new JBLabel();
+
+        myTextArea.setText("Format Nix files via an external formatter. Source of focused file will be passed as standard input.");
+        new CommandSuggestionsPopup(
+                myCommand,
+                NixLangSettings.getInstance().getCommandHistory(),
+                BUILTIN_SUGGESTIONS
+        ).install();
+
+
 
         return FormBuilder.createFormBuilder()
+                .addComponent(new TitledSeparator("Formatter Configuration"))
+                .addComponent(myTextArea)
                 .addComponent(myEnabled)
-                .addComponent(new TitledSeparator("Language Server Configuration"))
                 .addLabeledComponent("Command: ", myCommand)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
@@ -65,9 +73,9 @@ public class NixLspSettingsConfigurable implements SearchableConfigurable, Confi
         assert myEnabled != null;
         assert myCommand != null;
 
-        NixLspSettings settings = NixLspSettings.getInstance();
-        myEnabled.setSelected(settings.isEnabled());
-        myCommand.setText(settings.getCommand());
+        NixLangSettings settings = NixLangSettings.getInstance();
+        myEnabled.setSelected(settings.isFormatEnabled());
+        myCommand.setText(settings.getFormatCommand());
 
         updateUiState();
     }
@@ -78,13 +86,9 @@ public class NixLspSettingsConfigurable implements SearchableConfigurable, Confi
         assert myEnabled != null;
         assert myCommand != null;
 
-        NixLspSettings settings = NixLspSettings.getInstance();
-        settings.setEnabled(myEnabled.isSelected());
-        settings.setCommand(myCommand.getText());
-
-        for (Project project : ProjectManager.getInstance().getOpenProjects()) {
-            LspServerManager.getInstance(project).stopAndRestartIfNeeded(NixLspServerSupportProvider.class);
-        }
+        NixLangSettings settings = NixLangSettings.getInstance();
+        settings.setFormatEnabled(myEnabled.isSelected());
+        settings.setFormatCommand(myCommand.getText());
     }
 
     @Override
@@ -92,9 +96,9 @@ public class NixLspSettingsConfigurable implements SearchableConfigurable, Confi
         assert myEnabled != null;
         assert myCommand != null;
 
-        NixLspSettings settings = NixLspSettings.getInstance();
-        return Configurable.isCheckboxModified(myEnabled, settings.isEnabled()) ||
-                Configurable.isFieldModified(myCommand.getTextField(), settings.getCommand());
+        NixLangSettings settings = NixLangSettings.getInstance();
+        return Configurable.isCheckboxModified(myEnabled, settings.isFormatEnabled()) ||
+                Configurable.isFieldModified(myCommand.getTextField(), settings.getFormatCommand());
     }
 
     private void updateUiState() {

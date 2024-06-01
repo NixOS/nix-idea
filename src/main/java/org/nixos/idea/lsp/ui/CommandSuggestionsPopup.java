@@ -37,20 +37,19 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public final class CommandSuggestionsPopup {
-    // Implementation partially inspired by TextCompletionField
 
-    private static final List<Suggestion> BUILDIN_SUGGESTIONS = List.of(
-            Suggestion.builtin("<html>Use <b>nil</b> from nixpkgs</html>",
-                    "nix --extra-experimental-features \"nix-command flakes\" run nixpkgs#nil"),
-            Suggestion.builtin("<html>Use <b>nixd</b> from nixpkgs</html>",
-                    "nix --extra-experimental-features \"nix-command flakes\" run nixpkgs#nixd")
-    );
+    // Implementation partially inspired by TextCompletionField
 
     private final @NotNull ExpandableTextField myEditor;
     private final @NotNull Collection<String> myHistory;
     private @Nullable ListPopup myPopup;
+    private final @NotNull List<Suggestion> mySuggestions;
 
-    public CommandSuggestionsPopup(@NotNull RawCommandLineEditor commandLineEditor, @NotNull Collection<String> history) {
+    public CommandSuggestionsPopup(@NotNull RawCommandLineEditor commandLineEditor,
+                                   @NotNull Collection<String> history,
+                                   @NotNull List<Suggestion> suggestions
+    ) {
+        mySuggestions = suggestions;
         myEditor = commandLineEditor.getEditorField();
         myHistory = history;
     }
@@ -72,7 +71,7 @@ public final class CommandSuggestionsPopup {
 
     public void show() {
         if (myPopup == null) {
-            myPopup = new MyListPopup();
+            myPopup = new MyListPopup(mySuggestions);
             myPopup.showUnderneathOf(myEditor);
         }
     }
@@ -110,8 +109,8 @@ public final class CommandSuggestionsPopup {
     }
 
     private final class MyListPopup extends ListPopupImpl implements JBPopupListener {
-        private MyListPopup() {
-            super(null, new MyListPopupStep());
+        private MyListPopup(List<Suggestion> suggestions) {
+            super(null, new MyListPopupStep(suggestions));
             // Disable focus in popup, so that the text field stays in focus.
             setRequestFocus(false);
             // Prevent the popup from overriding the paste-action.
@@ -127,7 +126,8 @@ public final class CommandSuggestionsPopup {
             switch (aEvent.getKeyCode()) {
                 // Do no handle left and right key,
                 // as it would prevent their usage in the text field while the popup is open.
-                case KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT -> {}
+                case KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT -> {
+                }
                 default -> super.process(aEvent);
             }
         }
@@ -138,13 +138,13 @@ public final class CommandSuggestionsPopup {
         }
     }
 
-    private record Suggestion(
+    public record Suggestion(
             @NotNull Icon icon,
             @NotNull String primaryText,
             @Nullable String secondaryText,
             @NotNull String command
     ) {
-        static @NotNull Suggestion builtin(@NotNull String name, @NotNull String command) {
+        public static @NotNull Suggestion builtin(@NotNull String name, @NotNull String command) {
             return new Suggestion(AllIcons.Actions.Lightning, name, command, command);
         }
 
@@ -161,9 +161,9 @@ public final class CommandSuggestionsPopup {
 
     private final class MyListPopupStep extends BaseListPopupStep<Suggestion> implements ListPopupStepEx<Suggestion> {
 
-        public MyListPopupStep() {
+        public MyListPopupStep(List<Suggestion> suggestions) {
             super(null, Stream.concat(
-                    BUILDIN_SUGGESTIONS.stream(),
+                    suggestions.stream(),
                     myHistory.stream().map(Suggestion::history)
             ).toList());
         }
