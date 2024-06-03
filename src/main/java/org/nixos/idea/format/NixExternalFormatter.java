@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.file.NixFile;
 import org.nixos.idea.lang.NixLanguage;
-import org.nixos.idea.settings.NixLangSettings;
+import org.nixos.idea.settings.NixExternalFormatterSettings;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -50,7 +50,7 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
 
     @Override
     protected @Nullable FormattingTask createFormattingTask(@NotNull AsyncFormattingRequest request) {
-        NixLangSettings nixSettings = NixLangSettings.getInstance();
+        NixExternalFormatterSettings nixSettings = NixExternalFormatterSettings.getInstance();
         if (!nixSettings.isFormatEnabled()) {
             return null;
         }

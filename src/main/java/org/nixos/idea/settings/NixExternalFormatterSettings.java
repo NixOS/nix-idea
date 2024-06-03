@@ -12,8 +12,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 
-@State(name = "NixLangSettings", storages = @Storage(value = "nix-idea-lang.xml", roamingType = RoamingType.DISABLED))
-public final class NixLangSettings implements PersistentStateComponent<NixLangSettings.State> {
+@State(name = "NixExternalFormatterSettings", storages = @Storage(value = "nix-idea-ext-fmt.xml", roamingType = RoamingType.DISABLED))
+public final class NixExternalFormatterSettings implements PersistentStateComponent<NixExternalFormatterSettings.State> {
 
     // TODO: Use RoamingType.LOCAL with 2024.1
 
@@ -24,8 +24,8 @@ public final class NixLangSettings implements PersistentStateComponent<NixLangSe
 
     private @NotNull State myState = new State();
 
-    public static @NotNull NixLangSettings getInstance() {
-        return ApplicationManager.getApplication().getService(NixLangSettings.class);
+    public static @NotNull NixExternalFormatterSettings getInstance() {
+        return ApplicationManager.getApplication().getService(NixExternalFormatterSettings.class);
     }
 
     public boolean isFormatEnabled() {

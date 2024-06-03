@@ -49,7 +49,7 @@
                 implementation="org.nixos.idea.settings.NixColorSettingsPage"/>
 
         <applicationService
-                serviceImplementation="org.nixos.idea.settings.NixLangSettings"/>
+                serviceImplementation="org.nixos.idea.settings.NixExternalFormatterSettings"/>
 
         <applicationConfigurable
                 parentId="language"

@@ -51,7 +51,7 @@ public class NixLangSettingsConfigurable implements SearchableConfigurable, Conf
         myTextArea.setText("Format Nix files via an external formatter. Source of focused file will be passed as standard input.");
         new CommandSuggestionsPopup(
                 myCommand,
-                NixLangSettings.getInstance().getCommandHistory(),
+                NixExternalFormatterSettings.getInstance().getCommandHistory(),
                 BUILTIN_SUGGESTIONS
         ).install();
 
@@ -70,7 +70,7 @@ public class NixLangSettingsConfigurable implements SearchableConfigurable, Conf
         assert myEnabled != null;
         assert myCommand != null;
 
-        NixLangSettings settings = NixLangSettings.getInstance();
+        NixExternalFormatterSettings settings = NixExternalFormatterSettings.getInstance();
         myEnabled.setSelected(settings.isFormatEnabled());
         myCommand.setText(settings.getFormatCommand());
 
@@ -83,9 +83,9 @@ public class NixLangSettingsConfigurable implements SearchableConfigurable, Conf
         assert myEnabled != null;
         assert myCommand != null;
 
-        NixLangSettings settings = NixLangSettings.getInstance();
-        settings.setFormatEnabled(myEnabled.isSelected());
-        settings.setFormatCommand(myCommand.getText());
+        var formatterSettings = NixExternalFormatterSettings.getInstance();
+        formatterSettings.setFormatEnabled(myEnabled.isSelected());
+        formatterSettings.setFormatCommand(myCommand.getText());
     }
 
     @Override
@@ -93,7 +93,7 @@ public class NixLangSettingsConfigurable implements SearchableConfigurable, Conf
         assert myEnabled != null;
         assert myCommand != null;
 
-        NixLangSettings settings = NixLangSettings.getInstance();
+        var settings = NixExternalFormatterSettings.getInstance();
         return Configurable.isCheckboxModified(myEnabled, settings.isFormatEnabled()) ||
                 Configurable.isFieldModified(myCommand.getTextField(), settings.getFormatCommand());
     }
