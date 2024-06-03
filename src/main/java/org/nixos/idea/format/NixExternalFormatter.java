@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.file.NixFile;
+import org.nixos.idea.lang.NixLanguage;
 import org.nixos.idea.settings.NixLangSettings;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
 
     @Override
     protected @NotNull String getNotificationGroupId() {
-        return "NixIDEA";
+        return NixLanguage.NOTIFICATION_GROUP_ID;
     }
 
     @Override
@@ -50,7 +51,6 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
     @Override
     protected @Nullable FormattingTask createFormattingTask(@NotNull AsyncFormattingRequest request) {
         NixLangSettings nixSettings = NixLangSettings.getInstance();
-        System.out.println("started fmt task");
         if (!nixSettings.isFormatEnabled()) {
             return null;
         }
@@ -62,14 +62,11 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
         var command = nixSettings.getFormatCommand();
         List<String> argv = ParametersListUtil.parse(command, false, true);
 
-        try {
-            var commandLine = new GeneralCommandLine(argv);
+        var commandLine = new GeneralCommandLine(argv);
 
-            OSProcessHandler handler = new OSProcessHandler(commandLine.withCharset(StandardCharsets.UTF_8));
+        try {
+            var handler = new OSProcessHandler(commandLine.withCharset(StandardCharsets.UTF_8));
             OutputStream processInput = handler.getProcessInput();
-            Files.copy(ioFile.toPath(), processInput);
-            processInput.flush();
-            processInput.close();
             return new FormattingTask() {
                 @Override
                 public void run() {
@@ -86,6 +83,14 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
                         }
                     });
                     handler.startNotify();
+                    try {
+                        Files.copy(ioFile.toPath(), processInput);
+                        processInput.flush();
+                        processInput.close();
+                    } catch (IOException e) {
+                        handler.destroyProcess();
+                        request.onError("NixIDEA", e.getMessage());
+                    }
                 }
 
                 @Override
@@ -99,7 +104,7 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
                     return true;
                 }
             };
-        } catch (ExecutionException | IOException e) {
+        } catch (ExecutionException e) {
             request.onError("NixIDEA", e.getMessage());
             return null;
         }

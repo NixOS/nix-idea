@@ -58,6 +58,8 @@
                 instance="org.nixos.idea.settings.NixLangSettingsConfigurable"/>
 
         <formattingService implementation="org.nixos.idea.format.NixExternalFormatter"/>
+
+        <notificationGroup id="NixIDEA" displayType="BALLOON" key="notification.group.nixidea"/>
     </extensions>
 
 </idea-plugin>
