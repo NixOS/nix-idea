@@ -59,7 +59,7 @@
 
         <formattingService implementation="org.nixos.idea.format.NixExternalFormatter"/>
 
-        <notificationGroup id="NixIDEA" displayType="BALLOON" key="notification.group.nixidea"/>
+        <notificationGroup id="NixIDEA" displayType="BALLOON"/>
     </extensions>
 
 </idea-plugin>
