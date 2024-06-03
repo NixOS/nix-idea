@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 
-@State(name = "NixLangSettings", storages = @Storage(value = "nix-idea-tools.xml", roamingType = RoamingType.DISABLED))
+@State(name = "NixLangSettings", storages = @Storage(value = "nix-idea-lang.xml", roamingType = RoamingType.DISABLED))
 public final class NixLangSettings implements PersistentStateComponent<NixLangSettings.State> {
 
     // TODO: Use RoamingType.LOCAL with 2024.1

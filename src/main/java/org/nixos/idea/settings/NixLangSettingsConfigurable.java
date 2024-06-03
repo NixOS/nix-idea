@@ -29,12 +29,12 @@ public class NixLangSettingsConfigurable implements SearchableConfigurable, Conf
 
     @Override
     public @NotNull @NonNls String getId() {
-        return "org.nixos.idea.lsp.NixLangSettingsConfigurable";
+        return "org.nixos.idea.settings.NixLangSettingsConfigurable";
     }
 
     @Override
     public @NlsContexts.ConfigurableName String getDisplayName() {
-        return "Nix Language Server (LSP)";
+        return "Nix";
     }
 
     @Override
@@ -57,7 +57,7 @@ public class NixLangSettingsConfigurable implements SearchableConfigurable, Conf
 
 
         return FormBuilder.createFormBuilder()
-                .addComponent(new TitledSeparator("Formatter Configuration"))
+                .addComponent(new TitledSeparator("External Formatter Configuration"))
                 .addComponent(myTextArea)
                 .addComponent(myEnabled)
                 .addLabeledComponent("Command: ", myCommand)
