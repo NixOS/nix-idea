@@ -71,7 +71,7 @@ public final class CommandSuggestionsPopup {
 
     public void show() {
         if (myPopup == null) {
-            myPopup = new MyListPopup(mySuggestions);
+            myPopup = new MyListPopup();
             myPopup.showUnderneathOf(myEditor);
         }
     }
@@ -109,8 +109,8 @@ public final class CommandSuggestionsPopup {
     }
 
     private final class MyListPopup extends ListPopupImpl implements JBPopupListener {
-        private MyListPopup(List<Suggestion> suggestions) {
-            super(null, new MyListPopupStep(suggestions));
+        private MyListPopup() {
+            super(null, new MyListPopupStep());
             // Disable focus in popup, so that the text field stays in focus.
             setRequestFocus(false);
             // Prevent the popup from overriding the paste-action.
@@ -161,9 +161,9 @@ public final class CommandSuggestionsPopup {
 
     private final class MyListPopupStep extends BaseListPopupStep<Suggestion> implements ListPopupStepEx<Suggestion> {
 
-        public MyListPopupStep(List<Suggestion> suggestions) {
+        public MyListPopupStep() {
             super(null, Stream.concat(
-                    suggestions.stream(),
+                    mySuggestions.stream(),
                     myHistory.stream().map(Suggestion::history)
             ).toList());
         }
