@@ -4,7 +4,7 @@
 
 ### Added
 
-- Support for code formatting, via external commands ([#80](https://github.com/NixOS/nix-idea/pull/80))
+- Support for code formatting via external commands ([#80](https://github.com/NixOS/nix-idea/pull/80))
 
 ### Changed
 

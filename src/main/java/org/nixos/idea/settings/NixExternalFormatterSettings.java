@@ -12,10 +12,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 
-@State(name = "NixExternalFormatterSettings", storages = @Storage(value = "nix-idea-ext-fmt.xml", roamingType = RoamingType.DISABLED))
+@State(name = "NixExternalFormatterSettings", storages = @Storage(value = NixStoragePaths.TOOLS, roamingType = RoamingType.DISABLED))
 public final class NixExternalFormatterSettings implements PersistentStateComponent<NixExternalFormatterSettings.State> {
-
-    // TODO: Use RoamingType.LOCAL with 2024.1
 
     // Documentation:
     // https://plugins.jetbrains.com/docs/intellij/persisting-state-of-components.html
@@ -29,28 +27,28 @@ public final class NixExternalFormatterSettings implements PersistentStateCompon
     }
 
     public boolean isFormatEnabled() {
-        return myState.formatEnabled;
+        return myState.enabled;
     }
 
     public void setFormatEnabled(boolean enabled) {
-        myState.formatEnabled = enabled;
+        myState.enabled = enabled;
     }
 
     public @NotNull String getFormatCommand() {
-        return myState.formatCommand;
+        return myState.command;
     }
 
     public void setFormatCommand(@NotNull String command) {
-        myState.formatCommand = command;
+        myState.command = command;
         addFormatCommandToHistory(command);
     }
 
     public @NotNull Collection<String> getCommandHistory() {
-        return Collections.unmodifiableCollection(myState.formatCommandHistory);
+        return Collections.unmodifiableCollection(myState.history);
     }
 
     private void addFormatCommandToHistory(@NotNull String command) {
-        Deque<String> history = myState.formatCommandHistory;
+        Deque<String> history = myState.history;
         history.remove(command);
         history.addFirst(command);
         while (history.size() > MAX_HISTORY_SIZE) {
@@ -71,8 +69,8 @@ public final class NixExternalFormatterSettings implements PersistentStateCompon
     }
 
     static final class State {
-        public boolean formatEnabled = false;
-        public @NotNull String formatCommand = "";
-        public Deque<String> formatCommandHistory = new ArrayDeque<>();
+        public boolean enabled = false;
+        public @NotNull String command = "";
+        public Deque<String> history = new ArrayDeque<>();
     }
 }

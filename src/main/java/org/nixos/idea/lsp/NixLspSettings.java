@@ -6,16 +6,15 @@ import com.intellij.openapi.components.RoamingType;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import org.jetbrains.annotations.NotNull;
+import org.nixos.idea.settings.NixStoragePaths;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 
-@State(name = "NixLspSettings", storages = @Storage(value = "nix-idea-tools.xml", roamingType = RoamingType.DISABLED))
+@State(name = "NixLspSettings", storages = @Storage(value = NixStoragePaths.TOOLS, roamingType = RoamingType.DISABLED))
 public final class NixLspSettings implements PersistentStateComponent<NixLspSettings.State> {
-
-    // TODO: Use RoamingType.LOCAL with 2024.1
 
     // Documentation:
     // https://plugins.jetbrains.com/docs/intellij/persisting-state-of-components.html
