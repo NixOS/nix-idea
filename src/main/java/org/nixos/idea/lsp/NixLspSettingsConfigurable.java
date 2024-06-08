@@ -18,8 +18,15 @@ import org.nixos.idea.lsp.ui.CommandSuggestionsPopup;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import java.util.List;
 
 public class NixLspSettingsConfigurable implements SearchableConfigurable, Configurable.Beta {
+    private static final List<CommandSuggestionsPopup.Suggestion> BUILTIN_SUGGESTIONS = List.of(
+            CommandSuggestionsPopup.Suggestion.builtin("<html>Use <b>nil</b> from nixpkgs</html>",
+                    "nix --extra-experimental-features \"nix-command flakes\" run nixpkgs#nil"),
+            CommandSuggestionsPopup.Suggestion.builtin("<html>Use <b>nixd</b> from nixpkgs</html>",
+                    "nix --extra-experimental-features \"nix-command flakes\" run nixpkgs#nixd")
+    );
 
     private @Nullable JBCheckBox myEnabled;
     private @Nullable RawCommandLineEditor myCommand;
@@ -43,7 +50,7 @@ public class NixLspSettingsConfigurable implements SearchableConfigurable, Confi
         myCommand.getEditorField().getEmptyText().setText("Command to start Language Server");
         myCommand.getEditorField().getAccessibleContext().setAccessibleName("Command to start Language Server");
         myCommand.getEditorField().setMargin(myEnabled.getMargin());
-        new CommandSuggestionsPopup(myCommand, NixLspSettings.getInstance().getCommandHistory()).install();
+        new CommandSuggestionsPopup(myCommand, NixLspSettings.getInstance().getCommandHistory(), BUILTIN_SUGGESTIONS).install();
 
         return FormBuilder.createFormBuilder()
                 .addComponent(myEnabled)
