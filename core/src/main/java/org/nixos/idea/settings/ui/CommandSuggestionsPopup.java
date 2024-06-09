@@ -1,4 +1,4 @@
-package org.nixos.idea.lsp.ui;
+package org.nixos.idea.settings.ui;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.CustomShortcutSet;
@@ -195,7 +195,7 @@ public final class CommandSuggestionsPopup {
         @Override
         public @Nullable PopupStep<?> onChosen(Suggestion selectedValue, boolean finalChoice) {
             myEditor.setText(selectedValue.command());
-            return FINAL_CHOICE;
+            return PopupStep.FINAL_CHOICE;
         }
     }
 }

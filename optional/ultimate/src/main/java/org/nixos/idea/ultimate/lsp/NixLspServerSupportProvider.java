@@ -1,10 +1,11 @@
-package org.nixos.idea.lsp;
+package org.nixos.idea.ultimate.lsp;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.platform.lsp.api.LspServerSupportProvider;
 import org.jetbrains.annotations.NotNull;
 import org.nixos.idea.file.NixFileType;
+import org.nixos.idea.ultimate.settings.NixLspSettings;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class NixLspServerSupportProvider implements LspServerSupportProvider {

@@ -9,6 +9,7 @@ repositories {
 }
 
 dependencies {
+    implementation(plugin("org.jetbrains.kotlin.jvm", embeddedKotlinVersion))
     implementation(plugin(libs.plugins.jetbrains.intellij.platform))
 }
 
@@ -20,11 +21,14 @@ dependencies {
  */
 fun plugin(pluginProvider: Provider<PluginDependency>): Provider<Map<String, String>> {
     return pluginProvider.map {
-        val id = it.pluginId
-        mapOf(
-            "group" to id,
-            "name" to "$id.gradle.plugin", // PLUGIN_MARKER_SUFFIX
-            "version" to it.version.requiredVersion,
-        )
+        plugin(it.pluginId, it.version.requiredVersion)
     }
+}
+
+fun plugin(id: String, version: String): Map<String, String> {
+    return mapOf(
+        "group" to id,
+        "name" to "$id.gradle.plugin", // PLUGIN_MARKER_SUFFIX
+        "version" to version,
+    )
 }

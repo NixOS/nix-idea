@@ -1,4 +1,4 @@
-package org.nixos.idea.lsp;
+package org.nixos.idea.ultimate.settings;
 
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
@@ -14,7 +14,8 @@ import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.nixos.idea.lsp.ui.CommandSuggestionsPopup;
+import org.nixos.idea.settings.ui.CommandSuggestionsPopup;
+import org.nixos.idea.ultimate.lsp.NixLspServerSupportProvider;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;

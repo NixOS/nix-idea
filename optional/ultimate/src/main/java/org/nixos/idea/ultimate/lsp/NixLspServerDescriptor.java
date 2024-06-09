@@ -1,4 +1,4 @@
-package org.nixos.idea.lsp;
+package org.nixos.idea.ultimate.lsp;
 
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
@@ -8,6 +8,7 @@ import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor;
 import com.intellij.util.execution.ParametersListUtil;
 import org.jetbrains.annotations.NotNull;
 import org.nixos.idea.file.NixFileType;
+import org.nixos.idea.ultimate.settings.NixLspSettings;
 
 import java.util.List;
 

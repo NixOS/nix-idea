@@ -1,4 +1,4 @@
-package org.nixos.idea.lsp;
+package org.nixos.idea.ultimate.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;

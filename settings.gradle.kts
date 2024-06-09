@@ -9,4 +9,11 @@ pluginManagement {
 
 rootProject.name = "NixIDEA"
 
+include("core")
+include("optional:clion")
+include("optional:java")
+include("optional:python")
+include("optional:ultimate")
+
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

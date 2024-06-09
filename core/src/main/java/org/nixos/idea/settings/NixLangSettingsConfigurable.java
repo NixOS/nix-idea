@@ -12,7 +12,7 @@ import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.nixos.idea.lsp.ui.CommandSuggestionsPopup;
+import org.nixos.idea.settings.ui.CommandSuggestionsPopup;
 
 import javax.swing.*;
 import java.util.List;
