@@ -3,11 +3,12 @@ plugins {
 }
 
 repositories {
+    maven("https://oss.sonatype.org/content/repositories/snapshots/")
     gradlePluginPortal()
 }
 
 dependencies {
-    implementation(plugin(libs.plugins.jetbrains.intellij))
+    implementation(plugin(libs.plugins.jetbrains.intellij.platform))
 }
 
 /**

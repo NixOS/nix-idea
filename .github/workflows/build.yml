@@ -44,13 +44,13 @@ jobs:
     - name: Collect metadata for upcoming steps and jobs
       id: metadata
       run: |
-        ./gradlew --stacktrace metadata listProductsReleases
-        echo "products-releases=$(jq -Rnc '[inputs]' < build/listProductsReleases.txt)" >> "$GITHUB_OUTPUT"
+        ./gradlew --stacktrace metadata
+        echo "products-releases=$(./gradlew -q printProductsReleases | jq -Rnc '[inputs]')" >> "$GITHUB_OUTPUT"
     # Build
     - name: Build project
-      run: ./gradlew --stacktrace assemble
-    - name: Package and verify plugin
-      run: ./gradlew --stacktrace verifyPlugin
+      run: ./gradlew --stacktrace assemble buildPlugin
+    - name: Verify plugin
+      run: ./gradlew --stacktrace verifyPluginStructure
     - name: Run linters and tests
       run: ./gradlew --stacktrace check
     # Upload artifacts
@@ -99,7 +99,7 @@ jobs:
         key: pluginVerifier-${{ matrix.idea-release }}-${{ runner.os }}
     # Run checks
     - name: Check plugin compatibility
-      run: ./gradlew --stacktrace -PverifierIdeVersionOverride="${{ matrix.idea-release }}" runPluginVerifier
+      run: ./gradlew --stacktrace -PverifierIdeVersionOverride="${{ matrix.idea-release }}" verifyPlugin
     # Upload artifacts
     - name: Upload build reports
       if: always()
