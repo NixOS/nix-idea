@@ -36,18 +36,31 @@ object NixIndStringUtil {
             }
 
             when (c) {
-                // ''' is escaped to ''
-                // ''  is the string delimiter
+                // ''\ escapes any character, but we can only cover known ones in advance:
                 '\'' -> when {
+                    // ''' is escaped to ''
                     prev2Chars() == "''" -> append("''")
+                    // ''  is the string delimiter
+                    else -> continue
+                }
+
+                '\\' -> when {
+                    prev2Chars() == "''" -> continue
                     prevChar() == '\'' -> continue
                     else -> append(c)
                 }
-                // ''\ escapes any character, but we can only cover known ones in advance:
-                'r' -> if (prev3Chars() == "''\\") append('\r') else append(c)
-                'n' -> if (prev3Chars() == "''\\") append('\n') else append(c)
-                't' -> if (prev3Chars() == "''\\") append('\t') else append(c)
-                else -> append(c)
+
+                '$' -> if (prevChar() == '$') append(c) else continue
+                '{' -> if (prevChar() == '$') append("\${") else append(c)
+
+                else -> if (prev3Chars() == "''\\") when (c) {
+                    'r' -> if (prev3Chars() == "''\\") append('\r') else append(c)
+                    'n' -> if (prev3Chars() == "''\\") append('\n') else append(c)
+                    't' -> if (prev3Chars() == "''\\") append('\t') else append(c)
+                    else -> append("''\\").append(c)
+                } else {
+                    append(c)
+                }
             }
         }
     }

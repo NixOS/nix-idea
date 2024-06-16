@@ -14,41 +14,28 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class NixIndStringUtilTest {
-//    @ParameterizedTest(name = "[{index}] {0} -> {1}")
-//    @CsvSource(textBlock = """
-//            ''              , ""
-//            abc             , "abc"
-//            "               , "\\\""
-//            \\              , "\\\\"
-//            \\x             , "\\\\x"
-//            a${b}c          , "a\\${b}c"
-//            '\n'            , "\\n"
-//            '\r'            , "\\r"
-//            '\t'            , "\\t"
-//            # supplementary character, i.e. character form a supplementary plane,
-//            # which needs a surrogate pair to be represented in UTF-16
-//            \uD83C\uDF09    , "\uD83C\uDF09"
-//            """)
-//    void quote(String unescaped, String expectedResult) {
-//        assertEquals(expectedResult, NixStringUtil.quote(unescaped));
-//    }
-
     @ParameterizedTest(name = "[{index}] {0} -> {1}")
-    @CsvSource(textBlock = """
-            ''              , ''
+    @CsvSource(quoteCharacter = '|', textBlock = """
+            ||              , ||
             abc             , abc
-            "               , \\"
-            \\              , \\\\
-            \\x             , \\\\x
-            a${b}c          , a\\${b}c
-            '\n'            , \\n
-            '\r'            , \\r
-            '\t'            , \\t
+            "               , "
+            \\              , \\
+            \\x             , \\x
+            a${b}c          , a${b}c
+            |\n|            , |\n|
+            |\r|            , |\r|
+            |\t|            , |\t|
+            |''\\t|         , |\t|
+            |''\\r|         , |\r|
+            |''\\n|         , |\n|
+            |'''|           , |''|
+            $$              , $
             # supplementary character, i.e. character form a supplementary plane,
             # which needs a surrogate pair to be represented in UTF-16
             \uD83C\uDF09    , \uD83C\uDF09
             """)
     void escape(String unescaped, String expectedResult) {
+        NixIndStringUtil.INSTANCE.escape("''\\t");
         var str = NixIndStringUtil.INSTANCE.escape(unescaped);
         assertEquals(expectedResult, str);
     }
