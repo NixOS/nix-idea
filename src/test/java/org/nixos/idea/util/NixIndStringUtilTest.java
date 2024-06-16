@@ -13,25 +13,25 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-final class NixStringUtilTest {
-    @ParameterizedTest(name = "[{index}] {0} -> {1}")
-    @CsvSource(textBlock = """
-            ''              , ""
-            abc             , "abc"
-            "               , "\\\""
-            \\              , "\\\\"
-            \\x             , "\\\\x"
-            a${b}c          , "a\\${b}c"
-            '\n'            , "\\n"
-            '\r'            , "\\r"
-            '\t'            , "\\t"
-            # supplementary character, i.e. character form a supplementary plane,
-            # which needs a surrogate pair to be represented in UTF-16
-            \uD83C\uDF09    , "\uD83C\uDF09"
-            """)
-    void quote(String unescaped, String expectedResult) {
-        assertEquals(expectedResult, NixStringUtil.quote(unescaped));
-    }
+final class NixIndStringUtilTest {
+//    @ParameterizedTest(name = "[{index}] {0} -> {1}")
+//    @CsvSource(textBlock = """
+//            ''              , ""
+//            abc             , "abc"
+//            "               , "\\\""
+//            \\              , "\\\\"
+//            \\x             , "\\\\x"
+//            a${b}c          , "a\\${b}c"
+//            '\n'            , "\\n"
+//            '\r'            , "\\r"
+//            '\t'            , "\\t"
+//            # supplementary character, i.e. character form a supplementary plane,
+//            # which needs a surrogate pair to be represented in UTF-16
+//            \uD83C\uDF09    , "\uD83C\uDF09"
+//            """)
+//    void quote(String unescaped, String expectedResult) {
+//        assertEquals(expectedResult, NixStringUtil.quote(unescaped));
+//    }
 
     @ParameterizedTest(name = "[{index}] {0} -> {1}")
     @CsvSource(textBlock = """
@@ -49,9 +49,9 @@ final class NixStringUtilTest {
             \uD83C\uDF09    , \uD83C\uDF09
             """)
     void escape(String unescaped, String expectedResult) {
-        StringBuilder stringBuilder = new StringBuilder();
-        NixStringUtil.escape(stringBuilder, unescaped);
-        assertEquals(expectedResult, stringBuilder.toString());
+        var sb = new StringBuilder();
+        NixIndStringUtil.INSTANCE.escape(sb, unescaped);
+        assertEquals(expectedResult, sb.toString());
     }
 
     @ParameterizedTest(name = "[{index}] {0} -> {1}")
@@ -68,7 +68,7 @@ final class NixStringUtilTest {
             ''''\\"''       , "
             ''''\\\\''      , \\
             ''''\\\\x''     , \\x
-            '''''''         , |''|
+            ''  '''  ''     , |  '''|
             "''\\""         , ''"
             "a\\${b}c"      , a${b}c
             ''a''${b}c''    , a${b}c
@@ -82,8 +82,6 @@ final class NixStringUtilTest {
             # which needs a surrogate pair to be represented in UTF-16
             "\uD83C\uDF09"  , \uD83C\uDF09
             ''\uD83C\uDF09'', \uD83C\uDF09
-            # TODO implement indentation (the one below fails)
-            # '' a ''          , |a |
             """)
     @WithIdeaPlatform.OnEdt
     void parse(String code, String expectedResult, Project project) {

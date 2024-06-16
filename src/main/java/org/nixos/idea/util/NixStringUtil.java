@@ -113,6 +113,10 @@ public final class NixStringUtil {
         } else if (type == NixTypes.IND_STR_ESCAPE) {
             assert text.length() == 3 && ("''$".contentEquals(text) || "'''".contentEquals(text)) ||
                     text.length() == 4 && "''\\".contentEquals(text.subSequence(0, 3)) : text;
+            if ("'''".contentEquals(text)){
+                builder.append("''");
+                return;
+            }
             char c = text.charAt(text.length() - 1);
             builder.append(unescape(c));
         } else {
