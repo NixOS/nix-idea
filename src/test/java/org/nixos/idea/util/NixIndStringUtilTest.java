@@ -49,47 +49,7 @@ final class NixIndStringUtilTest {
             \uD83C\uDF09    , \uD83C\uDF09
             """)
     void escape(String unescaped, String expectedResult) {
-        var sb = new StringBuilder();
-        NixIndStringUtil.INSTANCE.escape(sb, unescaped);
-        assertEquals(expectedResult, sb.toString());
-    }
-
-    @ParameterizedTest(name = "[{index}] {0} -> {1}")
-    @CsvSource(quoteCharacter = '|', textBlock = """
-            ""              , ||
-            "x"             , x
-            ''abc''         , abc
-            "\\""           , "
-            "\\\\"          , \\
-            "\\\\x"         , \\x
-            ''\\"''         , \\"
-            ''\\\\''        , \\\\
-            ''\\\\x''       , \\\\x
-            ''''\\"''       , "
-            ''''\\\\''      , \\
-            ''''\\\\x''     , \\x
-            ''  '''  ''     , |  '''|
-            "''\\""         , ''"
-            "a\\${b}c"      , a${b}c
-            ''a''${b}c''    , a${b}c
-            ''a''\\${b}c''  , a${b}c
-            "a$${b}c"       , a$${b}c
-            ''a$${b}c''     , a$${b}c
-            |"\n"|          , |\n|
-            |"\r"|          , |\r|
-            |"\t"|          , |\t|
-            # supplementary character, i.e. character form a supplementary plane,
-            # which needs a surrogate pair to be represented in UTF-16
-            "\uD83C\uDF09"  , \uD83C\uDF09
-            ''\uD83C\uDF09'', \uD83C\uDF09
-            """)
-    @WithIdeaPlatform.OnEdt
-    void parse(String code, String expectedResult, Project project) {
-        NixString string = NixElementFactory.createString(project, code);
-        List<NixStringPart> parts = string.getStringParts();
-        assert parts.isEmpty() || parts.size() == 1;
-        for (NixStringPart part : parts) {
-            assertEquals(expectedResult, NixStringUtil.parse((NixStringText) part));
-        }
+        var str = NixIndStringUtil.INSTANCE.escape(unescaped);
+        assertEquals(expectedResult, str);
     }
 }

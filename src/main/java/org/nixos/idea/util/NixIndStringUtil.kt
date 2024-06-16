@@ -1,7 +1,5 @@
 package org.nixos.idea.util
 
-import java.lang.StringBuilder
-
 object NixIndStringUtil {
     /**
      * Escapes the given string for use in a double-quoted string expression in the Nix Expression Language.
@@ -15,19 +13,40 @@ object NixIndStringUtil {
      * $ nix eval --expr " ''   '''   '' "
      *  "''   "
      * ```
+     *
+     * This function does not erase string interpolations, because
+     * they are hard to parse in a loop without a proper grammar. For example:
+     * ```nix
+     * '' ${someNixFunc "${foo "}}" }" } ''
+     * ```
      */
-    fun escape(sb: StringBuilder, chars: CharSequence): Unit = sb.run {
+    fun escape(chars: CharSequence) = buildString {
         for ((index, c) in chars.withIndex()) {
             fun prevChar() = chars.getOrNull(index - 1)
             fun prev2Chars(): String? {
                 val prev = prevChar() ?: return null
-                val prevPrev = chars.getOrNull(index - 2)  ?: return null
+                val prevPrev = chars.getOrNull(index - 2) ?: return null
                 return "${prevPrev}${prev}"
             }
 
+            fun prev3Chars(): String? {
+                val prev2 = prev2Chars() ?: return null
+                val prevPrev2 = chars.getOrNull(index - 3) ?: return null
+                return "${prevPrev2}${prev2}"
+            }
+
             when (c) {
-//                '\'' -> if (prevChar != '\'') append(c)
-                '$' -> if (prev2Chars() == "''") append('$')
+                // ''' is escaped to ''
+                // ''  is the string delimiter
+                '\'' -> when {
+                    prev2Chars() == "''" -> append("''")
+                    prevChar() == '\'' -> continue
+                }
+                // ''\ escapes any character, but we can only cover known ones in advance:
+                'r' -> if (prev3Chars() == "''\\") append('\r')
+                'n' -> if (prev3Chars() == "''\\") append('\n')
+                't' -> if (prev3Chars() == "''\\") append('\t')
+                else -> append(c)
             }
         }
     }

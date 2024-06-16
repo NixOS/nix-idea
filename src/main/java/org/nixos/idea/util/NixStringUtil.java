@@ -4,6 +4,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.nixos.idea.psi.NixStringPart;
 import org.nixos.idea.psi.NixStringText;
 import org.nixos.idea.psi.NixTypes;
 
@@ -93,7 +94,7 @@ public final class NixStringUtil {
      * @param textNode A part of a string.
      * @return The resulting string after resolving all escape sequences.
      */
-    public static @NotNull String parse(@NotNull NixStringText textNode) {
+    public static @NotNull String parse(@NotNull NixStringPart textNode) {
         StringBuilder builder = new StringBuilder();
         for (ASTNode child = textNode.getNode().getFirstChildNode(); child != null; child = child.getTreeNext()) {
             parse(builder, child);
