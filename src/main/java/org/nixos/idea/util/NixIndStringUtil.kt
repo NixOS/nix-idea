@@ -20,7 +20,7 @@ object NixIndStringUtil {
      * '' ${someNixFunc "${foo "}}" }" } ''
      * ```
      */
-    fun escape(chars: CharSequence) = buildString {
+    fun escape(chars: CharSequence): String = buildString {
         for ((index, c) in chars.withIndex()) {
             fun prevChar() = chars.getOrNull(index - 1)
             fun prev2Chars(): String? {
@@ -41,11 +41,12 @@ object NixIndStringUtil {
                 '\'' -> when {
                     prev2Chars() == "''" -> append("''")
                     prevChar() == '\'' -> continue
+                    else -> append(c)
                 }
                 // ''\ escapes any character, but we can only cover known ones in advance:
-                'r' -> if (prev3Chars() == "''\\") append('\r')
-                'n' -> if (prev3Chars() == "''\\") append('\n')
-                't' -> if (prev3Chars() == "''\\") append('\t')
+                'r' -> if (prev3Chars() == "''\\") append('\r') else append(c)
+                'n' -> if (prev3Chars() == "''\\") append('\n') else append(c)
+                't' -> if (prev3Chars() == "''\\") append('\t') else append(c)
                 else -> append(c)
             }
         }

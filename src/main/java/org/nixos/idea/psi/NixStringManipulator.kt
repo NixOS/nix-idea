@@ -26,13 +26,12 @@ class NixStringManipulator : AbstractElementManipulator<NixString>() {
         return (element as? AbstractNixString)?.updateText(replacement)
     }
 
-    override fun getRangeInElement(element: NixString): TextRange =
-        when {
-            element.textLength == 0 -> TextRange.EMPTY_RANGE
-            element is NixIndString && element.textLength < 4 -> TextRange(0, element.textLength)
-            element is NixIndString -> TextRange(2, element.textLength - 2)
-            // element is not IndString, so it must be StdString
-            element.textLength == 1 -> TextRange(0, 1)
-            else -> TextRange(1, element.textLength - 1)
-        }
+    override fun getRangeInElement(element: NixString): TextRange = when {
+        element.textLength == 0 -> TextRange.EMPTY_RANGE
+        element is NixIndString && element.textLength < 4 -> TextRange(0, element.textLength)
+        element is NixIndString -> TextRange(2, element.textLength - 2)
+        // element is not IndString, so it must be StdString
+        element.textLength == 1 -> TextRange(0, 1)
+        else -> TextRange(1, element.textLength - 1)
+    }
 }

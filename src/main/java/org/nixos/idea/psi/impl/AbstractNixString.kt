@@ -2,7 +2,6 @@ package org.nixos.idea.psi.impl
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiLanguageInjectionHost
-import com.intellij.psi.impl.source.tree.LeafElement
 import org.nixos.idea.psi.NixString
 import org.nixos.idea.psi.NixStringLiteralEscaper
 
