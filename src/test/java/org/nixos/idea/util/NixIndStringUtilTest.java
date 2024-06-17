@@ -1,15 +1,7 @@
 package org.nixos.idea.util;
 
-import com.intellij.openapi.project.Project;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.nixos.idea._testutil.WithIdeaPlatform;
-import org.nixos.idea.psi.NixElementFactory;
-import org.nixos.idea.psi.NixString;
-import org.nixos.idea.psi.NixStringPart;
-import org.nixos.idea.psi.NixStringText;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
