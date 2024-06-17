@@ -7,8 +7,8 @@ object NixIndStringUtil {
      * See [Nix docs](https://nix.dev/manual/nix/2.22/language/values.html#type-string) for the logic, which
      * is non-trivial.
      *
-     * For example, `''` can be used to escape `'`, which means `''` is not the string
-     * terminator
+     * For example, `'` can be used to escape `''`, which means `'''` does not contain
+     * a string terminator
      * ```
      * $ nix eval --expr " ''   '''   '' "
      *  "''   "
@@ -20,6 +20,7 @@ object NixIndStringUtil {
      * '' ${someNixFunc "${foo "}}" }" } ''
      * ```
      */
+    @JvmStatic
     fun escape(chars: CharSequence): String = buildString {
         for ((index, c) in chars.withIndex()) {
             fun prevChar() = chars.getOrNull(index - 1)

@@ -91,7 +91,7 @@ final class NixStringUtilTest {
         List<NixStringPart> parts = string.getStringParts();
         assert parts.isEmpty() || parts.size() == 1;
         for (NixStringPart part : parts) {
-            assertEquals(expectedResult, NixStringUtil.parse(part));
+            assertEquals(expectedResult, NixStringUtil.parse((NixStringText) part));
         }
     }
 }

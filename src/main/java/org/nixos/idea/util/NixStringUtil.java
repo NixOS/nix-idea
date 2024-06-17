@@ -94,7 +94,7 @@ public final class NixStringUtil {
      * @param textNode A part of a string.
      * @return The resulting string after resolving all escape sequences.
      */
-    public static @NotNull String parse(@NotNull NixStringPart textNode) {
+    public static @NotNull String parse(@NotNull NixStringText textNode) {
         StringBuilder builder = new StringBuilder();
         for (ASTNode child = textNode.getNode().getFirstChildNode(); child != null; child = child.getTreeNext()) {
             parse(builder, child);

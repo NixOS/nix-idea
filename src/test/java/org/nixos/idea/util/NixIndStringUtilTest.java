@@ -27,8 +27,7 @@ final class NixIndStringUtilTest {
             \uD83C\uDF09    , \uD83C\uDF09
             """)
     void escape(String unescaped, String expectedResult) {
-        NixIndStringUtil.INSTANCE.escape("''\\t");
-        var str = NixIndStringUtil.INSTANCE.escape(unescaped);
+        var str = NixIndStringUtil.escape(unescaped);
         assertEquals(expectedResult, str);
     }
 }
