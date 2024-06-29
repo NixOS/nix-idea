@@ -8,20 +8,22 @@
 
 # Package Files #
 *.jar
-!gradle/wrapper/gradle-wrapper.jar
 *.war
 *.ear
-
-out
-.idea/workspace.xml
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-
-**/.idea
+# IntelliJ
 *.iml
-**/.gradle
-build
+.idea/*
+!.idea/codeStyles/
+out/
+!src/**/out/
+
+# Gradle
+.gradle/
+build/
+!src/**/build/
 
 src/gen
