@@ -4,6 +4,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.nixos.idea.psi.NixStringPart;
 import org.nixos.idea.psi.NixStringText;
 import org.nixos.idea.psi.NixTypes;
 
@@ -113,6 +114,10 @@ public final class NixStringUtil {
         } else if (type == NixTypes.IND_STR_ESCAPE) {
             assert text.length() == 3 && ("''$".contentEquals(text) || "'''".contentEquals(text)) ||
                     text.length() == 4 && "''\\".contentEquals(text.subSequence(0, 3)) : text;
+            if ("'''".contentEquals(text)){
+                builder.append("''");
+                return;
+            }
             char c = text.charAt(text.length() - 1);
             builder.append(unescape(c));
         } else {

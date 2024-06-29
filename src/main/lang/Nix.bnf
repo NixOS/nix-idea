@@ -24,6 +24,10 @@
   // no one really needs to know that + - * / are expected at any offset
   consumeTokenMethod("expr_op.*")="consumeTokenFast"
 
+   // make IndStrings language injection Hosts
+   implements("string")="com.intellij.psi.PsiLanguageInjectionHost"
+   mixin("string")="org.nixos.idea.psi.impl.AbstractNixString"
+
   tokens = [
     // This list does not contain all tokens. This list only defines the debug
     // names for tokens which have a distinct text representation. Other tokens

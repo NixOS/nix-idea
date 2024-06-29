@@ -68,6 +68,7 @@ final class NixStringUtilTest {
             ''''\\"''       , "
             ''''\\\\''      , \\
             ''''\\\\x''     , \\x
+            '''''''         , |''|
             "''\\""         , ''"
             "a\\${b}c"      , a${b}c
             ''a''${b}c''    , a${b}c
@@ -81,6 +82,8 @@ final class NixStringUtilTest {
             # which needs a surrogate pair to be represented in UTF-16
             "\uD83C\uDF09"  , \uD83C\uDF09
             ''\uD83C\uDF09'', \uD83C\uDF09
+            # TODO implement indentation (the one below fails)
+            # '' a ''          , |a |
             """)
     @WithIdeaPlatform.OnEdt
     void parse(String code, String expectedResult, Project project) {
