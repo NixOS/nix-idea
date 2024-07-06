@@ -10,20 +10,15 @@ import org.nixos.idea.util.NixStringUtil
 class NixStringManipulator : AbstractElementManipulator<NixString>() {
 
     /**
-     * This function's result is in fact unused because
-     * [AbstractNixString.updateText] does not do anything yet,
+     * This function's result changes the original text in the host language
+     * when the fragment in the guest language changes
      */
     override fun handleContentChange(
         element: NixString,
         range: TextRange,
         newContent: String
-    ): NixString? {
-        var replacement = ""
-        for (part in element.stringParts) {
-            val parsed = NixStringUtil.parse(part)
-            replacement = range.replace(element.text, parsed)
-        }
-        return (element as? AbstractNixString)?.updateText(replacement)
+    ): NixString {
+        return element
     }
 
     override fun getRangeInElement(element: NixString): TextRange = when {
