@@ -26,8 +26,8 @@ final class NixIndStringUtilTest {
             # which needs a surrogate pair to be represented in UTF-16
             \uD83C\uDF09    , \uD83C\uDF09
             """)
-    void escape(String unescaped, String expectedResult) {
-        var str = NixIndStringUtil.escape(unescaped);
+    void unescape(String unescaped, String expectedResult) {
+        var str = NixIndStringUtil.unescape(unescaped);
         assertEquals(expectedResult, str);
     }
 }
