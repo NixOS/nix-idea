@@ -94,17 +94,28 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
                         }
                         //  $ can be escaped by prefixing it with '' (that is, two single quotes), i.e., ''$.
                         '$' -> outChars.append(c)
-                        // Linefeed, carriage-return and tab characters can
-                        // be written as ''\n, ''\r, ''\t, and ''\ escapes any other character.
-                        'a' -> outChars.append(0x07.toChar())
-                        'b' -> outChars.append('\b')
-                        'f' -> outChars.append(0x0c.toChar())
-                        'n' -> outChars.append('\n')
-                        't' -> outChars.append('\t')
-                        'r' -> outChars.append('\r')
-                        'v' -> outChars.append(0x0b.toChar())
+                        '\\' -> {
+                            if (index == chars.length) return false
+                            c = chars[index++]
+                            when(c) {
+                                // Linefeed, carriage-return and tab characters can
+                                // be written as ''\n, ''\r, ''\t, and ''\ escapes any other character.
+                                'a' -> outChars.append(0x07.toChar())
+                                'b' -> outChars.append('\b')
+                                'f' -> outChars.append(0x0c.toChar())
+                                'n' -> outChars.append('\n')
+                                't' -> outChars.append('\t')
+                                'r' -> outChars.append('\r')
+                                'v' -> outChars.append(0x0b.toChar())
+                                else -> return false
+                            }
+                        }
                         else -> return false
                     }
+                    if (sourceOffsets != null) {
+                        sourceOffsets[outChars.length - outOffset] = index
+                    }
+                    continue
                 }
 
 //                 // $ removes any special meaning from the following $.
@@ -122,10 +133,7 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
 //                    // what here??
 //                }
 
-
-                if (sourceOffsets != null) {
-                    sourceOffsets[outChars.length - outOffset] = index
-                }
+                outChars.append(c)
             }
             return true
         }
