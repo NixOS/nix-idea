@@ -10,6 +10,7 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
     override fun isOneLine(): Boolean = false
 
     private var outSourceOffsets: IntArray? = null
+    private var minIndent: Int? = 0
 
     override fun getRelevantTextRange(): TextRange {
         if (myHost.textLength <= 4) return TextRange.EMPTY_RANGE
@@ -17,16 +18,17 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
     }
 
     override fun decode(rangeInsideHost: TextRange, outChars: StringBuilder): Boolean {
-        // TODO only indented strings supported for now
+        // TODO issue #81 only indented strings supported for now
         // single line strings require a new decode function because
         // it uses different escaping mechanisms
         if (myHost !is NixIndString) return false
 
         val subText: String = rangeInsideHost.substring(myHost.text)
         val array = IntArray(subText.length + 1)
-        val success = unescapeAndDecode(subText, outChars, array)
+        val foundIndent = unescapeAndDecode(subText, outChars, array)
         outSourceOffsets = array
-        return success
+        minIndent = foundIndent ?: return false
+        return true
     }
 
     override fun getOffsetInHost(offsetInDecoded: Int, rangeInsideHost: TextRange): Int {
@@ -36,14 +38,22 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
     }
 
     companion object {
-        // this function does not consider interpolations so that
-        // they do appear in the guest language and remain when we end up converting back to Nix
-        fun unescapeAndDecode(chars: String, outChars: StringBuilder, sourceOffsets: IntArray?): Boolean {
+        /**
+         * Does not consider interpolations so that
+         * they do appear in the guest language and remain when we end up converting back to Nix.
+         *
+         * @returns the minIndent of the string if successful, or null if unsuccessful.
+         */
+        fun unescapeAndDecode(chars: String, outChars: StringBuilder, sourceOffsets: IntArray?): Int? {
             assert(sourceOffsets == null || sourceOffsets.size == chars.length + 1)
 
             var index = 0
             val outOffset = outChars.length
             var braces = 0
+            var indentSoFar = 0
+            val minIndent = chars.lines()
+                .filterNot { it.isEmpty() }
+                .minOfOrNull { it.takeWhile(Char::isWhitespace).count() } ?: 0
 
 
             while (index < chars.length) {
@@ -53,8 +63,8 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
                         sourceOffsets[outChars.length - outOffset + 1] = index
                     }
                 }
-                var c = chars[index++]
 
+                var c = chars[index++]
                 updateOffsets(index)
 
 
@@ -65,8 +75,18 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
                     continue
                 }
 
+                if (c == '\n' && index < chars.length - 1) {
+                    // we know that the next n chars are going to be whitespace indent
+                    index += minIndent
+                    outChars.append(c)
+                    if (sourceOffsets != null) {
+                        sourceOffsets[outChars.length - outOffset] = index
+                    }
+                    continue
+                }
+
                 if (c == '\'') {
-                    if (index == chars.length) return false
+                    if (index == chars.length) return null
                     c = chars[index++]
 
                     if (c != '\'') {
@@ -78,10 +98,10 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
                         continue
                     }
 
-                    if (index == chars.length) return false
+                    if (index == chars.length) return null
                     c = chars[index++]
 
-                    when(c) {
+                    when (c) {
                         // '' can be escaped by prefixing it with ', i.e., '''.
                         '\'' -> {
                             outChars.append("\'")
@@ -91,9 +111,9 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
                         //  $ can be escaped by prefixing it with '' (that is, two single quotes), i.e., ''$.
                         '$' -> outChars.append(c)
                         '\\' -> {
-                            if (index == chars.length) return false
+                            if (index == chars.length) return null
                             c = chars[index++]
-                            when(c) {
+                            when (c) {
                                 // Linefeed, carriage-return and tab characters can
                                 // be written as ''\n, ''\r, ''\t, and ''\ escapes any other character.
                                 'a' -> outChars.append(0x07.toChar())
@@ -103,10 +123,11 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
                                 't' -> outChars.append('\t')
                                 'r' -> outChars.append('\r')
                                 'v' -> outChars.append(0x0b.toChar())
-                                else -> return false
+                                else -> return null
                             }
                         }
-                        else -> return false
+
+                        else -> return null
                     }
                     if (sourceOffsets != null) {
                         sourceOffsets[outChars.length - outOffset] = index
@@ -116,7 +137,7 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
 
                 outChars.append(c)
             }
-            return true
+            return minIndent
         }
     }
 

@@ -9,19 +9,35 @@ import org.nixos.idea.psi.NixString
 import org.nixos.idea.psi.NixStringLiteralEscaper
 
 
-abstract class AbstractNixString(private val astNode: ASTNode) : PsiLanguageInjectionHost, AbstractNixPsiElement(astNode),NixString {
+abstract class AbstractNixString(private val astNode: ASTNode) : PsiLanguageInjectionHost,
+    AbstractNixPsiElement(astNode), NixString {
 
     override fun isValidHost() = true
 
     override fun updateText(s: String): NixString {
-        // TODO also support single-line strings
+        // TODO issue #81 also support single-line strings
         if (this !is NixIndString) {
             LOG.info("not a nix ind string")
             return this
         }
-        val withoutQuotes = s.substring(2..(s.lastIndex - 2))
-        (astNode.firstChildNode.treeNext.firstChildNode as? LeafPsiElement)
-            ?.replaceWithText(withoutQuotes)
+        val originalNode = astNode.firstChildNode.treeNext.firstChildNode as? LeafPsiElement
+        val minIndentInOriginal = originalNode?.text?.lines()
+            ?.filterNot { it.isEmpty() }
+            ?.minOfOrNull { it.takeWhile(Char::isWhitespace).count() } ?: 0
+
+        val leadingSpace = buildString { repeat(minIndentInOriginal) { append(' ') } }
+
+        val withoutQuotesWithIndent = s
+            // remove quotes
+            .substring(2..(s.lastIndex - 2))
+            // restore indent
+            .lines()
+            .withIndex()
+            .joinToString(separator = System.lineSeparator()) { (index, line) ->
+                if (index != 0) leadingSpace + line else line
+            }
+
+        originalNode?.replaceWithText(withoutQuotesWithIndent)
         return this
     }
 
