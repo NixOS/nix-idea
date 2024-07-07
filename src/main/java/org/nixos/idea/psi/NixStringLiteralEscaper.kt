@@ -32,7 +32,7 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
     override fun getOffsetInHost(offsetInDecoded: Int, rangeInsideHost: TextRange): Int {
         val offsets = outSourceOffsets ?: throw IllegalStateException("#decode was not called")
         val result = if (offsetInDecoded < offsets.size) offsets[offsetInDecoded] else -1
-        return result.coerceIn(2..rangeInsideHost.length) + rangeInsideHost.startOffset
+        return result.coerceIn(0..rangeInsideHost.length) + rangeInsideHost.startOffset
     }
 
     companion object {

@@ -17,8 +17,10 @@ class NixStringManipulator : AbstractElementManipulator<NixString>() {
         element: NixString,
         range: TextRange,
         newContent: String
-    ): NixString {
-        return element
+    ): NixString? {
+        val escaped = newContent
+        val replacement = range.replace(element.text, escaped)
+        return element.updateText(replacement) as? NixString
     }
 
     override fun getRangeInElement(element: NixString): TextRange = when {

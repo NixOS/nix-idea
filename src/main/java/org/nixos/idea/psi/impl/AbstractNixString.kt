@@ -4,6 +4,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.impl.source.tree.LeafElement
+import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.util.IncorrectOperationException
 import org.nixos.idea.psi.NixIndString
 import org.nixos.idea.psi.NixString
@@ -20,7 +21,8 @@ abstract class AbstractNixString(private val astNode: ASTNode) : PsiLanguageInje
             LOG.info("not a nix ind string")
             return this
         }
-        (astNode.firstChildNode as LeafElement).replaceWithText(s)
+        (astNode.firstChildNode.treeNext.firstChildNode as? LeafPsiElement)
+            ?.replaceWithText(s)
         return this
     }
 
