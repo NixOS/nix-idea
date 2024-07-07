@@ -2,6 +2,7 @@ package org.nixos.idea.util;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.nixos.idea.psi.NixStringLiteralEscaper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -21,13 +22,16 @@ final class NixIndStringUtilTest {
             |''\\r|         , |\r|
             |''\\n|         , |\n|
             |'''|           , |''|
-            $$              , $
+            $$              , $$
+            ''$             , $
             # supplementary character, i.e. character form a supplementary plane,
             # which needs a surrogate pair to be represented in UTF-16
             \uD83C\uDF09    , \uD83C\uDF09
             """)
-    void unescape(String unescaped, String expectedResult) {
-        var str = NixIndStringUtil.unescape(unescaped);
+    void unescape(String escaped, String expectedResult) {
+        var sb = new StringBuilder();
+        NixStringLiteralEscaper.Companion.unescapeAndDecode(escaped, sb, null);
+        var str = sb.toString();
         assertEquals(expectedResult, str);
     }
 }

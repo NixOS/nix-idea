@@ -17,14 +17,14 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
     }
 
     override fun decode(rangeInsideHost: TextRange, outChars: StringBuilder): Boolean {
-        // only indented strings supported for now
+        // TODO only indented strings supported for now
+        // single line strings require a new decode function because
+        // it uses different escaping mechanisms
         if (myHost !is NixIndString) return false
 
         val subText: String = rangeInsideHost.substring(myHost.text)
-
-
         val array = IntArray(subText.length + 1)
-        val success = unescapeAndDecode(subText, outChars, array, interpolations = false)
+        val success = unescapeAndDecode(subText, outChars, array)
         outSourceOffsets = array
         return success
     }
@@ -32,17 +32,13 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
     override fun getOffsetInHost(offsetInDecoded: Int, rangeInsideHost: TextRange): Int {
         val offsets = outSourceOffsets ?: throw IllegalStateException("#decode was not called")
         val result = if (offsetInDecoded < offsets.size) offsets[offsetInDecoded] else -1
-        println("gotOffsetInHost decoded=${offsetInDecoded} rangeInsideHost=${rangeInsideHost} result=$result")
         return result.coerceIn(2..rangeInsideHost.length) + rangeInsideHost.startOffset
     }
 
     companion object {
-        fun unescapeAndDecode(
-            chars: String,
-            outChars: StringBuilder,
-            sourceOffsets: IntArray?,
-            interpolations: Boolean
-        ): Boolean {
+        // this function does not consider interpolations so that
+        // they do appear in the guest language and remain when we end up converting back to Nix
+        fun unescapeAndDecode(chars: String, outChars: StringBuilder, sourceOffsets: IntArray?): Boolean {
             assert(sourceOffsets == null || sourceOffsets.size == chars.length + 1)
 
             var index = 0
@@ -117,21 +113,6 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
                     }
                     continue
                 }
-
-//                 // $ removes any special meaning from the following $.
-//                if (c == '$') {
-//                    if (index == chars.length) return false
-//                    c = chars[index++]
-//                    if (c != '$') {
-//                        // if what follows isn't another ' then we are not escaping anything,
-//                        // so we can continue
-//                        outChars.append('$')
-//                        updateOffsets(index - 1)
-//                        outChars.append(c)
-//                        continue
-//                    }
-//                    // what here??
-//                }
 
                 outChars.append(c)
             }

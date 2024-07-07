@@ -1,23 +1,33 @@
 package org.nixos.idea.psi.impl
 
 import com.intellij.lang.ASTNode
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiLanguageInjectionHost
+import com.intellij.psi.impl.source.tree.LeafElement
+import com.intellij.util.IncorrectOperationException
+import org.nixos.idea.psi.NixIndString
 import org.nixos.idea.psi.NixString
 import org.nixos.idea.psi.NixStringLiteralEscaper
 
 
-abstract class AbstractNixString(node: ASTNode) : PsiLanguageInjectionHost, AbstractNixPsiElement(node), NixString {
+abstract class AbstractNixString(private val astNode: ASTNode) : PsiLanguageInjectionHost, AbstractNixPsiElement(astNode),NixString {
 
     override fun isValidHost() = true
 
-    override fun updateText(text: String): NixString {
-        // TODO implement. This is called when you edit the injected file in
-        //   order for the final Nix string to get updated
-        //   It is not necessary for syntax highlighting in injections
-        //   but is a nice to have
+    override fun updateText(s: String): NixString {
+        // TODO also support single-line strings
+        if (this !is NixIndString) {
+            LOG.info("not a nix ind string")
+            return this
+        }
+        (astNode.firstChildNode as LeafElement).replaceWithText(s)
         return this
     }
 
     override fun createLiteralTextEscaper() = NixStringLiteralEscaper(this)
+
+    companion object {
+        val LOG = Logger.getInstance(AbstractNixString::class.java)
+    }
 }
 
