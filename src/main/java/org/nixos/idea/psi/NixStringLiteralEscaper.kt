@@ -3,6 +3,7 @@ package org.nixos.idea.psi
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.LiteralTextEscaper
 import com.intellij.psi.PsiLanguageInjectionHost
+import org.intellij.lang.annotations.Language
 import org.nixos.idea.psi.impl.AbstractNixString
 
 class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiLanguageInjectionHost>(host) {
@@ -10,7 +11,6 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
     override fun isOneLine(): Boolean = false
 
     private var outSourceOffsets: IntArray? = null
-    private var minIndent: Int? = 0
 
     override fun getRelevantTextRange(): TextRange {
         if (myHost.textLength <= 4) return TextRange.EMPTY_RANGE
@@ -25,10 +25,9 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
 
         val subText: String = rangeInsideHost.substring(myHost.text)
         val array = IntArray(subText.length + 1)
-        val foundIndent = unescapeAndDecode(subText, outChars, array)
+        val success = unescapeAndDecode(subText, outChars, array)
         outSourceOffsets = array
-        minIndent = foundIndent ?: return false
-        return true
+        return success
     }
 
     override fun getOffsetInHost(offsetInDecoded: Int, rangeInsideHost: TextRange): Int {
@@ -44,7 +43,7 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
          *
          * @returns the minIndent of the string if successful, or null if unsuccessful.
          */
-        fun unescapeAndDecode(chars: String, outChars: StringBuilder, sourceOffsets: IntArray?): Int? {
+        fun unescapeAndDecode(chars: String, outChars: StringBuilder, sourceOffsets: IntArray?): Boolean {
             assert(sourceOffsets == null || sourceOffsets.size == chars.length + 1)
 
             var index = 0
@@ -86,19 +85,18 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
                 }
 
                 if (c == '\'') {
-                    if (index == chars.length) return null
+                    if (index == chars.length) return false
                     c = chars[index++]
 
                     if (c != '\'') {
                         // if what follows isn't another ' then we are not escaping anything,
-                        // so we can continue
+                        // so we can backtrace and continue
                         outChars.append("\'")
-                        updateOffsets(index - 1)
-                        outChars.append(c)
+                        index--
                         continue
                     }
 
-                    if (index == chars.length) return null
+                    if (index == chars.length) return false
                     c = chars[index++]
 
                     when (c) {
@@ -111,7 +109,7 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
                         //  $ can be escaped by prefixing it with '' (that is, two single quotes), i.e., ''$.
                         '$' -> outChars.append(c)
                         '\\' -> {
-                            if (index == chars.length) return null
+                            if (index == chars.length) return false
                             c = chars[index++]
                             when (c) {
                                 // Linefeed, carriage-return and tab characters can
@@ -123,11 +121,11 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
                                 't' -> outChars.append('\t')
                                 'r' -> outChars.append('\r')
                                 'v' -> outChars.append(0x0b.toChar())
-                                else -> return null
+                                else -> return false
                             }
                         }
 
-                        else -> return null
+                        else -> return false
                     }
                     if (sourceOffsets != null) {
                         sourceOffsets[outChars.length - outOffset] = index
@@ -137,7 +135,7 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
 
                 outChars.append(c)
             }
-            return minIndent
+            return true
         }
     }
 

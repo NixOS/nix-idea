@@ -27,17 +27,18 @@ abstract class AbstractNixString(private val astNode: ASTNode) : PsiLanguageInje
 
         val leadingSpace = buildString { repeat(minIndentInOriginal) { append(' ') } }
 
-        val withoutQuotesWithIndent = s
-            // remove quotes
-            .substring(2..(s.lastIndex - 2))
-            // restore indent
+        val lines = s.substring(2..(s.lastIndex - 2)) // remove quotes
             .lines()
-            .withIndex()
-            .joinToString(separator = System.lineSeparator()) { (index, line) ->
-                if (index != 0) leadingSpace + line else line
-            }
 
-        originalNode?.replaceWithText(withoutQuotesWithIndent)
+        // restore indent
+        val withIndent = lines
+            .withIndex()
+            .map { (index, line) -> if (index != 0) leadingSpace + line else line }
+
+        // if the first line was removed in the fragment, add it back to preserve a multiline string
+        val withLeadingBlankLine = if (lines.first().isNotEmpty()) listOf("") + withIndent else withIndent
+
+        originalNode?.replaceWithText(withLeadingBlankLine.joinToString(separator = System.lineSeparator()))
         return this
     }
 
