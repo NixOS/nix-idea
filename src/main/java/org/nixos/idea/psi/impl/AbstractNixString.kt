@@ -2,6 +2,7 @@ package org.nixos.idea.psi.impl
 
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.nixos.idea.psi.NixIndString
@@ -38,7 +39,7 @@ abstract class AbstractNixString(private val astNode: ASTNode) : PsiLanguageInje
         // if the first line was removed in the fragment, add it back to preserve a multiline string
         val withLeadingBlankLine = if (lines.first().isNotEmpty()) listOf("") + withIndent else withIndent
 
-        originalNode?.replaceWithText(withLeadingBlankLine.joinToString(separator = System.lineSeparator()))
+        originalNode?.replaceWithText(withLeadingBlankLine.joinToString(separator = "\n"))
         return this
     }
 
