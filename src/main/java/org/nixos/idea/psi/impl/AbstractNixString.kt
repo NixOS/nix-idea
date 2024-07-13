@@ -12,7 +12,7 @@ import org.nixos.idea.psi.NixStringLiteralEscaper
 abstract class AbstractNixString(private val astNode: ASTNode) : PsiLanguageInjectionHost,
     AbstractNixPsiElement(astNode), NixString {
 
-    override fun isValidHost() = true
+    override fun isValidHost() = this is NixIndString
 
     override fun updateText(s: String): NixString {
         // TODO issue #81 also support single-line strings

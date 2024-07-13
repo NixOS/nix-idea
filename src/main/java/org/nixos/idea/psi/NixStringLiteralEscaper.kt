@@ -40,8 +40,6 @@ class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<PsiL
         /**
          * Does not consider interpolations so that
          * they do appear in the guest language and remain when we end up converting back to Nix.
-         *
-         * @returns the minIndent of the string if successful, or null if unsuccessful.
          */
         fun unescapeAndDecode(chars: String, outChars: StringBuilder, sourceOffsets: IntArray?): Boolean {
             assert(sourceOffsets == null || sourceOffsets.size == chars.length + 1)
