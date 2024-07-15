@@ -4,12 +4,16 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.nixos.idea.psi.NixAntiquotation;
+import org.nixos.idea.psi.NixIndString;
+import org.nixos.idea.psi.NixStdString;
+import org.nixos.idea.psi.NixString;
 import org.nixos.idea.psi.NixStringPart;
 import org.nixos.idea.psi.NixStringText;
 import org.nixos.idea.psi.NixTypes;
 
 /**
- * Utilities for strings in the Nix Expression Language.
+ * Utilities for encoding and decoding strings in the Nix Expression Language.
  */
 public final class NixStringUtil {
 
@@ -88,6 +92,43 @@ public final class NixStringUtil {
     }
 
     /**
+     * Detects the maximal amount of characters removed from the start of the lines.
+     * May return {@link Integer#MAX_VALUE} if the content of the string is blank.
+     *
+     * @param string the string from which to get the indentation
+     * @return the detected indentation, or {@link Integer#MAX_VALUE}
+     */
+    public static int detectMaxIndent(@NotNull NixString string) {
+        if (string instanceof NixStdString) {
+            return 0;
+        } else if (string instanceof NixIndString) {
+            int result = Integer.MAX_VALUE;
+            int preliminary = 0;
+            for (NixStringPart part : string.getStringParts()) {
+                if (part instanceof NixStringText textNode) {
+                    for (ASTNode token = textNode.getNode().getFirstChildNode(); token != null; token = token.getTreeNext()) {
+                        IElementType type = token.getElementType();
+                        if (type == NixTypes.IND_STR_INDENT) {
+                            preliminary = Math.min(result, token.getTextLength());
+                        } else if (type == NixTypes.IND_STR_LF) {
+                            preliminary = 0;
+                        } else {
+                            assert type == NixTypes.IND_STR || type == NixTypes.IND_STR_ESCAPE : type;
+                            result = preliminary;
+                        }
+                    }
+                } else {
+                    assert part instanceof NixAntiquotation : part.getClass();
+                    result = preliminary;
+                }
+            }
+            return result;
+        } else {
+            throw new IllegalStateException("Unexpected subclass of NixString: " + string.getClass());
+        }
+    }
+
+    /**
      * Returns the content of the given part of a string in the Nix Expression Language.
      * All escape sequences are resolved.
      *
@@ -95,31 +136,46 @@ public final class NixStringUtil {
      * @return The resulting string after resolving all escape sequences.
      */
     public static @NotNull String parse(@NotNull NixStringText textNode) {
+        int maxIndent = detectMaxIndent((NixString) textNode.getParent());
         StringBuilder builder = new StringBuilder();
         for (ASTNode child = textNode.getNode().getFirstChildNode(); child != null; child = child.getTreeNext()) {
-            parse(builder, child);
+            parse(builder, child, maxIndent);
         }
         return builder.toString();
     }
 
-    private static void parse(@NotNull StringBuilder builder, @NotNull ASTNode token) {
+    private static void parse(@NotNull StringBuilder builder, @NotNull ASTNode token, int maxIndent) {
         CharSequence text = token.getChars();
         IElementType type = token.getElementType();
-        if (type == NixTypes.STR || type == NixTypes.IND_STR) {
+        if (type == NixTypes.STR || type == NixTypes.IND_STR || type == NixTypes.IND_STR_LF) {
             builder.append(text);
+        } else if (type == NixTypes.IND_STR_INDENT) {
+            int end = text.length();
+            if (end > maxIndent) {
+                CharSequence remain = text.subSequence(maxIndent, end);
+                builder.append(remain);
+            }
         } else if (type == NixTypes.STR_ESCAPE) {
             assert text.length() == 2 && text.charAt(0) == '\\' : text;
             char c = text.charAt(1);
             builder.append(unescape(c));
         } else if (type == NixTypes.IND_STR_ESCAPE) {
-            assert text.length() == 3 && ("''$".contentEquals(text) || "'''".contentEquals(text)) ||
-                    text.length() == 4 && "''\\".contentEquals(text.subSequence(0, 3)) : text;
-            if ("'''".contentEquals(text)){
-                builder.append("''");
-                return;
+            switch (text.charAt(2)) {
+                case '$' -> {
+                    assert "''$".contentEquals(text) : text;
+                    builder.append("$");
+                }
+                case '\'' -> {
+                    assert "'''".contentEquals(text) : text;
+                    builder.append("''");
+                }
+                case '\\' -> {
+                    assert text.length() == 4 && "''\\".contentEquals(text.subSequence(0, 3)) : text;
+                    char c = text.charAt(3);
+                    builder.append(unescape(c));
+                }
+                default -> throw new IllegalStateException("Unknown escape sequence: " + text);
             }
-            char c = text.charAt(text.length() - 1);
-            builder.append(unescape(c));
         } else {
             throw new IllegalStateException("Unexpected token in string: " + token);
         }
