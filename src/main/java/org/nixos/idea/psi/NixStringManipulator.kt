@@ -18,6 +18,7 @@ class NixStringManipulator : AbstractElementManipulator<NixString>() {
         range: TextRange,
         newContent: String
     ): NixString? {
+        // Maybe we should invert the relationship between this method and NixString.updateText
         val escaped = newContent
         val replacement = range.replace(element.text, escaped)
         return element.updateText(replacement) as? NixString

@@ -7,7 +7,7 @@ import org.nixos.idea.util.NixStringUtil
 
 class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<NixString>(host) {
 
-    override fun isOneLine(): Boolean = false
+    override fun isOneLine(): Boolean = false // TODO Check
 
     private var outSourceOffsets: IntArray? = null
 

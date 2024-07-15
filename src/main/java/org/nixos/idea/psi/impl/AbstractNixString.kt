@@ -18,6 +18,8 @@ abstract class AbstractNixString(private val astNode: ASTNode) : PsiLanguageInje
     override fun updateText(s: String): NixString {
         // TODO issue #81 also support single-line strings
         if (this !is NixIndString) {
+            TODO("Can we implement this easily?")
+            TODO("Does this behave well?")
             LOG.info("not a nix ind string")
             return this
         }
