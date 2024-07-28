@@ -20,6 +20,14 @@ public final class NixElementFactory {
         return createElement(project, NixString.class, "", code, "");
     }
 
+    public static @NotNull NixStringText createStdStringText(@NotNull Project project, @NotNull String code) {
+        return createElement(project, NixStringText.class, "\"", code, "\"");
+    }
+
+    public static @NotNull NixStringText createIndStringText(@NotNull Project project, @NotNull String code) {
+        return createElement(project, NixStringText.class, "''\n", code, "''");
+    }
+
     public static @NotNull NixAttr createAttr(@NotNull Project project, @NotNull String code) {
         return createElement(project, NixAttr.class, "x.", code, "");
     }

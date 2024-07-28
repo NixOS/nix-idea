@@ -13,24 +13,25 @@ import static org.nixos.idea.psi.NixTypes.*;
   private final AbstractIntList states = new IntArrayList();
 
   private void pushState(int newState) {
-      if (newState == YYINITIAL){
-          throw new IllegalStateException("Pusing YYINITIAL is not supported");
-      }
+      assert newState != YYINITIAL : "Pusing YYINITIAL is not supported";
       // store current state on the stack to allow restoring it in popState(...)
       states.push(yystate());
       yybegin(newState);
   }
 
   private void popState(int expectedState) {
-    if (states.isEmpty()){
-      throw new IllegalStateException("Popping an empty stack of states. Expected: " + expectedState);
-    }
+    assert !states.isEmpty() : "Popping an empty stack of states. Expected: " + expectedState;
     // safe-guard, because we always know which state we're currently in in the rules below
-    if (yystate() != expectedState) {
-        throw new IllegalStateException(String.format("Unexpected state. Current: %d, expected: %d", yystate(), expectedState));
-    }
+    assert yystate() == expectedState : String.format("Unexpected state. Current: %d, expected: %d", yystate(), expectedState);
     // start the lexer with the previous state, which was stored by pushState(...)
     yybegin(states.popInt());
+  }
+
+  private void replaceState(int expectedState, int newState) {
+      assert newState != YYINITIAL : "Pusing YYINITIAL is not supported";
+      // safe-guard, because we always know which state we're currently in in the rules below
+      assert yystate() == expectedState : String.format("Unexpected state. Current: %d, expected: %d", yystate(), expectedState);
+      yybegin(newState);
   }
 
   protected void onReset() {
@@ -44,7 +45,9 @@ import static org.nixos.idea.psi.NixTypes.*;
 %function advance
 %type IElementType
 %unicode
-%state BLOCK STRING IND_STRING ANTIQUOTATION_START ANTIQUOTATION PATH
+%state BLOCK STRING IND_STRING ANTIQUOTATION_START ANTIQUOTATION
+%xstate IND_STRING_START IND_STRING_INDENT PATH
+%suppress empty-match
 
 ANY=[^]
 ID=[a-zA-Z_][a-zA-Z0-9_'-]*
@@ -71,8 +74,19 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   \"                    { popState(STRING); return STRING_CLOSE; }
 }
 
+<IND_STRING_START> {
+  // The first line is ignored in case it is empty
+  [\ ]*\n               { replaceState(IND_STRING_START, IND_STRING_INDENT); return com.intellij.psi.TokenType.WHITE_SPACE; }
+}
+
+<IND_STRING_START, IND_STRING_INDENT> {
+  [\ ]+                 { replaceState(yystate(), IND_STRING); return IND_STR_INDENT; }
+  ""                    { replaceState(yystate(), IND_STRING); }
+}
+
 <IND_STRING> {
-  [^\$\']+              { return IND_STR; }
+  \n                    { replaceState(IND_STRING, IND_STRING_INDENT); return IND_STR_LF; }
+  [^\$\'\n]+            { return IND_STR; }
   "$"|"$$"|"'"          { return IND_STR; }
   "''$"|"'''"           { return IND_STR_ESCAPE; }
   "''"\\{ANY}           { return IND_STR_ESCAPE; }
@@ -83,7 +97,7 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
 <ANTIQUOTATION_START> {
   // '$' and '{' must be two separate tokens to make NixBraceMatcher work
   // correctly with Grammar-Kit.
-  "{"                   { popState(ANTIQUOTATION_START); pushState(ANTIQUOTATION); return LCURLY; }
+  "{"                   { replaceState(ANTIQUOTATION_START, ANTIQUOTATION); return LCURLY; }
 }
 
 <ANTIQUOTATION> {
@@ -98,10 +112,10 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
   {PATH_SEG}            { return PATH_SEGMENT; }
   {PATH_CHAR}+          { return PATH_SEGMENT; }
-  // anything else, e.g. whitespace, stops lexing of a PATH
+  // anything else, e.g. a whitespace, stops lexing of a PATH
   // we're delegating back to the parent state
   // PATH_END is an empty-length token to signal the end of the path
-  [^]                   { popState(PATH); yypushback(yylength()); return PATH_END; }
+  ""                    { popState(PATH); return PATH_END; }
 }
 
 <YYINITIAL, BLOCK, ANTIQUOTATION> {
@@ -152,7 +166,7 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   "->"                  { return IMPL; }
 
   \"                    { pushState(STRING); return STRING_OPEN; }
-  \'\'                  { pushState(IND_STRING); return IND_STRING_OPEN; }
+  \'\'                  { pushState(IND_STRING_START); return IND_STRING_OPEN; }
 
   // Note that `true`, `false` and `null` are built-in variables but not
   // keywords. Therefore, they are not listed here.
@@ -171,5 +185,5 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   {WHITE_SPACE}         { return com.intellij.psi.TokenType.WHITE_SPACE; }
 }
 
-// matched by all %state states
+// matched by inclusive states (%state), but not by exclusive states (%xstate)
 [^]                     { return com.intellij.psi.TokenType.BAD_CHARACTER; }
