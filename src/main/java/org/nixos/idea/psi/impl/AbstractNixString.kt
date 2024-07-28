@@ -1,52 +1,62 @@
 package org.nixos.idea.psi.impl
 
 import com.intellij.lang.ASTNode
-import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiLanguageInjectionHost
-import com.intellij.psi.impl.source.tree.LeafPsiElement
+import org.nixos.idea.psi.NixElementFactory
 import org.nixos.idea.psi.NixIndString
-import org.nixos.idea.psi.NixString
+import org.nixos.idea.psi.NixStdString
 import org.nixos.idea.psi.NixStringLiteralEscaper
+import org.nixos.idea.psi.NixStringText
+import org.nixos.idea.util.NixStringUtil
 
 
 abstract class AbstractNixString(private val astNode: ASTNode) : PsiLanguageInjectionHost,
-    AbstractNixPsiElement(astNode), NixString {
+    AbstractNixPsiElement(astNode), NixStringText {
 
-    override fun isValidHost() = this is NixIndString
+    override fun isValidHost() = true
 
-    override fun updateText(s: String): NixString {
-        // TODO issue #81 also support single-line strings
-        if (this !is NixIndString) {
-            LOG.info("not a nix ind string")
-            return this
+    override fun updateText(s: String): NixStringText {
+        val project = project
+        val replacement = when (val string = parent) {
+            is NixStdString -> {
+                val escaped = buildString { NixStringUtil.escapeStd(this, s) }
+                NixElementFactory.createStdStringText(project, escaped)
+            }
+
+            is NixIndString -> {
+                val indent = indentForNewText(string)
+                val indentStart = prevSibling == null
+                val indentEnd = if (nextSibling == null) trailingIndent(text) ?: baseIndent(string) else indent
+                val escaped = buildString { NixStringUtil.escapeInd(this, s, indent, indentStart, indentEnd) }
+                NixElementFactory.createIndStringText(project, escaped)
+            }
+
+            else -> throw IllegalStateException("Unexpected parent: " + parent.javaClass)
         }
-        val originalNode = astNode.firstChildNode.treeNext.firstChildNode as? LeafPsiElement
-        val minIndentInOriginal = originalNode?.text?.lines()
-            ?.filterNot { it.isEmpty() }
-            ?.minOfOrNull { it.takeWhile(Char::isWhitespace).count() } ?: 0
-
-        val leadingSpace = buildString { repeat(minIndentInOriginal) { append(' ') } }
-
-        val lines = s.substring(2..(s.lastIndex - 2)) // remove quotes
-            .lines()
-
-        // restore indent
-        val withIndent = lines
-            .withIndex()
-            .map { (index, line) -> if (index != 0) leadingSpace + line else line }
-
-        // if the first line was removed in the fragment, add it back to preserve a multiline string
-        val withLeadingBlankLine = if (lines.first().isNotEmpty()) listOf("") + withIndent else withIndent
-
-        originalNode?.replaceWithText(withLeadingBlankLine.joinToString(separator = "\n"))
-        return this
+        return replace(replacement) as NixStringText
     }
 
     override fun createLiteralTextEscaper() = NixStringLiteralEscaper(this)
 
     companion object {
-        val LOG = Logger.getInstance(AbstractNixString::class.java)
+        private fun indentForNewText(string: NixIndString): Int {
+            return NixStringUtil.detectMaxIndent(string).takeIf { it != Int.MAX_VALUE } ?: (baseIndent(string) + 2)
+        }
+
+        private fun baseIndent(string: NixIndString): Int {
+            // TODO Detect indent of string
+            //  This should be the indent of the line where the string starts.
+            return 0
+        }
+
+        private fun trailingIndent(str: String): Int? {
+            val lastLineFeed = str.lastIndexOf('\n')
+            val lastLine = if (lastLineFeed != -1) str.substring(lastLineFeed + 1) else null
+            return if (lastLine != null && lastLine.all { it == ' ' }) {
+                lastLine.length
+            } else {
+                null
+            }
+        }
     }
 }
-

@@ -34,6 +34,34 @@ final class NixElementFactoryTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {"", "x", "abc", " ", "\\n", "\\${x}", "$\\{x}"})
+    void createStdStringText(String code) {
+        NixStringText result = NixElementFactory.createStdStringText(myProject, code);
+        assertEquals(code, result.getText());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\"", "\"x\"", "${x}", "\\${\"42\"}"})
+    void createStdStringTextFail(String code) {
+        assertThrows(RuntimeException.class,
+                () -> NixElementFactory.createStdStringText(myProject, code));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "x", "abc", " ", "\n", "''\\n", "''${x}", "$${x}"})
+    void createIndStringText(String code) {
+        NixStringText result = NixElementFactory.createIndStringText(myProject, code);
+        assertEquals(code, result.getText());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"''", "''x''", "${x}", "$${''42''}"})
+    void createIndStringTextFail(String code) {
+        assertThrows(RuntimeException.class,
+                () -> NixElementFactory.createIndStringText(myProject, code));
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = {"x", "\"x\"", "${x}", "${\"x\"}", "\"x${y}z\""})
     void createAttr(String code) {
         NixAttr result = NixElementFactory.createAttr(myProject, code);

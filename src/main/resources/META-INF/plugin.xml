@@ -59,9 +59,13 @@
 
         <formattingService implementation="org.nixos.idea.format.NixExternalFormatter"/>
 
-        <!-- Manipulator for injections support -->
-        <lang.elementManipulator forClass="org.nixos.idea.psi.NixString"
-                                 implementationClass="org.nixos.idea.psi.NixStringManipulator"/>
+        <!-- Injections support -->
+        <languageInjectionPerformer
+                language="Nix"
+                implementationClass="org.nixos.idea.psi.NixInjectionPerformer"/>
+        <lang.elementManipulator
+                forClass="org.nixos.idea.psi.NixStringText"
+                implementationClass="org.nixos.idea.psi.NixStringManipulator"/>
 
         <notificationGroup id="NixIDEA" displayType="BALLOON"/>
     </extensions>

@@ -23,6 +23,7 @@ final class NixStringUtilTest {
             \\              , "\\\\"
             \\x             , "\\\\x"
             a${b}c          , "a\\${b}c"
+            a$${b}c         , "a$${b}c"
             '\n'            , "\\n"
             '\r'            , "\\r"
             '\t'            , "\\t"
@@ -42,6 +43,7 @@ final class NixStringUtilTest {
             \\              , \\\\
             \\x             , \\\\x
             a${b}c          , a\\${b}c
+            a$${b}c         , a$${b}c
             '\n'            , \\n
             '\r'            , \\r
             '\t'            , \\t
@@ -49,9 +51,44 @@ final class NixStringUtilTest {
             # which needs a surrogate pair to be represented in UTF-16
             \uD83C\uDF09    , \uD83C\uDF09
             """)
-    void escape(String unescaped, String expectedResult) {
+    void escapeStd(String unescaped, String expectedResult) {
         StringBuilder stringBuilder = new StringBuilder();
-        NixStringUtil.escape(stringBuilder, unescaped);
+        NixStringUtil.escapeStd(stringBuilder, unescaped);
+        assertEquals(expectedResult, stringBuilder.toString());
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} -> {1}")
+    @CsvSource(quoteCharacter = '|', textBlock = """
+            # Indent non-empty lines
+            ||              , 4, false, 2, ||
+            ||              , 4, true , 2, ||
+            |a|             , 4, false, 2, |a|
+            |a|             , 4, true , 2, |    a|
+            |\n\n|          , 4, false, 2, |\n|
+            |\n\n|          , 4, true , 2, |\n|
+            | \n \n|        , 4, false, 2, | \n     \n  |
+            | \n \n |       , 4, false, 2, | \n     \n     |
+            | \n \n|        , 4, true , 2, |     \n     \n  |
+            | \n \n |       , 4, true , 2, |     \n     \n     |
+            # Should be be escaped
+            |''|            , 2, false, 0, |'''|
+            |'''|           , 2, false, 0, |''''|
+            |''''|          , 2, false, 0, |''''''|
+            |${|            , 2, false, 0, |''${|
+            |\r|            , 2, false, 0, |''\\r|
+            |\t|            , 2, false, 0, |''\\t|
+            # Should not be escaped
+            |\\|            , 2, false, 0, |\\|
+            |\\x|           , 2, false, 0, |\\x|
+            |$${|           , 2, false, 0, |$${|
+            |\nx|           , 2, false, 0, |\n  x|
+            # supplementary character, i.e. character form a supplementary plane,
+            # which needs a surrogate pair to be represented in UTF-16
+            |\uD83C\uDF09|  , 2, false, 0, |\uD83C\uDF09|
+            """)
+    void escapeInd(String unescaped, int indent, boolean indentStart, int indentEnd, String expectedResult) {
+        StringBuilder stringBuilder = new StringBuilder();
+        NixStringUtil.escapeInd(stringBuilder, unescaped, indent, indentStart, indentEnd);
         assertEquals(expectedResult, stringBuilder.toString());
     }
 
@@ -140,6 +177,7 @@ final class NixStringUtilTest {
             "\uD83C\uDF09"  , \uD83C\uDF09
             ''\uD83C\uDF09'', \uD83C\uDF09
             # Remove common indentation in indented strings
+            |''  ''|        , ||
             |'' a ''|       , |a |
             |''    a    ''| , |a    |
             |'' a\n b\n''|  , |a\nb\n|

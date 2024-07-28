@@ -25,8 +25,8 @@
   consumeTokenMethod("expr_op.*")="consumeTokenFast"
 
    // make IndStrings language injection Hosts
-   implements("string")="com.intellij.psi.PsiLanguageInjectionHost"
-   mixin("string")="org.nixos.idea.psi.impl.AbstractNixString"
+   implements("string_text")="com.intellij.psi.PsiLanguageInjectionHost"
+   mixin("string_text")="org.nixos.idea.psi.impl.AbstractNixString"
 
   tokens = [
     // This list does not contain all tokens. This list only defines the debug
@@ -202,15 +202,15 @@ private set_recover ::= curly_recover !bind
 private list_recover ::= brac_recover !expr_select
 
 ;{ extends(".*_string")="string" }
-std_string ::= STRING_OPEN string_part* STRING_CLOSE { pin=1 }
-ind_string ::= IND_STRING_OPEN string_part* IND_STRING_CLOSE { pin=1 }
+std_string ::= STRING_OPEN string_parts STRING_CLOSE { pin=1 }
+ind_string ::= IND_STRING_OPEN string_parts IND_STRING_CLOSE { pin=1 }
 fake string ::= string_part* { methods=[ string_parts="string_part" ] }
+private string_parts ::= string_text ( antiquotation string_text )*
 ;{ extends("string_text|antiquotation")=string_part }
-string_part ::= string_text | antiquotation { recoverWhile=string_part_recover }
-string_text ::= string_token+
+fake string_part ::=
+string_text ::= string_token*
 antiquotation ::= DOLLAR LCURLY expr recover_antiquotation RCURLY { pin=1 }
 private recover_antiquotation ::= { recoverWhile=curly_recover }
-private string_part_recover ::= !(DOLLAR | STRING_CLOSE | IND_STRING_CLOSE | string_token)
 private string_token ::= STR | STR_ESCAPE | IND_STR | IND_STR_INDENT | IND_STR_ESCAPE | IND_STR_LF
 
 ;{ extends("bind_attr|bind_inherit")=bind }

@@ -36,7 +36,7 @@ public final class NixStringUtil {
     public static @NotNull String quote(@NotNull CharSequence unescaped) {
         StringBuilder builder = new StringBuilder();
         builder.append('"');
-        escape(builder, unescaped);
+        escapeStd(builder, unescaped);
         builder.append('"');
         return builder.toString();
     }
@@ -47,19 +47,20 @@ public final class NixStringUtil {
      * For example, the following code would generate a broken result.
      * <pre>{@code
      *     StringBuilder b1 = new StringBuilder(), b2 = new StringBuilder();
-     *     NixStringUtil.escape(b1, "$");
-     *     NixStringUtil.escape(b2, "{''}");
+     *     NixStringUtil.escapeStd(b1, "$");
+     *     NixStringUtil.escapeStd(b2, "{''}");
      *     System.out.println(b1.toString() + b2.toString());
      * }</pre>
      * The result would be the following broken Nix code.
      * <pre>
-     *     "${''}"
+     *     ${''}
      * </pre>
      *
      * @param builder   The target string builder. The result will be appended to the given string builder.
      * @param unescaped The raw string which shall be escaped.
      */
-    public static void escape(@NotNull StringBuilder builder, @NotNull CharSequence unescaped) {
+    public static void escapeStd(@NotNull StringBuilder builder, @NotNull CharSequence unescaped) {
+        boolean potentialInterpolation = false;
         for (int charIndex = 0; charIndex < unescaped.length(); charIndex++) {
             char nextChar = unescaped.charAt(charIndex);
             switch (nextChar) {
@@ -68,7 +69,7 @@ public final class NixStringUtil {
                     builder.append('\\').append(nextChar);
                     break;
                 case '{':
-                    if (builder.charAt(builder.length() - 1) == '$') {
+                    if (potentialInterpolation) {
                         builder.setCharAt(builder.length() - 1, '\\');
                         builder.append('$').append('{');
                     } else {
@@ -88,6 +89,65 @@ public final class NixStringUtil {
                     builder.append(nextChar);
                     break;
             }
+            potentialInterpolation = nextChar == '$' && !potentialInterpolation;
+        }
+    }
+
+    /**
+     * Escapes the given string for use in an indented string expression in the Nix Expression Language.
+     * Note that it is not safe to concat the result of two calls of this method.
+     *
+     * @param builder     The target string builder. The result will be appended to the given string builder.
+     * @param unescaped   The raw string which shall be escaped.
+     * @param indent      The number as spaces used for indentation
+     * @param indentStart Whether the start of the string needs to be indented
+     * @param indentEnd   The number as spaces used for indentation in the last line
+     */
+    public static void escapeInd(@NotNull StringBuilder builder, @NotNull CharSequence unescaped, int indent, boolean indentStart, int indentEnd) {
+        String indentStr = " ".repeat(indent);
+        boolean potentialInterpolation = false;
+        boolean potentialClosing = false;
+        for (int charIndex = 0; charIndex < unescaped.length(); charIndex++) {
+            char nextChar = unescaped.charAt(charIndex);
+            if (indentStart && nextChar != '\n') {
+                builder.append(indentStr);
+                indentStart = false;
+            }
+            switch (nextChar) {
+                case '\'':
+                    // Convert `''` to `'''`
+                    if (potentialClosing) {
+                        builder.append('\'');
+                    }
+                    builder.append('\'');
+                    break;
+                case '{':
+                    // Convert `${` to `''${`, but leave `$${` untouched
+                    if (potentialInterpolation) {
+                        builder.setLength(builder.length() - 1);
+                        builder.append("''${");
+                    } else {
+                        builder.append('{');
+                    }
+                    break;
+                case '\r':
+                    builder.append("''\\r");
+                    break;
+                case '\t':
+                    builder.append("''\\t");
+                    break;
+                case '\n':
+                    indentStart = true;
+                    // fallthrough
+                default:
+                    builder.append(nextChar);
+                    break;
+            }
+            potentialInterpolation = nextChar == '$' && !potentialInterpolation;
+            potentialClosing = nextChar == '\'' && !potentialClosing;
+        }
+        if (indentStart) {
+            builder.append(" ".repeat(Math.min(indent, indentEnd)));
         }
     }
 
