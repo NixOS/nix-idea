@@ -7,10 +7,11 @@ junit5-bom = { module = "org.junit:junit-bom", version = "5.9.1" }
 junit5-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit5-platform-testkit = { module = "org.junit.platform:junit-platform-testkit" }
 junit5-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine" }
+junit4 = { module = "junit:junit", version = "4.13.2" }
 
 [plugins]
 # read more: https://github.com/JetBrains/intellij-platform-gradle-plugin
-jetbrains-intellij-platform = { id = "org.jetbrains.intellij.platform", version = "2.0.0-beta7" }
+jetbrains-intellij-platform = { id = "org.jetbrains.intellij.platform", version = "2.0.1" }
 # read more: https://github.com/JetBrains/gradle-changelog-plugin
 jetbrains-changelog = { id = "org.jetbrains.changelog", version = "2.2.0" }
 # read more: https://github.com/JetBrains/gradle-grammar-kit-plugin
