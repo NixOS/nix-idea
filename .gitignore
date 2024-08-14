@@ -26,4 +26,5 @@ out/
 build/
 !src/**/build/
 
+/.intellijPlatform
 src/gen

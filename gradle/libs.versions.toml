@@ -2,15 +2,17 @@
 # -> https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [libraries]
+jetbrains-annotations = { module = "org.jetbrains:annotations", version = "24.1.0" }
 junit5-bom = { module = "org.junit:junit-bom", version = "5.9.1" }
 junit5-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit5-platform-testkit = { module = "org.junit.platform:junit-platform-testkit" }
 junit5-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine" }
+junit4 = { module = "junit:junit", version = "4.13.2" }
 
 [plugins]
-# gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-jetbrains-intellij = { id = "org.jetbrains.intellij", version = "1.17.2" }
-# gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
+# read more: https://github.com/JetBrains/intellij-platform-gradle-plugin
+jetbrains-intellij-platform = { id = "org.jetbrains.intellij.platform", version = "2.0.1" }
+# read more: https://github.com/JetBrains/gradle-changelog-plugin
 jetbrains-changelog = { id = "org.jetbrains.changelog", version = "2.2.0" }
-# grammarkit - read more: https://github.com/JetBrains/gradle-grammar-kit-plugin
+# read more: https://github.com/JetBrains/gradle-grammar-kit-plugin
 jetbrains-grammarkit = { id = "org.jetbrains.grammarkit", version = "2022.3.2.2" }

@@ -1,13 +1,14 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.EnumSet
 
 plugins {
     id("java")
     kotlin("jvm") version embeddedKotlinVersion
-    alias(libs.plugins.jetbrains.intellij)
+    alias(libs.plugins.jetbrains.intellij.platform)
     alias(libs.plugins.jetbrains.changelog)
     alias(libs.plugins.jetbrains.grammarkit)
     id("local.bump-version")
@@ -44,22 +45,96 @@ kotlin {
 // Configure project's dependencies
 repositories {
     mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
 dependencies {
+    compileOnly(libs.jetbrains.annotations)
+
     testImplementation(platform(libs.junit5.bom))
     testImplementation(libs.junit5.jupiter)
     testImplementation(libs.junit5.platform.testkit)
+    testImplementation(libs.junit4)
     testRuntimeOnly(libs.junit5.vintage.engine)
+
+    intellijPlatform {
+        create(platformType, platformVersion)
+        testFramework(TestFrameworkType.Platform)
+        //testFramework(TestFrameworkType.JUnit5)
+        instrumentationTools()
+        // Version 1.364 seems to be broken and always complains about supposedly missing 'plugin.xml':
+        // https://youtrack.jetbrains.com/issue/MP-6388
+        pluginVerifier("1.307")
+    }
 }
 
-// Configure gradle-intellij-plugin plugin.
-// Read more: https://github.com/JetBrains/gradle-intellij-plugin
-intellij.pluginName = pluginName
-intellij {
-    version = platformVersion
-    type = platformType
-    updateSinceUntilBuild = true
+// Configure intellij-platform-gradle-plugin plugin.
+// Read more: https://github.com/JetBrains/intellij-platform-gradle-plugin
+intellijPlatform {
+    projectName = pluginName
+    pluginConfiguration {
+        id = "nix-idea"
+        name = "NixIDEA"
+        version = pluginVersion
+        vendor {
+            name = "NixOS"
+        }
+        ideaVersion {
+            sinceBuild = pluginSinceBuild
+            untilBuild = pluginUntilBuild
+        }
+        // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
+        description = providers.provider {
+            projectDir.resolve("README.md").readText().lines()
+                .run {
+                    val start = "<!-- Plugin description -->"
+                    val end = "<!-- Plugin description end -->"
+                    if (!containsAll(listOf(start, end))) {
+                        throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                    }
+                    subList(indexOf(start) + 1, indexOf(end))
+                }
+                .joinToString("\n")
+                .run { markdownToHTML(this) }
+        }
+        // Get the latest available change notes from the changelog file
+        changeNotes = provider {
+            with(changelog) {
+                renderItem(
+                    (getOrNull(pluginVersion) ?: getUnreleased())
+                        .withHeader(false)
+                        .withEmptySections(false),
+                    Changelog.OutputType.HTML
+                )
+            }
+        }
+    }
+    verifyPlugin {
+        ides {
+            ides(
+                providers.gradleProperty("verifierIdeVersionOverride")
+                    // Verify only against the IDE specified by the property
+                    .map { listOf(it) }
+                    // If property is not set, verify against the recommended list of IDEs
+                    .orElse(ProductReleasesValueSource())
+            )
+        }
+        failureLevel = EnumSet.complementOf(
+            EnumSet.of(
+                FailureLevel.DEPRECATED_API_USAGES,
+                FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES,
+                FailureLevel.EXPERIMENTAL_API_USAGES,
+            )
+        )
+    }
+    publishing {
+        token = providers.environmentVariable("JETBRAINS_TOKEN")
+        // Note: `listOf("foo").first()` does not what you think on Java 21 and Gradle 8.6. (The return type is TaskProvider<Task>)
+        // See https://github.com/gradle/gradle/issues/27699 and https://youtrack.jetbrains.com/issue/KT-65235.
+        channels = listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.')[0])
+    }
 }
 
 changelog {
@@ -149,60 +224,6 @@ tasks {
         useJUnitPlatform {
             excludeTags("mock")
         }
-    }
-
-    patchPluginXml {
-        version = pluginVersion
-        sinceBuild = pluginSinceBuild
-        untilBuild = pluginUntilBuild
-
-        // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
-        pluginDescription = providers.provider {
-            projectDir.resolve("README.md").readText().lines()
-                .run {
-                    val start = "<!-- Plugin description -->"
-                    val end = "<!-- Plugin description end -->"
-                    if (!containsAll(listOf(start, end))) {
-                        throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
-                    }
-                    subList(indexOf(start) + 1, indexOf(end))
-                }
-                .joinToString("\n")
-                .run { markdownToHTML(this) }
-        }
-
-        // Get the latest available change notes from the changelog file
-        changeNotes = provider {
-            with(changelog) {
-                renderItem(
-                        (getOrNull(pluginVersion) ?: getUnreleased())
-                                .withHeader(false)
-                                .withEmptySections(false),
-                        Changelog.OutputType.HTML
-                )
-            }
-        }
-    }
-
-    runPluginVerifier {
-        ideVersions = providers.gradleProperty("verifierIdeVersionOverride").map { listOf(it) }.orElse(listOf())
-        failureLevel = EnumSet.complementOf(
-            EnumSet.of(
-                FailureLevel.DEPRECATED_API_USAGES,
-                FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES,
-                FailureLevel.EXPERIMENTAL_API_USAGES,
-            )
-        )
-        // Version 1.364 seems to be broken and always complains about supposedly missing 'plugin.xml':
-        // https://youtrack.jetbrains.com/issue/MP-6388
-        verifierVersion = "1.307"
-    }
-
-    publishPlugin {
-        token = providers.environmentVariable("JETBRAINS_TOKEN")
-        // Note: `listOf("foo").first()` does not what you think on Java 21 and Gradle 8.6. (The return type is TaskProvider<Task>)
-        // See https://github.com/gradle/gradle/issues/27699 and https://youtrack.jetbrains.com/issue/KT-65235.
-        channels = listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.')[0])
     }
 
 }
