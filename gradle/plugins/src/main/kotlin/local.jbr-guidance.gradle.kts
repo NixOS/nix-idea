@@ -3,6 +3,7 @@ import org.gradle.tooling.Failure
 import org.gradle.tooling.events.FailureResult
 import org.gradle.tooling.events.FinishEvent
 import org.gradle.tooling.events.OperationCompletionListener
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import java.util.function.Predicate
 
@@ -18,8 +19,9 @@ jbrHome.resolve("bin/java").takeIf { it.exists() }
     ?.also { _ ->
         // Use JVM at `jbr/bin/java`. The JVM otherwise downloaded by intellij-platform-gradle-plugin wouldn't work on NixOS.
         // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1437#issuecomment-1987310948
+        // VerifyPluginTask doesn't execute the JVM, so we can ignore this task for the sake of consistency with other platforms.
         tasks.configureEach {
-            if (this is RuntimeAware) {
+            if (this is RuntimeAware && this !is VerifyPluginTask) {
                 runtimeDirectory = jbrHome
             }
         }
