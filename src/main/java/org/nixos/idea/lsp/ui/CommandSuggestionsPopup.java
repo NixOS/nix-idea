@@ -179,7 +179,7 @@ public final class CommandSuggestionsPopup {
         }
 
         @Override
-        public @Nls @Nullable String getValueFor(Suggestion suggestion) {
+        public @Nls @Nullable String getSecondaryTextFor(Suggestion suggestion) {
             return suggestion.secondaryText();
         }
 

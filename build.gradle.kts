@@ -111,7 +111,7 @@ intellijPlatform {
             }
         }
     }
-    verifyPlugin {
+    pluginVerification {
         ides {
             ides(
                 providers.gradleProperty("verifierIdeVersionOverride")
