@@ -4,11 +4,15 @@
 
 ### Added
 
+- Support for IDEA 2024.3
+
 ### Changed
 
 ### Deprecated
 
 ### Removed
+
+- Support for IDEA 2023.3
 
 ### Fixed
 
