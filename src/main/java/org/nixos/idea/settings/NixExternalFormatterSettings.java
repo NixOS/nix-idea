@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 
-@State(name = "NixExternalFormatterSettings", storages = @Storage(value = NixStoragePaths.TOOLS, roamingType = RoamingType.DISABLED))
+@State(name = "NixExternalFormatterSettings", storages = @Storage(value = NixStoragePaths.TOOLS, roamingType = RoamingType.LOCAL))
 public final class NixExternalFormatterSettings implements PersistentStateComponent<NixExternalFormatterSettings.State> {
 
     // Documentation:

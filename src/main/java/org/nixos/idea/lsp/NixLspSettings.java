@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 
-@State(name = "NixLspSettings", storages = @Storage(value = NixStoragePaths.TOOLS, roamingType = RoamingType.DISABLED))
+@State(name = "NixLspSettings", storages = @Storage(value = NixStoragePaths.TOOLS, roamingType = RoamingType.LOCAL))
 public final class NixLspSettings implements PersistentStateComponent<NixLspSettings.State> {
 
     // Documentation:

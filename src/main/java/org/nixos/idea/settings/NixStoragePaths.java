@@ -11,8 +11,7 @@ public final class NixStoragePaths {
     /**
      * Location and configuration of external tools.
      * The settings in the file are considered system dependent.
-     * This constant must be used with {@link RoamingType#DISABLED}.
-     * TODO: Use RoamingType.LOCAL with 2024.1
+     * This constant must be used with {@link RoamingType#LOCAL}.
      */
     public static final String TOOLS = "nix-idea-tools.xml";
 
