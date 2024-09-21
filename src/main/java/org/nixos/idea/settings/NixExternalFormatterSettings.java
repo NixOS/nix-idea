@@ -1,4 +1,4 @@
-package org.nixos.idea.lsp;
+package org.nixos.idea.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -6,15 +6,14 @@ import com.intellij.openapi.components.RoamingType;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import org.jetbrains.annotations.NotNull;
-import org.nixos.idea.settings.NixStoragePaths;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 
-@State(name = "NixLspSettings", storages = @Storage(value = NixStoragePaths.TOOLS, roamingType = RoamingType.LOCAL))
-public final class NixLspSettings implements PersistentStateComponent<NixLspSettings.State> {
+@State(name = "NixExternalFormatterSettings", storages = @Storage(value = NixStoragePaths.TOOLS, roamingType = RoamingType.LOCAL))
+public final class NixExternalFormatterSettings implements PersistentStateComponent<NixExternalFormatterSettings.State> {
 
     // Documentation:
     // https://plugins.jetbrains.com/docs/intellij/persisting-state-of-components.html
@@ -23,32 +22,32 @@ public final class NixLspSettings implements PersistentStateComponent<NixLspSett
 
     private @NotNull State myState = new State();
 
-    public static @NotNull NixLspSettings getInstance() {
-        return ApplicationManager.getApplication().getService(NixLspSettings.class);
+    public static @NotNull NixExternalFormatterSettings getInstance() {
+        return ApplicationManager.getApplication().getService(NixExternalFormatterSettings.class);
     }
 
-    public boolean isEnabled() {
+    public boolean isFormatEnabled() {
         return myState.enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setFormatEnabled(boolean enabled) {
         myState.enabled = enabled;
     }
 
-    public @NotNull String getCommand() {
+    public @NotNull String getFormatCommand() {
         return myState.command;
     }
 
-    public void setCommand(@NotNull String command) {
+    public void setFormatCommand(@NotNull String command) {
         myState.command = command;
-        addToHistory(command);
+        addFormatCommandToHistory(command);
     }
 
     public @NotNull Collection<String> getCommandHistory() {
         return Collections.unmodifiableCollection(myState.history);
     }
 
-    private void addToHistory(@NotNull String command) {
+    private void addFormatCommandToHistory(@NotNull String command) {
         Deque<String> history = myState.history;
         history.remove(command);
         history.addFirst(command);

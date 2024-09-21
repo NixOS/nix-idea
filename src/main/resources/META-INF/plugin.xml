@@ -1,9 +1,5 @@
 <idea-plugin>
 
-    <id>nix-idea</id>
-    <name>NixIDEA</name>
-    <vendor>NixOS</vendor>
-
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends optional="true" config-file="nix-idea-ultimate.xml">com.intellij.modules.ultimate</depends>
@@ -15,25 +11,25 @@
                 implementationClass="org.nixos.idea.file.NixFileType"
                 fieldName="INSTANCE"
                 language="Nix"
-                extensions="nix" />
+                extensions="nix"/>
 
         <lang.parserDefinition
                 language="Nix"
-                implementationClass="org.nixos.idea.lang.NixParserDefinition" />
+                implementationClass="org.nixos.idea.lang.NixParserDefinition"/>
 
         <lang.syntaxHighlighterFactory
                 language="Nix"
-                implementationClass="org.nixos.idea.lang.highlighter.NixSyntaxHighlighterFactory" />
+                implementationClass="org.nixos.idea.lang.highlighter.NixSyntaxHighlighterFactory"/>
 
-        <highlightVisitor implementation="org.nixos.idea.lang.highlighter.NixHighlightVisitor" />
-        <highlightVisitor implementation="org.nixos.idea.lang.highlighter.NixRainbowVisitor" />
+        <highlightVisitor implementation="org.nixos.idea.lang.highlighter.NixHighlightVisitor"/>
+        <highlightVisitor implementation="org.nixos.idea.lang.highlighter.NixRainbowVisitor"/>
 
         <additionalTextAttributes scheme="Default" file="colorSchemes/NixDefault.xml"/>
         <additionalTextAttributes scheme="Darcula" file="colorSchemes/NixDarcula.xml"/>
 
         <lang.braceMatcher
                 language="Nix"
-                implementationClass="org.nixos.idea.lang.NixBraceMatcher" />
+                implementationClass="org.nixos.idea.lang.NixBraceMatcher"/>
 
         <lang.commenter
                 language="Nix"
@@ -46,7 +42,7 @@
                 parentId="build"
                 displayName="NixIDEA Settings"
                 id="org.nixos.idea.settings.NixIDEASettings"
-                instance="org.nixos.idea.settings.NixIDEASettings" />
+                instance="org.nixos.idea.settings.NixIDEASettings"/>
 
         <applicationService
                 serviceImplementation="org.nixos.idea.settings.NixSymbolSettings"/>
@@ -58,8 +54,20 @@
                 instance="org.nixos.idea.settings.NixSymbolConfigurable"/>
 
         <colorSettingsPage
-                implementation="org.nixos.idea.settings.NixColorSettingsPage" />
+                implementation="org.nixos.idea.settings.NixColorSettingsPage"/>
 
+        <applicationService
+                serviceImplementation="org.nixos.idea.settings.NixExternalFormatterSettings"/>
+
+        <applicationConfigurable
+                parentId="language"
+                displayName="Nix"
+                id="org.nixos.idea.settings.NixLangSettingsConfigurable"
+                instance="org.nixos.idea.settings.NixLangSettingsConfigurable"/>
+
+        <formattingService implementation="org.nixos.idea.format.NixExternalFormatter"/>
+
+        <notificationGroup id="NixIDEA" displayType="BALLOON"/>
     </extensions>
 
 </idea-plugin>
