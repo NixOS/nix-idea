@@ -7,7 +7,7 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import org.nixos.idea.settings.SimplePersistentStateComponentHelper.delegate
 
-@State(name = "NixSymbolSettings", storages = [Storage("nix-idea.xml")])
+@State(name = "NixSymbolSettings", storages = [Storage(NixStoragePaths.DEFAULT)])
 class NixSymbolSettings : SimplePersistentStateComponent<NixSymbolSettings.State>(State()) {
 
     class State : BaseState() {
