@@ -71,13 +71,15 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
             entry(NixTypes.URI, NixTextAttributes.URI),
             // String literals
             entry(NixTypes.STR, NixTextAttributes.STRING),
+            entry(NixTypes.STR_ESCAPE, NixTextAttributes.STRING_ESCAPE),
             entry(NixTypes.STRING_CLOSE, NixTextAttributes.STRING),
             entry(NixTypes.STRING_OPEN, NixTextAttributes.STRING),
             entry(NixTypes.IND_STR, NixTextAttributes.STRING),
+            entry(NixTypes.IND_STR_LF, NixTextAttributes.STRING),
+            entry(NixTypes.IND_STR_INDENT, NixTextAttributes.STRING),
+            entry(NixTypes.IND_STR_ESCAPE, NixTextAttributes.STRING_ESCAPE),
             entry(NixTypes.IND_STRING_CLOSE, NixTextAttributes.STRING),
             entry(NixTypes.IND_STRING_OPEN, NixTextAttributes.STRING),
-            entry(NixTypes.STR_ESCAPE, NixTextAttributes.STRING_ESCAPE),
-            entry(NixTypes.IND_STR_ESCAPE, NixTextAttributes.STRING_ESCAPE),
             // Other
             entry(NixTypes.SCOMMENT, NixTextAttributes.LINE_COMMENT),
             entry(NixTypes.MCOMMENT, NixTextAttributes.BLOCK_COMMENT),
