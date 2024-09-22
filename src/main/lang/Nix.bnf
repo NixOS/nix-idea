@@ -24,6 +24,10 @@
   // no one really needs to know that + - * / are expected at any offset
   consumeTokenMethod("expr_op.*")="consumeTokenFast"
 
+  // Declaration hosts
+  implements("expr_let|expr_attrs|expr_lambda")="org.nixos.idea.psi.NixDeclarationHost"
+  mixin("expr_let|expr_attrs|expr_lambda")="org.nixos.idea.psi.impl.AbstractNixDeclarationHost"
+
   tokens = [
     // This list does not contain all tokens. This list only defines the debug
     // names for tokens which have a distinct text representation. Other tokens
