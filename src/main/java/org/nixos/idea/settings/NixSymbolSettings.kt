@@ -12,7 +12,7 @@ class NixSymbolSettings : SimplePersistentStateComponent<NixSymbolSettings.State
 
     class State : BaseState() {
         var enabled by property(true)
-        var jumpToFirstDeclaration by property(true)
+        var jumpToFirstDeclaration by property(false)
         var showDeclarationsAsUsages by property(false)
     }
 
