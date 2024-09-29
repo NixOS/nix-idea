@@ -452,9 +452,18 @@ public final class Markers extends AbstractCollection<Markers.Marker> {
         }
 
         /**
+         * The {@link TagName} of this marker.
+         *
+         * @return tag name of this marker.
+         */
+        public @NotNull TagName tagName() {
+            return myTagName;
+        }
+
+        /**
          * The offset where the marker starts in the unmarked text.
          *
-         * @return Start offset of marker.
+         * @return Start offset of this marker.
          */
         public int start() {
             return myStart;
@@ -463,7 +472,7 @@ public final class Markers extends AbstractCollection<Markers.Marker> {
         /**
          * The offset where the marker ends in the unmakred text.
          *
-         * @return End offset of marker.
+         * @return End offset of this marker.
          */
         public int end() {
             return myEnd;
@@ -472,7 +481,7 @@ public final class Markers extends AbstractCollection<Markers.Marker> {
         /**
          * The {@linkplain #start() start offset} {@linkplain #end() end offset} as a {@link TextRange}.
          *
-         * @return Location of marker in unmarked text as {@link TextRange}.
+         * @return Location of this marker in unmarked text as {@link TextRange}.
          */
         public @NotNull TextRange range() {
             return TextRange.create(myStart, myEnd);
@@ -483,7 +492,7 @@ public final class Markers extends AbstractCollection<Markers.Marker> {
          * This method throws a runtime exception if {@link #start()} and {@link #end()} are different.
          * This method is intended to be used for {@linkplain #tagNameVoid(String) void markers}.
          *
-         * @return Location of empty marker in unmarked text.
+         * @return Location of this empty marker in unmarked text.
          */
         public int offset() {
             if (myStart != myEnd) throw new IllegalStateException("Cannot represent range as offset: " + this);

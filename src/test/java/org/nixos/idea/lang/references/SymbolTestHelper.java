@@ -18,9 +18,11 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiTreeUtilKt;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import org.jetbrains.annotations.NotNull;
-import org.nixos.idea.lang.references.symbol.NixSymbol;
 import org.nixos.idea.lang.references.symbol.NixUserSymbol;
+import org.nixos.idea.psi.NixAttrPath;
 import org.nixos.idea.psi.NixDeclarationHost;
+import org.nixos.idea.psi.NixElementFactory;
+import org.nixos.idea.psi.NixPsiUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,11 +42,13 @@ public final class SymbolTestHelper {
 
     //region findSymbol
 
-    public @NotNull NixSymbol findSymbol(@NotNull PsiFile file, @NotNull String name, int offset) {
-        return findSymbol(file, List.of(name), offset);
+    public @NotNull NixUserSymbol findSymbol(@NotNull PsiFile file, @NotNull String attrPath, int offset) {
+        NixAttrPath pathElement = NixElementFactory.createAttrPath(file.getProject(), attrPath);
+        List<String> path = pathElement.getAttrList().stream().map(NixPsiUtil::getAttributeName).toList();
+        return findSymbol(file, path, offset);
     }
 
-    public @NotNull NixSymbol findSymbol(@NotNull PsiFile file, @NotNull List<String> path, int offset) {
+    public @NotNull NixUserSymbol findSymbol(@NotNull PsiFile file, @NotNull List<String> path, int offset) {
         NixDeclarationHost host = PsiTreeUtil.findElementOfClassAtOffset(file, offset, NixDeclarationHost.class, false);
         if (host == null) {
             throw new IllegalStateException("No NixDeclarationHost found on given location");
