@@ -12,6 +12,7 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
 import com.intellij.testFramework.fixtures.IdeaTestExecutionPolicy;
 import com.intellij.testFramework.fixtures.IdeaTestFixture;
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
@@ -28,7 +29,11 @@ import java.util.Objects;
 import java.util.function.Function;
 
 final class IdeaPlatformExtension implements ParameterResolver, TestInstancePreConstructCallback, TestInstancePreDestroyCallback {
+
     private static final Namespace NAMESPACE = Namespace.create(IdeaPlatformExtension.class);
+    private static final Named<?> KEY_FIXTURE = Named.of("KEY_FIXTURE", new Object());
+    private static final Named<?> KEY_FIXTURE_CLOSABLE = Named.of("KEY_FIXTURE_CLOSABLE", new Object());
+
     private static final Map<Class<?>, Function<ExtensionContext, ?>> PARAMETER_FACTORIES = Map.ofEntries(
             createResolver(CodeInsightTestFixture.class, IdeaPlatformExtension::resolveCodeInsightFixture),
             createResolver(IdeaProjectTestFixture.class, IdeaPlatformExtension::resolveFixture),
@@ -40,20 +45,30 @@ final class IdeaPlatformExtension implements ParameterResolver, TestInstancePreC
 
     @Override
     public void preConstructTestInstance(TestInstanceFactoryContext factoryContext, ExtensionContext context) throws Exception {
-        context.getStore(NAMESPACE).put(FixtureClosableWrapper.class, new FixtureClosableWrapper(context));
+        FixtureClosableWrapper existing = context.getStore(NAMESPACE).get(KEY_FIXTURE, FixtureClosableWrapper.class);
+        if (existing == null) {
+            context.getStore(NAMESPACE).put(KEY_FIXTURE, new FixtureClosableWrapper(context));
+            context.getStore(NAMESPACE).put(KEY_FIXTURE_CLOSABLE, Boolean.TRUE);
+        } else {
+            context.getStore(NAMESPACE).put(KEY_FIXTURE, existing);
+        }
     }
 
     @Override
     public void preDestroyTestInstance(ExtensionContext context) throws Exception {
         // Unfortunately, the ExtensionContext given to `preConstructTestInstance` is not scoped to the individual test.
-        // We therefore have cleanup the context manually.
+        // We therefore must clean up the context manually.
         // https://github.com/junit-team/junit5/issues/3445
         FixtureClosableWrapper wrapper;
-        do {
-            wrapper = context.getStore(NAMESPACE).remove(FixtureClosableWrapper.class, FixtureClosableWrapper.class);
+        while (context != null) {
+            wrapper = context.getStore(NAMESPACE).remove(KEY_FIXTURE, FixtureClosableWrapper.class);
+            if (wrapper != null) {
+                if (context.getStore(NAMESPACE).remove(KEY_FIXTURE_CLOSABLE, Boolean.class) == Boolean.TRUE) {
+                    wrapper.close();
+                }
+            }
             context = context.getParent().orElse(null);
-        } while (context != null && wrapper == null);
-        if (wrapper != null) wrapper.close();
+        }
     }
 
     @Override
@@ -75,7 +90,7 @@ final class IdeaPlatformExtension implements ParameterResolver, TestInstancePreC
     }
 
     private static IdeaProjectTestFixture resolveFixture(ExtensionContext context) {
-        return context.getStore(NAMESPACE).get(FixtureClosableWrapper.class, FixtureClosableWrapper.class).myFixture;
+        return context.getStore(NAMESPACE).get(KEY_FIXTURE, FixtureClosableWrapper.class).myFixture;
     }
 
     private static Project resolveProject(ExtensionContext context) {
