@@ -9,12 +9,12 @@ import java.util.Collection;
 @SuppressWarnings("UnstableApiUsage")
 public final class NixScopeReference extends NixSymbolReference {
 
-    public NixScopeReference(@NotNull NixPsiElement element, @NotNull NixPsiElement identifier, @NotNull String variableName) {
-        super(element, identifier, variableName);
+    public NixScopeReference(@NotNull NixPsiElement owner, @NotNull NixPsiElement identifier, @NotNull String variableName) {
+        super(owner, identifier, variableName);
     }
 
     @Override
     public @NotNull Collection<NixSymbol> resolveReference() {
-        return myElement.getScope().resolveVariable(myName);
+        return myOwner.getScope().resolveVariable(myName);
     }
 }

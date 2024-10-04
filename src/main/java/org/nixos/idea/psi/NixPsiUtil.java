@@ -53,6 +53,17 @@ public final class NixPsiUtil {
         };
     }
 
+    public static @Nullable NixExpr getDefaultValue(@NotNull NixParameter parameter) {
+        if (parameter instanceof NixFormal formal) {
+            return formal.getDefaultValue();
+        } else if (parameter instanceof NixArgument) {
+            return null;
+        } else {
+            LOG.error("Unexpected NixParameter implementation: " + parameter.getClass());
+            return null;
+        }
+    }
+
     /**
      * Returns the static name of an attribute.
      * Is {@code null} for dynamic attributes.

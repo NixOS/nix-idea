@@ -5,10 +5,12 @@ import com.intellij.openapi.diagnostic.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.lang.references.NixSymbolDeclaration;
+import org.nixos.idea.lang.references.NixSymbolResolver;
 import org.nixos.idea.lang.references.symbol.NixUserSymbol;
 import org.nixos.idea.psi.NixAttr;
 import org.nixos.idea.psi.NixAttrPath;
 import org.nixos.idea.psi.NixBind;
+import org.nixos.idea.psi.NixBindAttr;
 import org.nixos.idea.psi.NixBindInherit;
 import org.nixos.idea.psi.NixDeclarationHost;
 import org.nixos.idea.psi.NixExprAttrs;
@@ -76,6 +78,11 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
         return getSymbols().getDeclarations(attributePath);
     }
 
+    @Override
+    public @NotNull Collection<NixSymbolResolver> getFullDeclarations(@NotNull List<String> attributePath) {
+        return getSymbols().getFullDeclarations(attributePath);
+    }
+
     static @NotNull Collection<NixSymbolDeclaration> getDeclarations(@NotNull AbstractNixPsiElement element) {
         AbstractNixDeclarationHost declarationHost = element.getDeclarationHost();
         if (declarationHost == null) {
@@ -117,10 +124,10 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
         NixUserSymbol.Type type = isVariable ? NixUserSymbol.Type.VARIABLE : NixUserSymbol.Type.ATTRIBUTE;
         for (NixBind bind : bindList) {
             if (bind instanceof NixBindAttrImpl bindAttr) {
-                result.addBindAttr(bindAttr, bindAttr.getAttrPath(), type);
+                result.addBindAttr(bindAttr, bindAttr, type);
             } else if (bind instanceof NixBindInherit bindInherit) {
                 for (NixAttr inheritedAttribute : bindInherit.getAttrList()) {
-                    result.addInherit(bindInherit, inheritedAttribute, type, bindInherit.getExpr() != null);
+                    result.addInherit(bindInherit, inheritedAttribute, type, bindInherit);
                 }
             } else {
                 LOG.error("Unexpected NixBind implementation: " + bind.getClass());
@@ -142,7 +149,8 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
 
     private final class Symbols {
         private final @NotNull Map<List<String>, NixUserSymbol> mySymbols = new HashMap<>();
-        private final @NotNull Map<List<String>, List<NixSymbolDeclaration>> myDeclarationsBySymbol = new HashMap<>();
+        private final @NotNull Map<List<String>, List<NixSymbolDeclaration>> myDeclarationsByNames = new HashMap<>();
+        private final @NotNull Map<List<String>, List<NixSymbolResolver>> myFullDeclarationsByNames = new HashMap<>();
         private final @NotNull Map<NixPsiElement, List<NixSymbolDeclaration>> myDeclarationsByElement = new HashMap<>();
         private final @NotNull Set<String> myVariables = new HashSet<>();
         private final long mySettingsModificationCount;
@@ -155,37 +163,44 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
             return mySettingsModificationCount != settings.getStateModificationCount();
         }
 
-        private void addBindAttr(@NotNull NixPsiElement element, @NotNull NixAttrPath attrPath, @NotNull NixUserSymbol.Type type) {
+        private void addBindAttr(@NotNull NixPsiElement element, @NotNull NixBindAttr bindAttr, @NotNull NixUserSymbol.Type type) {
             if (!checkDeclarationHost(element)) {
                 return;
             }
 
+            NixAttrPath attrPath = bindAttr.getAttrPath();
             String elementName = attrPath.getText();
+            List<NixAttr> attrElements = attrPath.getAttrList();
             List<String> path = new ArrayList<>();
-            for (NixAttr attr : attrPath.getAttrList()) {
+            for (NixAttr attr : attrElements) {
                 String name = NixPsiUtil.getAttributeName(attr);
                 if (name == null) {
                     return;
                 }
                 path.add(name);
-                add(element, attr, path, type, true, elementName, null);
+                NixSymbolResolver resolver = path.size() == attrElements.size()
+                        ? NixSymbolResolver.of(bindAttr.getExpr())
+                        : null;
+                add(element, attr, path, resolver, type, true, elementName, null);
                 type = NixUserSymbol.Type.ATTRIBUTE;
             }
         }
 
         private void addInherit(@NotNull NixPsiElement element, @NotNull NixAttr attr,
-                                @NotNull NixUserSymbol.Type type, boolean exposeAsVariable) {
+                                @NotNull NixUserSymbol.Type type, NixBindInherit bindInherit) {
             String name = NixPsiUtil.getAttributeName(attr);
             if (checkDeclarationHost(element) && name != null) {
-                add(element, attr, List.of(name),
-                        type, exposeAsVariable, attr.getText(), "inherit");
+                NixSymbolResolver resolver = NixSymbolResolver.of(NixSymbolResolver.of(bindInherit.getExpr()), name);
+                add(element, attr, List.of(name), resolver,
+                        type, bindInherit.getExpr() != null, attr.getText(), "inherit");
             }
         }
 
-        private void addParameter(@NotNull NixPsiElement element, @NotNull NixIdentifier identifier) {
-            if (checkDeclarationHost(element)) {
-                add(element, identifier,
-                        List.of(identifier.getText()),
+        private void addParameter(@NotNull NixParameter parameter, @NotNull NixIdentifier identifier) {
+            if (checkDeclarationHost(parameter)) {
+                NixSymbolResolver resolver = NixSymbolResolver.of(NixPsiUtil.getDefaultValue(parameter));
+                add(parameter, identifier,
+                        List.of(identifier.getText()), resolver,
                         NixUserSymbol.Type.PARAMETER, true,
                         identifier.getText(), "lambda");
             }
@@ -194,7 +209,8 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
         private void add(@NotNull NixPsiElement element,
                          @NotNull NixPsiElement identifier,
                          @NotNull List<String> attributePath,
-                         @NotNull NixUserSymbol.Type type,
+                         @Nullable NixSymbolResolver resolver,
+                         @NotNull NixUserSymbol.Type symbolType,
                          boolean exposeAsVariable,
                          @NotNull String elementName,
                          @Nullable String elementType) {
@@ -202,16 +218,20 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
             List<String> attributePathCopy = List.copyOf(attributePath);
 
             NixUserSymbol symbol = mySymbols.computeIfAbsent(attributePathCopy,
-                    path -> new NixUserSymbol(AbstractNixDeclarationHost.this, path, type));
+                    path -> new NixUserSymbol(AbstractNixDeclarationHost.this, path, symbolType));
             if (exposeAsVariable && attributePath.size() == 1) {
                 myVariables.add(attributePath.get(0));
             }
 
             NixSymbolDeclaration declaration = new NixSymbolDeclaration(element, identifier, symbol, elementName, elementType);
-            myDeclarationsBySymbol.computeIfAbsent(attributePathCopy, __ -> new ArrayList<>())
+            myDeclarationsByNames.computeIfAbsent(attributePathCopy, __ -> new ArrayList<>())
                     .add(declaration);
             myDeclarationsByElement.computeIfAbsent(element, __ -> new ArrayList<>())
                     .add(declaration);
+            if (resolver != null) {
+                myFullDeclarationsByNames.computeIfAbsent(attributePathCopy, __ -> new ArrayList<>())
+                        .add(resolver);
+            }
         }
 
         private @Nullable NixUserSymbol getSymbolForScope(@NotNull String variableName) {
@@ -223,7 +243,11 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
         }
 
         private @NotNull List<NixSymbolDeclaration> getDeclarations(@NotNull List<String> attributePath) {
-            return myDeclarationsBySymbol.getOrDefault(attributePath, List.of());
+            return myDeclarationsByNames.getOrDefault(attributePath, List.of());
+        }
+
+        private @NotNull List<NixSymbolResolver> getFullDeclarations(@NotNull List<String> attributePath) {
+            return myFullDeclarationsByNames.getOrDefault(attributePath, List.of());
         }
 
         private @NotNull List<NixSymbolDeclaration> getDeclarations(@NotNull NixPsiElement element) {

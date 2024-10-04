@@ -14,7 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.lang.NixLanguage;
 import org.nixos.idea.lang.references.symbol.NixSymbol;
 import org.nixos.idea.lang.references.symbol.NixUserSymbol;
+import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixPsiElement;
+import org.nixos.idea.psi.NixString;
 import org.nixos.idea.settings.NixSymbolSettings;
 
 import java.util.Collection;
@@ -53,14 +55,20 @@ public final class NixUsageSearcher implements UsageSearcher, LeafOccurrenceMapp
 
     @Override
     public @NotNull Collection<? extends Usage> mapOccurrence(@NotNull NixSymbol symbol, @NotNull LeafOccurrence occurrence) {
+        int nextOffset = occurrence.getOffsetInStart();
         for (PsiElement element = occurrence.getStart(); element != null && element != occurrence.getScope(); element = element.getParent()) {
+            int offset = nextOffset;
+            nextOffset += element.getStartOffsetInParent();
             if (element instanceof NixPsiElement nixElement) {
+                assert nixElement.getOwnReferences().stream().allMatch(ref -> ref.getElement() == nixElement);
                 List<NixUsage> usages = nixElement.getOwnReferences().stream()
-                        .filter(reference -> reference.resolvesTo(symbol))
+                        .filter(ref -> ref.getRangeInElement().contains(offset) && ref.resolvesTo(symbol))
                         .map(NixUsage::new)
                         .toList();
                 if (!usages.isEmpty()) {
                     return usages;
+                } else if (element instanceof NixExpr && !(element instanceof NixString)) {
+                    return List.of(); // Performance optimization
                 }
             }
         }
