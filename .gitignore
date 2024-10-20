@@ -18,6 +18,7 @@ hs_err_pid*
 *.iml
 .idea/*
 !.idea/codeStyles/
+!.idea/runConfigurations/
 out/
 !src/**/out/
 

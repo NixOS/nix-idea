@@ -1,5 +1,6 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -166,6 +167,11 @@ sourceSets {
 }
 
 tasks {
+
+    val runIntellij by intellijPlatformTesting.runIde.registering {
+        type = IntelliJPlatformType.IntellijIdeaCommunity
+    }
+
     withType<JavaCompile> {
         options.encoding = "UTF-8"
     }
