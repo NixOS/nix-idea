@@ -96,6 +96,7 @@ abstract class AbstractSymbolNavigationTests {
         val declarationMarkers = markers.markers(TAG_DECL)
         val referenceMarkers = markers.markers(TAG_REF)
 
+        NixSymbolSettings.getInstance().enabled = true
         val file = myFixture.configureByText(NixFileType.INSTANCE, unmarkedCode)
         PsiTestUtil.checkErrorElements(file) // Fail early if there is a syntax error
 

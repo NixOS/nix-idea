@@ -11,7 +11,7 @@ import org.nixos.idea.settings.SimplePersistentStateComponentHelper.delegate
 class NixSymbolSettings : SimplePersistentStateComponent<NixSymbolSettings.State>(State()) {
 
     class State : BaseState() {
-        var enabled by property(true)
+        var enabledPreview by property(false)
         var jumpToFirstDeclaration by property(false)
         var showDeclarationsAsUsages by property(false)
     }
@@ -23,7 +23,7 @@ class NixSymbolSettings : SimplePersistentStateComponent<NixSymbolSettings.State
         }
     }
 
-    var enabled: Boolean by delegate(State::enabled)
+    var enabled: Boolean by delegate(State::enabledPreview)
     var jumpToFirstDeclaration by delegate(State::jumpToFirstDeclaration)
     var showDeclarationsAsUsages: Boolean by delegate(State::showDeclarationsAsUsages)
 
