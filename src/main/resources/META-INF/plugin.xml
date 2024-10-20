@@ -35,11 +35,23 @@
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixCommenter"/>
 
+        <searcher forClass="com.intellij.find.usages.api.UsageSearchParameters"
+                  implementationClass="org.nixos.idea.lang.references.NixUsageSearcher"/>
+
         <projectConfigurable
                 parentId="build"
                 displayName="NixIDEA Settings"
                 id="org.nixos.idea.settings.NixIDEASettings"
                 instance="org.nixos.idea.settings.NixIDEASettings"/>
+
+        <applicationService
+                serviceImplementation="org.nixos.idea.settings.NixSymbolSettings"/>
+
+        <applicationConfigurable
+                parentId="language"
+                displayName="Nix Symbols"
+                id="org.nixos.idea.settings.NixSymbolConfigurable"
+                instance="org.nixos.idea.settings.NixSymbolConfigurable"/>
 
         <colorSettingsPage
                 implementation="org.nixos.idea.settings.NixColorSettingsPage"/>
