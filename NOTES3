@@ -1,0 +1,29 @@
+Implementation issues:
+  Custom index for references?
+  Why NavigatableSymbol? Couldn't you just use the usage search? Why do I have to implement the declaration search twice?
+  !Should I implement PsiSymbolReferenceSearcher?
+  !What is SearchService.searchPsiSymbolReferences and SearchService.searchPsiSymbolDeclarations for? They seem unused.
+Usage problems
+  Why am I not able to jump to the declarations from the usage search?
+  Option to make it possible to see declarations in usage-search?
+Bad testability
+  Documentation only mentions solutions which don't work with symbols
+    https://plugins.jetbrains.com/docs/intellij/find-usages-test.html
+  myFixture.testFindUsagesUsingAction() fails if there is only one usage, or no usage at all
+  myFixture.testFindUsagesUsingAction() does not return declarations, which means the declaration search is not tested
+
+
+----
+
+PR #82:
+Maybe InjectedFileViewProvider helps?
+NixStringLiteralEscaper.unescapeAndDecode braces unused
+NixStringLiteralEscaper.unescapeAndDecode does not work with empty lines
+NixStringLiteralEscaper.unescapeAndDecode does not detect right indentation for blank lines
+
+----
+
+TODO with statement
+TODO modules
+TODO Auto complete suggesting combinations of attributes
+TODO Variables vs string interpolation. (${"subject"} works, but "${"subject}"?)

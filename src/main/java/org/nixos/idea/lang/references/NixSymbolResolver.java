@@ -5,6 +5,7 @@ import com.intellij.util.containers.ContainerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.lang.references.symbol.NixSymbol;
+import org.nixos.idea.lang.references.symbol.NixUserSymbol;
 import org.nixos.idea.psi.NixAttrPath;
 import org.nixos.idea.psi.NixExpr;
 import org.nixos.idea.psi.NixExprAttrs;
@@ -45,13 +46,12 @@ public interface NixSymbolResolver {
                     Collection<? extends NixSymbolReference> references = var.getOwnReferences();
                     if (references.size() > 1) {
                         LOG.error("Unexpected references for variable: " + references);
-                    }
-                    if (!references.isEmpty()) {
+                    } else if (references.isEmpty()) {
+                        return List.of();
+                    } else {
                         return references.iterator().next().resolveReference().stream()
                                 .flatMap(symbol -> symbol.resolve(attributeName).stream())
                                 .toList();
-                    } else {
-                        return List.of();
                     }
                 } else if (expr instanceof NixExprSelect select) {
                     NixAttrPath attrPath = select.getAttrPath();
@@ -65,7 +65,8 @@ public interface NixSymbolResolver {
                             .toList();
                 } else if (expr instanceof NixExprAttrs attrs) {
                     if (NixPsiUtil.isLegacyLet(attrs)) {
-                        return ContainerUtil.createMaybeSingletonList(attrs.getSymbol(List.of("body", attributeName)));
+                        NixUserSymbol bodySymbol = attrs.getSymbol(List.of("body"));
+                        return bodySymbol == null ? List.of() : bodySymbol.resolve(attributeName);
                     } else {
                         return ContainerUtil.createMaybeSingletonList(attrs.getSymbol(List.of(attributeName)));
                     }
