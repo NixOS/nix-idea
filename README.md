@@ -51,7 +51,7 @@ yourself as described below.
 Follow the following steps before you build the project the first time.
 
  *  Clone the repository
- *  Ensure that you have a JDK for Java 11 or higher on your PATH
+ *  Ensure that you have a JDK for Java 17 or higher on your PATH
  *  Only on NixOS: Setup JetBrains Runtime (JBR) from `<nixpkgs>`
     ```sh
     nix-build '<nixpkgs>' -A jetbrains.jdk -o jbr
