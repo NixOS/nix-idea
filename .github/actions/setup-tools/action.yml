@@ -13,7 +13,7 @@ runs:
         java-version: 17
         distribution: temurin
     - name: Set up Gradle
-      uses: gradle/actions/setup-gradle@v3
+      uses: gradle/actions/setup-gradle@v4
       with:
-        gradle-home-cache-cleanup: ${{ inputs.publish-caches == 'true' }}
         cache-read-only: ${{ inputs.publish-caches != 'true' }}
+        validate-wrappers: false
