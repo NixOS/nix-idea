@@ -27,6 +27,10 @@
         <additionalTextAttributes scheme="Default" file="colorSchemes/NixDefault.xml"/>
         <additionalTextAttributes scheme="Darcula" file="colorSchemes/NixDarcula.xml"/>
 
+        <spellchecker.support
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixSpellcheckingStrategy"/>
+
         <lang.braceMatcher
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixBraceMatcher"/>
