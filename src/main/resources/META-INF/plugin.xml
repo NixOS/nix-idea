@@ -5,6 +5,9 @@
     <depends optional="true" config-file="nix-idea-ultimate.xml">com.intellij.modules.ultimate</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <psi.referenceContributor
+                language="Nix"
+                implementation="org.nixos.idea.imports.NixFilePathReferenceContributor" />
 
         <fileType
                 name="Nix file"

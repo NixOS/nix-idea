@@ -189,7 +189,9 @@ expr_float ::= FLOAT
 expr_string ::= expr_uri | std_string | ind_string
 expr_uri ::= URI
 ;{ extends("expr_lookup_path|expr_std_path")=expr_path }
-expr_path ::= expr_lookup_path | expr_std_path
+expr_path ::= expr_lookup_path | expr_std_path {
+  mixin="org.nixos.idea.psi.impl.NixExprPathMixin"
+}
 expr_lookup_path ::= SPATH
 expr_std_path ::= PATH_SEGMENT (PATH_SEGMENT | antiquotation)* PATH_END
 expr_parens ::= LPAREN expr recover_parens RPAREN { pin=1 }
