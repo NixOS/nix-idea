@@ -75,4 +75,14 @@ public final class NixPsiUtil {
             return null;
         }
     }
+
+    public static boolean isDeclaration(@NotNull NixIdentifier identifier) {
+        return identifier instanceof NixParameterName ||
+                identifier instanceof NixAttr attr && isDeclaration(attr);
+    }
+
+    public static boolean isDeclaration(@NotNull NixAttr attr) {
+        return attr.getParent() instanceof NixAttrPath path &&
+                path.getParent() instanceof NixBindAttr;
+    }
 }

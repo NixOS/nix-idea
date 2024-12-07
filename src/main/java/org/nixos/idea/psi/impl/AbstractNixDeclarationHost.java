@@ -9,6 +9,7 @@ import org.nixos.idea.lang.references.symbol.NixUserSymbol;
 import org.nixos.idea.psi.NixAttr;
 import org.nixos.idea.psi.NixAttrPath;
 import org.nixos.idea.psi.NixBind;
+import org.nixos.idea.psi.NixBindAttr;
 import org.nixos.idea.psi.NixBindInherit;
 import org.nixos.idea.psi.NixDeclarationHost;
 import org.nixos.idea.psi.NixExprAttrs;
@@ -116,7 +117,7 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
     private void collectBindDeclarations(@NotNull Symbols result, @NotNull List<NixBind> bindList, boolean isVariable) {
         NixUserSymbol.Type type = isVariable ? NixUserSymbol.Type.VARIABLE : NixUserSymbol.Type.ATTRIBUTE;
         for (NixBind bind : bindList) {
-            if (bind instanceof NixBindAttrImpl bindAttr) {
+            if (bind instanceof NixBindAttr bindAttr) {
                 result.addBindAttr(bindAttr, bindAttr.getAttrPath(), type);
             } else if (bind instanceof NixBindInherit bindInherit) {
                 for (NixAttr inheritedAttribute : bindInherit.getAttrList()) {
