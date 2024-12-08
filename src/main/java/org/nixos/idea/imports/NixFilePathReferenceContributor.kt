@@ -17,6 +17,9 @@ import org.nixos.idea.psi.impl.NixExprPathMixin
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
+import java.nio.file.Path
+import java.nio.file.Paths
+import kotlin.io.path.isDirectory
 
 class NixFilePathReferenceContributor: PsiReferenceContributor() {
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
@@ -40,7 +43,7 @@ private class NixImportReferenceImpl(key: NixExprPathMixin) : PsiReferenceBase<N
         val path = element.containingFile.parent?.virtualFile?.path ?: return null
         val resolvedPath = resolvePath(path, element.text) ?: return null
 
-        val file = LocalFileSystem.getInstance().findFileByPath(resolvedPath) ?: return null
+        val file = LocalFileSystem.getInstance().findFileByPath(resolvedPath.toString()) ?: return null
         val project = element.project
         val psiFile = PsiManager.getInstance(project).findFile(file)
 
@@ -52,10 +55,11 @@ private class NixImportReferenceImpl(key: NixExprPathMixin) : PsiReferenceBase<N
     override fun calculateDefaultRangeInElement(): TextRange = TextRange.from(0, element.textLength)
 }
 
-fun resolvePath(cwd: String, target: String): String? {
-    val path = nixEval(cwd, target) ?: return null
-    if (!path.endsWith(".nix")) {
-        return "$path/default.nix";
+fun resolvePath(cwd: String, target: String): Path? {
+    val resolvedPath = nixEval(cwd, target) ?: return null
+    val path = Paths.get(resolvedPath)
+    if (path.isDirectory()) {
+        return path.resolve("default.nix")
     }
 
     return path
