@@ -2,7 +2,10 @@ package org.nixos.idea.imports
 
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.VirtualFileSystem
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
@@ -12,14 +15,7 @@ import com.intellij.psi.PsiReferenceContributor
 import com.intellij.psi.PsiReferenceProvider
 import com.intellij.psi.PsiReferenceRegistrar
 import com.intellij.util.ProcessingContext
-import kotlinx.serialization.json.Json
 import org.nixos.idea.psi.impl.NixExprPathMixin
-import java.io.BufferedReader
-import java.io.File
-import java.io.InputStreamReader
-import java.nio.file.Path
-import java.nio.file.Paths
-import kotlin.io.path.isDirectory
 
 class NixFilePathReferenceContributor: PsiReferenceContributor() {
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
@@ -41,9 +37,9 @@ class NixFilePathReferenceContributor: PsiReferenceContributor() {
 private class NixImportReferenceImpl(key: NixExprPathMixin) : PsiReferenceBase<NixExprPathMixin>(key) {
     override fun resolve(): PsiElement? {
         val path = element.containingFile.parent?.virtualFile?.path ?: return null
-        val resolvedPath = resolvePath(path, element.text) ?: return null
+        val fs = LocalFileSystem.getInstance()
+        val file = resolvePath(fs, path, element.text) ?: return null
 
-        val file = LocalFileSystem.getInstance().findFileByPath(resolvedPath.toString()) ?: return null
         val project = element.project
         val psiFile = PsiManager.getInstance(project).findFile(file)
 
@@ -55,39 +51,13 @@ private class NixImportReferenceImpl(key: NixExprPathMixin) : PsiReferenceBase<N
     override fun calculateDefaultRangeInElement(): TextRange = TextRange.from(0, element.textLength)
 }
 
-fun resolvePath(cwd: String, target: String): Path? {
-    val resolvedPath = nixEval(cwd, target) ?: return null
-    val path = Paths.get(resolvedPath)
-    if (path.isDirectory()) {
-        return path.resolve("default.nix")
+fun resolvePath(fs: VirtualFileSystem, cwd: String, target: String): VirtualFile? {
+    val resolved = FileUtil.join(cwd, target)
+    val resolvedFile = fs.findFileByPath(resolved) ?: return null
+
+    if (resolvedFile.isDirectory) {
+        return resolvedFile.findChild("default.nix")
     }
 
-    return path
-}
-
-fun nixEval(path: String, expr: String): String? {
-    val command = listOf("nix", "eval", "--impure", "--expr", expr, "--json")
-
-    try {
-        val process = ProcessBuilder(command)
-            .directory(File(path))
-            .start()
-
-        val stdout = BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-            reader.readText()
-        }
-
-        val stderr = BufferedReader(InputStreamReader(process.errorStream)).use { reader ->
-            reader.readText()
-        }
-
-        val exitCode = process.waitFor()
-        if (exitCode == 0) {
-            return Json.decodeFromString<String>(stdout)
-        } else {
-            return null
-        }
-    } catch (e: Exception) {
-        return null
-    }
+    return resolvedFile
 }
