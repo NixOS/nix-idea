@@ -9,6 +9,7 @@
   Feel free to comment your feedback at [issue #87](https://github.com/NixOS/nix-idea/issues/87).
 - Support for simple spell checking
 - Automatic insertion of closing quotes
+- Support for *Code | Move Element Left/Right* (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>←/→</kbd>)
 
 ### Changed
 
