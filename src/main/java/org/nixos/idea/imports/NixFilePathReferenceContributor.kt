@@ -38,7 +38,7 @@ class NixFilePathReferenceContributor: PsiReferenceContributor() {
 private class NixImportReferenceImpl(key: NixExprPathMixin) : PsiReferenceBase<NixExprPathMixin>(key) {
     override fun resolve(): PsiElement? {
         val path = element.containingFile.parent?.virtualFile?.path ?: return null
-        val resolvedPath = nixEval(path, element.text) ?: return null
+        val resolvedPath = resolvePath(path, element.text) ?: return null
 
         val file = LocalFileSystem.getInstance().findFileByPath(resolvedPath) ?: return null
         val project = element.project
@@ -50,6 +50,15 @@ private class NixImportReferenceImpl(key: NixExprPathMixin) : PsiReferenceBase<N
     override fun getVariants(): Array<out LookupElement> = LookupElement.EMPTY_ARRAY
 
     override fun calculateDefaultRangeInElement(): TextRange = TextRange.from(0, element.textLength)
+}
+
+fun resolvePath(cwd: String, target: String): String? {
+    val path = nixEval(cwd, target) ?: return null
+    if (!path.endsWith(".nix")) {
+        return "$path/default.nix";
+    }
+
+    return path
 }
 
 fun nixEval(path: String, expr: String): String? {
