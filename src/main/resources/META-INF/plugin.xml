@@ -5,6 +5,7 @@
     <depends optional="true" config-file="nix-idea-ultimate.xml">com.intellij.modules.ultimate</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+
         <fileType
                 name="Nix file"
                 implementationClass="org.nixos.idea.file.NixFileType"
