@@ -15,18 +15,18 @@ import com.intellij.psi.PsiReferenceContributor
 import com.intellij.psi.PsiReferenceProvider
 import com.intellij.psi.PsiReferenceRegistrar
 import com.intellij.util.ProcessingContext
-import org.nixos.idea.psi.impl.NixExprPathMixin
+import org.nixos.idea.psi.impl.NixExprStdPathMixin
 
 class NixFilePathReferenceContributor: PsiReferenceContributor() {
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
         registrar.registerReferenceProvider(
-            PlatformPatterns.psiElement(NixExprPathMixin::class.java),
+            PlatformPatterns.psiElement(NixExprStdPathMixin::class.java),
             object : PsiReferenceProvider() {
                 override fun getReferencesByElement(
                     element: PsiElement,
                     context: ProcessingContext
                 ): Array<PsiReference> {
-                    val it = element as? NixExprPathMixin ?: return emptyArray()
+                    val it = element as? NixExprStdPathMixin ?: return emptyArray()
                     return arrayOf(NixImportReferenceImpl(it))
                 }
             }
@@ -34,7 +34,7 @@ class NixFilePathReferenceContributor: PsiReferenceContributor() {
     }
 }
 
-private class NixImportReferenceImpl(key: NixExprPathMixin) : PsiReferenceBase<NixExprPathMixin>(key) {
+private class NixImportReferenceImpl(key: NixExprStdPathMixin) : PsiReferenceBase<NixExprStdPathMixin>(key) {
     override fun resolve(): PsiElement? {
         val path = element.containingFile.parent?.virtualFile?.path ?: return null
         val fs = LocalFileSystem.getInstance()
