@@ -163,7 +163,7 @@ expr_op_base ::= expr_app
 // Grammar-Kit cannot handle "expr_app ::= expr_app expr_select_or_legacy" or
 // equivalent rules. As a workaround, we use this rule which will only create
 // one AST node for a series of function calls.
-expr_app ::= expr_select ( !missing_semi expr_select ) *
+expr_app ::= expr_select ( !missing_semi expr_select ) * { methods=[ lambda="/expr[0]" ] }
 
 ;{ methods("expr_select")=[ value="/expr[0]" default="/expr[1]" ] }
 expr_select ::= expr_simple [ !missing_semi ( select_attr | legacy_app_or )]
@@ -196,7 +196,7 @@ expr_lookup_path ::= SPATH
 expr_std_path ::= PATH_SEGMENT (PATH_SEGMENT | antiquotation)* PATH_END
 expr_parens ::= LPAREN expr recover_parens RPAREN { pin=1 }
 expr_attrs ::= [ REC | LET ] LCURLY recover_set (bind recover_set)* RCURLY { pin=2 }
-expr_list ::= LBRAC recover_list (expr_select recover_list)* RBRAC { pin=1 }
+expr_list ::= LBRAC recover_list (expr_select recover_list)* RBRAC { pin=1 methods=[ items="expr" ] }
 private recover_parens ::= { recoverWhile=paren_recover }
 private recover_set ::= { recoverWhile=set_recover }
 private recover_list ::= { recoverWhile=list_recover }
@@ -219,7 +219,7 @@ private string_token ::= STR | IND_STR | STR_ESCAPE | IND_STR_ESCAPE
 bind ::= bind_attr | bind_inherit
 bind_attr ::= attr_path ASSIGN bind_value SEMI { pin=2 }
 bind_value ::= <<parseBindValue expr0>> { elementType=expr }
-bind_inherit ::= INHERIT [ LPAREN expr RPAREN ] attr* SEMI { pin=1 }
+bind_inherit ::= INHERIT [ LPAREN expr RPAREN ] attr* SEMI { pin=1 methods=[ source="expr" attributes="attr" ] }
 // Is used in various rules just to provide a better error message when a
 // semicolon is missing. Must always be used with `!`.
 private missing_semi ::= <<parseIsBindValue>> ( RCURLY | IN | bind )

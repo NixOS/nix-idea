@@ -68,9 +68,9 @@ abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements Nix
             // TODO: Attribute reference support
             return List.of();
         } else if (this instanceof NixBindInherit bindInherit) {
-            NixExpr accessedObject = bindInherit.getExpr();
+            NixExpr accessedObject = bindInherit.getSource();
             if (accessedObject == null) {
-                return bindInherit.getAttrList().stream().flatMap(attr -> {
+                return bindInherit.getAttributes().stream().flatMap(attr -> {
                     String variableName = NixPsiUtil.getAttributeName(attr);
                     if (variableName == null) {
                         return Stream.empty();

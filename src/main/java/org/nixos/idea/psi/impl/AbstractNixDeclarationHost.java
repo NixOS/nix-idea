@@ -120,8 +120,8 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
             if (bind instanceof NixBindAttr bindAttr) {
                 result.addBindAttr(bindAttr, bindAttr.getAttrPath(), type);
             } else if (bind instanceof NixBindInherit bindInherit) {
-                for (NixAttr inheritedAttribute : bindInherit.getAttrList()) {
-                    result.addInherit(bindInherit, inheritedAttribute, type, bindInherit.getExpr() != null);
+                for (NixAttr inheritedAttribute : bindInherit.getAttributes()) {
+                    result.addInherit(bindInherit, inheritedAttribute, type, bindInherit.getSource() != null);
                 }
             } else {
                 LOG.error("Unexpected NixBind implementation: " + bind.getClass());
