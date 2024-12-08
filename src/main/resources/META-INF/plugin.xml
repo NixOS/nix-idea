@@ -27,13 +27,25 @@
         <additionalTextAttributes scheme="Default" file="colorSchemes/NixDefault.xml"/>
         <additionalTextAttributes scheme="Darcula" file="colorSchemes/NixDarcula.xml"/>
 
+        <spellchecker.support
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixSpellcheckingStrategy"/>
+
         <lang.braceMatcher
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixBraceMatcher"/>
 
+        <lang.quoteHandler
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixQuoteHandler"/>
+
         <lang.commenter
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixCommenter"/>
+
+        <moveLeftRightHandler
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixMoveElementLeftRightHandler"/>
 
         <searcher forClass="com.intellij.find.usages.api.UsageSearchParameters"
                   implementationClass="org.nixos.idea.lang.references.NixUsageSearcher"/>
