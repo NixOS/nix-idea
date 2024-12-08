@@ -35,6 +35,10 @@
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixBraceMatcher"/>
 
+        <lang.quoteHandler
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixQuoteHandler"/>
+
         <lang.commenter
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixCommenter"/>
