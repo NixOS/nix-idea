@@ -53,6 +53,11 @@ public final class NixPsiUtil {
         };
     }
 
+    public static @NotNull List<NixExpr> getArguments(@NotNull NixExprApp app) {
+        List<NixExpr> expressions = app.getExprList();
+        return expressions.subList(1, expressions.size());
+    }
+
     /**
      * Returns the static name of an attribute.
      * Is {@code null} for dynamic attributes.
