@@ -35,6 +35,10 @@
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixCommenter"/>
 
+        <lang.foldingBuilder
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixFoldingBuilder"/>
+
         <searcher forClass="com.intellij.find.usages.api.UsageSearchParameters"
                   implementationClass="org.nixos.idea.lang.references.NixUsageSearcher"/>
 
