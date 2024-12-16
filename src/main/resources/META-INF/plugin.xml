@@ -47,6 +47,9 @@
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixMoveElementLeftRightHandler"/>
 
+        <statementUpDownMover
+                implementation="org.nixos.idea.lang.NixStatementUpDownMover"/>
+
         <searcher forClass="com.intellij.find.usages.api.UsageSearchParameters"
                   implementationClass="org.nixos.idea.lang.references.NixUsageSearcher"/>
 

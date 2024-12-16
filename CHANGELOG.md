@@ -4,9 +4,13 @@
 
 ### Added
 
+- Support for *Code | Move Statement Up/Down* (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>↑/↓</kbd>)
+
 ### Changed
 
 - Settings have been refactored. Different pages are now merged into one hierarchy.
+- *Code | Move Statement Up/Down* (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>↑/↓</kbd>)
+  no-longer moves individual lines if that would break up expressions.
 
 ### Deprecated
 
