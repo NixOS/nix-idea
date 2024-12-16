@@ -3,9 +3,9 @@ package org.nixos.idea.lang;
 import com.intellij.openapi.actionSystem.IdeActions;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.nixos.idea._testutil.TestFixtureUtil;
 import org.nixos.idea._testutil.WithIdeaPlatform;
 import org.nixos.idea.file.NixFileType;
 
@@ -218,14 +218,6 @@ final class NixMoveElementLeftRightHandlerTest {
     }
 
     private void expect(@Language("HTML") String code) {
-        int caretMarker = code.indexOf(CodeInsightTestFixture.CARET_MARKER);
-        if (caretMarker >= 0) {
-            code = code.substring(0, caretMarker) +
-                   code.substring(caretMarker + CodeInsightTestFixture.CARET_MARKER.length());
-        }
-        Assertions.assertEquals(code, myFixture.getEditor().getDocument().getText());
-        if (caretMarker >= 0) {
-            Assertions.assertEquals(caretMarker, myFixture.getCaretOffset());
-        }
+        TestFixtureUtil.expect(myFixture, code);
     }
 }
