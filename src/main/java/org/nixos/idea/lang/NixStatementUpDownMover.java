@@ -2,6 +2,7 @@ package org.nixos.idea.lang;
 
 import com.intellij.codeInsight.editorActions.moveUpDown.LineMover;
 import com.intellij.codeInsight.editorActions.moveUpDown.LineRange;
+import com.intellij.lang.ASTNode;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.Pair;
@@ -9,11 +10,14 @@ import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.tree.TokenSet;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.text.CharArrayUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.file.NixFile;
+import org.nixos.idea.psi.NixStatementLike;
+import org.nixos.idea.psi.NixTypes;
 
 import java.util.Set;
 
@@ -40,18 +44,28 @@ public final class NixStatementUpDownMover extends LineMover {
             return false;
         }
 
-        PsiElement commonParent = findCommonParentStrict(range.getFirst(), range.getSecond());
+        PsiElement first = PsiTreeUtil.getDeepestFirst(range.getFirst());
+        PsiElement last = PsiTreeUtil.getDeepestLast(range.getSecond());
+        PsiElement commonParent = findCommonParentStrict(first, last);
         if (commonParent == null) {
             return false;
         }
 
-        PsiElement first = PsiTreeUtil.findPrevParent(commonParent, range.getFirst());
-        PsiElement last = PsiTreeUtil.findPrevParent(commonParent, range.getSecond());
+        StatementLikeHandler statementHandler = new StatementLikeHandler();
+        for (PsiElement parent = first.getParent(); parent != commonParent; parent = first.getParent()) {
+            statementHandler.firstPart(first, parent);
+            first = parent;
+        }
+        for (PsiElement parent = last.getParent(); parent != commonParent; parent = last.getParent()) {
+            statementHandler.lastPart(last, parent);
+            last = parent;
+        }
+
         while (commonParent != null) {
             if (tryMoveSubElements(editor, commonParent, first, last, info, down)) {
                 return true;
             }
-            if (tryMoveStatements(editor, commonParent, first, last, info, down)) {
+            if (statementHandler.tryMove(editor, commonParent, first, last, info, down)) {
                 return true;
             }
 
@@ -122,19 +136,227 @@ public final class NixStatementUpDownMover extends LineMover {
     }
 
     /**
-     * Try moving expressions up or down in the tree.
+     * Handler for moving expressions up or down in the tree.
      * For example moving an assertion into the body of a let-expression.
      */
-    private boolean tryMoveStatements(
-            @NotNull Editor editor,
-            @NotNull PsiElement commonParent,
-            @NotNull PsiElement first,
-            @NotNull PsiElement last,
-            @NotNull MoveInfo info,
-            boolean down
-    ) {
-        // TODO ...
-        return false;
+    private static final class StatementLikeHandler {
+        // I don't really like the implementation of this class.
+        // It is full of implicit assumptions about the syntax of the Nix expression language.
+        // Anyway, I did not have a good idea how to make it better and at least we have decent test coverage.
+
+        private static final TokenSet STATEMENT_END_TOKENS = TokenSet.create(NixTypes.SEMI, NixTypes.IN, NixTypes.COLON);
+        private static final TokenSet INSERTION_POINT_TOKENS = TokenSet.orSet(STATEMENT_END_TOKENS, TokenSet.create(NixTypes.THEN, NixTypes.ELSE));
+
+        private @Nullable PsiElement myFirst;
+        private @Nullable PsiElement myLast;
+        private @Nullable PsiElement myNextInsertionPoint;
+
+        private record JumpRange(@NotNull PsiElement lastOfRange, @Nullable PsiElement insertionPoint) {}
+
+        private void firstPart(@NotNull PsiElement first, @NotNull PsiElement parent) {
+            if (!(parent instanceof NixStatementLike)) {
+                myFirst = null;
+            } else if (myFirst == null) {
+                myFirst = findStatementStartLine(parent);
+            }
+        }
+
+        private void lastPart(@NotNull PsiElement last, @NotNull PsiElement parent) {
+            if (!(parent instanceof NixStatementLike)) {
+                myLast = null;
+                myNextInsertionPoint = null;
+            } else {
+                JumpRange end = findSelectionEnd(parent, last);
+                if (end != null) {
+                    myLast = end.lastOfRange();
+                    myNextInsertionPoint = end.insertionPoint();
+                } else {
+                    myLast = null;
+                    myNextInsertionPoint = null;
+                }
+            }
+        }
+
+        private boolean tryMove(
+                @NotNull Editor editor,
+                @NotNull PsiElement commonParent,
+                @NotNull PsiElement first,
+                @NotNull PsiElement last,
+                @NotNull MoveInfo info,
+                boolean down
+        ) {
+            if (!(commonParent instanceof NixStatementLike)) {
+                if (myFirst != null && myLast != null) {
+                    // We do not want to move statements much further up in the tree
+                    // if the user has selected statements inside the current subtree.
+                    info.prohibitMove();
+                    return true;
+                } else {
+                    myFirst = null;
+                    myLast = null;
+                    myNextInsertionPoint = null;
+                    return false;
+                }
+            }
+
+            firstPart(first, commonParent);
+            if (first != last || myLast == null) {
+                lastPart(last, commonParent);
+            }
+
+            if (myFirst == null || myLast == null) {
+                return false;
+            }
+            if (tryMoveOverBlankLine(editor, info, myFirst, myLast, down)) {
+                return true;
+            }
+
+            if (down) {
+                PsiElement insertionPoint = myNextInsertionPoint;
+                if (insertionPoint == null && first == last) {
+                    insertionPoint = findNextInsertionPoint(commonParent, last);
+                }
+                if (insertionPoint != null && insertionPoint != myLast) {
+                    PsiElement next = nextLeaf(myLast);
+                    if (next == null) {
+                        assert false : "Should be unreachable";
+                    } else {
+                        return tryMoveOver(editor, info, myFirst, myLast, next, insertionPoint);
+                    }
+                }
+            } else if (first == last) {
+                PsiElement insertionPoint = findPreviousInsertionPoint(commonParent, first);
+                if (insertionPoint != null) {
+                    PsiElement previous = prevLeaf(myFirst);
+                    if (previous == null) {
+                        assert false : "Should be unreachable";
+                    } else {
+                        return tryMoveOver(editor, info, myFirst, myLast, insertionPoint, previous);
+                    }
+                }
+                PsiElement startOfLine = findStatementStartLine(commonParent);
+                if (startOfLine != null && startOfLine != myFirst) {
+                    PsiElement previous = prevLeaf(myFirst);
+                    if (previous == null) {
+                        assert false : "Should be unreachable";
+                    } else {
+                        return tryMoveOver(editor, info, myFirst, myLast, startOfLine, previous);
+                    }
+                }
+            }
+            return false;
+        }
+
+        private @Nullable PsiElement findStatementStartLine(@NotNull PsiElement statement) {
+            if (!(statement instanceof NixStatementLike)) {
+                return null;
+            }
+
+            PsiElement current = statement;
+            while (true) {
+                PsiElement previous = current.getPrevSibling();
+                if (previous == null) {
+                    PsiElement parent = current.getParent();
+                    if (parent == null || parent instanceof PsiFile) {
+                        return current;
+                    } else {
+                        current = parent;
+                    }
+                } else if (previous instanceof PsiWhiteSpace) {
+                    if (previous.textContains('\n')) {
+                        return current;
+                    } else {
+                        current = previous;
+                    }
+                } else if (previous instanceof PsiComment) {
+                    current = previous;
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        private @Nullable JumpRange findSelectionEnd(@NotNull PsiElement parent, @Nullable PsiElement lastSelected) {
+            if (!(parent instanceof NixStatementLike)) {
+                return null;
+            }
+
+            ASTNode stmtEndToken = parent.getNode().findChildByType(STATEMENT_END_TOKENS);
+            if (stmtEndToken == null) {
+                return null;
+            }
+
+            PsiElement stmtEnd = stmtEndToken.getPsi();
+            PsiElement next = PsiTreeUtil.skipWhitespacesAndCommentsForward(stmtEnd);
+            PsiElement endOfLine = expandLine(stmtEnd, false);
+            if (next == null) {
+                return null;
+            }
+            if (lastSelected != null && endOfLine != null && lastSelected.getStartOffsetInParent() > endOfLine.getStartOffsetInParent()) {
+                endOfLine = expandLine(lastSelected, false);
+            }
+
+            if (endOfLine != null && next.getStartOffsetInParent() > endOfLine.getStartOffsetInParent()) {
+                return new JumpRange(endOfLine, findNextInsertionPoint(next, null));
+            } else if (next == lastSelected) {
+                // Optimization: `lastSelected` has already been processed
+                return myLast == null ? null : new JumpRange(myLast, myNextInsertionPoint);
+            } else {
+                return findSelectionEnd(next, null);
+            }
+        }
+
+        private @Nullable PsiElement findPreviousInsertionPoint(@NotNull PsiElement parent, @Nullable PsiElement before) {
+            if (!(parent instanceof NixStatementLike)) {
+                return null;
+            }
+
+            PsiElement start = before == null ? parent.getLastChild() :
+                    PsiTreeUtil.skipWhitespacesBackward(PsiTreeUtil.skipWhitespacesAndCommentsBackward(before));
+            for (PsiElement cur = start; cur != null; cur = PsiTreeUtil.skipWhitespacesBackward(cur)) {
+                if (INSERTION_POINT_TOKENS.contains(cur.getNode().getElementType())) {
+                    PsiElement childExpression = PsiTreeUtil.skipWhitespacesAndCommentsForward(cur);
+                    if (childExpression == null /* || childExpression == myFirst */) {
+                        return null;
+                    }
+
+                    PsiElement insertionPoint = findPreviousInsertionPoint(childExpression, null);
+                    if (insertionPoint != null) {
+                        return insertionPoint;
+                    }
+
+                    PsiElement startOfLine = expandLine(childExpression, true);
+                    if (startOfLine != null && startOfLine.getStartOffsetInParent() > cur.getStartOffsetInParent()) {
+                        return startOfLine;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private static @Nullable PsiElement findNextInsertionPoint(@NotNull PsiElement parent, @Nullable PsiElement after) {
+            if (!(parent instanceof NixStatementLike)) {
+                return null;
+            }
+
+            PsiElement first = after == null ? parent.getFirstChild() : PsiTreeUtil.skipWhitespacesForward(after);
+            for (PsiElement cur = first; cur != null; cur = PsiTreeUtil.skipWhitespacesForward(cur)) {
+                if (INSERTION_POINT_TOKENS.contains(cur.getNode().getElementType())) {
+                    PsiElement next = PsiTreeUtil.skipWhitespacesAndCommentsForward(cur);
+                    PsiElement endOfLine = expandLine(cur, false);
+                    if (next == null || endOfLine == null) {
+                        return null;
+                    }
+
+                    if (next.getStartOffsetInParent() > endOfLine.getStartOffsetInParent()) {
+                        return endOfLine;
+                    } else {
+                        return findNextInsertionPoint(next, null);
+                    }
+                }
+            }
+            return null;
+        }
     }
 
     /**
@@ -153,6 +375,9 @@ public final class NixStatementUpDownMover extends LineMover {
         LineRange range = createRange(document, info.toMove, first, last);
 
         int target = down ? range.endLine : range.startLine - 1;
+        if (target < 0 || target > document.getLineCount()) {
+            return false;
+        }
         int lineStartOffset = document.getLineStartOffset(target);
         int lineEndOffset = document.getLineEndOffset(target);
         if (!CharArrayUtil.isEmptyOrSpaces(document.getCharsSequence(), lineStartOffset, lineEndOffset)) {
@@ -226,16 +451,38 @@ public final class NixStatementUpDownMover extends LineMover {
         }
     }
 
-    private static PsiElement expandLine(@NotNull PsiElement element, boolean left) {
+    private static @Nullable PsiElement expandLine(@NotNull PsiElement element, boolean left) {
         while (true) {
             PsiElement next = left ? element.getPrevSibling() : element.getNextSibling();
             if (next == null) {
-                // TODO Cover case when a newline is before the first element
-                return null;
-            } else if (next instanceof PsiWhiteSpace && next.textContains('\n')) {
-                return element;
+                PsiElement nextLeaf = left ? PsiTreeUtil.prevLeaf(element) : PsiTreeUtil.nextLeaf(element);
+                if (nextLeaf == null || nextLeaf instanceof PsiWhiteSpace && nextLeaf.textContains('\n')) {
+                    return element;
+                } else {
+                    return null;
+                }
+            } else if (next instanceof PsiWhiteSpace) {
+                if (next.textContains('\n')) {
+                    return element;
+                }
             }
             element = next;
         }
+    }
+
+    private static @Nullable PsiElement prevLeaf(@NotNull PsiElement element) {
+        PsiElement previous = PsiTreeUtil.prevLeaf(element, true);
+        while (previous instanceof PsiWhiteSpace) {
+            previous = PsiTreeUtil.prevLeaf(previous, true);
+        }
+        return previous;
+    }
+
+    private static @Nullable PsiElement nextLeaf(@NotNull PsiElement element) {
+        PsiElement previous = PsiTreeUtil.nextLeaf(element, true);
+        while (previous instanceof PsiWhiteSpace) {
+            previous = PsiTreeUtil.nextLeaf(previous, true);
+        }
+        return previous;
     }
 }
