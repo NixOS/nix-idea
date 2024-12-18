@@ -53,6 +53,11 @@ public final class NixPsiUtil {
         };
     }
 
+    public static @NotNull List<NixExpr> getArguments(@NotNull NixExprApp app) {
+        List<NixExpr> expressions = app.getExprList();
+        return expressions.subList(1, expressions.size());
+    }
+
     /**
      * Returns the static name of an attribute.
      * Is {@code null} for dynamic attributes.
@@ -74,5 +79,15 @@ public final class NixPsiUtil {
             LOG.error("Unexpected NixAttr implementation: " + attr.getClass());
             return null;
         }
+    }
+
+    public static boolean isDeclaration(@NotNull NixIdentifier identifier) {
+        return identifier instanceof NixParameterName ||
+                identifier instanceof NixAttr attr && isDeclaration(attr);
+    }
+
+    public static boolean isDeclaration(@NotNull NixAttr attr) {
+        return attr.getParent() instanceof NixAttrPath path &&
+                path.getParent() instanceof NixBindAttr;
     }
 }
