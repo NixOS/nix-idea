@@ -51,7 +51,7 @@ private class NixImportReferenceImpl(key: NixExprStdPathMixin) : PsiReferenceBas
     override fun calculateDefaultRangeInElement(): TextRange = TextRange.from(0, element.textLength)
 }
 
-fun resolvePath(fs: VirtualFileSystem, cwd: String, target: String): VirtualFile? {
+private fun resolvePath(fs: VirtualFileSystem, cwd: String, target: String): VirtualFile? {
     val resolved = FileUtil.join(cwd, target)
     val resolvedFile = fs.findFileByPath(resolved) ?: return null
 
