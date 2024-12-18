@@ -96,7 +96,7 @@ private expr0 ::=
   | expr_op
 
 expr_assert ::= ASSERT expr SEMI expr { pin=1 implements=statement_like methods=[ assertion="/expr[0]" next="/expr[1]" ] }
-expr_if ::= IF expr then else { pin=1 implements=statement_like }
+expr_if ::= IF expr then else { pin=1 implements=statement_like methods=[ next="/expr[2]" ] } // TODO Remove statement_like?
 private then ::= THEN expr { pin=1 }
 private else ::= ELSE expr { pin=1 }
 expr_let ::= LET !LCURLY recover_let (bind recover_let)* IN expr { pin=2 implements=statement_like methods=[ next="expr" ] }
@@ -105,7 +105,7 @@ private recover_let ::= { recoverWhile=let_recover }
 private let_recover ::= braces_recover !(ASSERT | SEMI | IF | THEN | ELSE | LET | IN | WITH) !bind
 
 ;{ methods("argument|formal|parameter")=[ identifier="parameter_name" ] }
-expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 implements=statement_like }
+expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 implements=statement_like methods=[ next="expr" ] }
 private lambda_params ::= argument [ !missing_semi AT formals ] | formals [ !missing_semi AT argument ]
 argument ::= parameter_name { implements=parameter }
 formals ::= LCURLY ( formal COMMA )* [ ( ELLIPSIS | formal ) ] recover_formals RCURLY { pin=1 }
@@ -236,7 +236,7 @@ attr_path ::= attr ( DOT attr )* { methods=[ firstAttr="/attr[0]" ] }
 
 // Interface for identifiers.
 fake identifier ::= ID | OR_KW
-fake statement_like ::= { extends="expr" }
+fake statement_like ::= [expr] { extends="expr" methods=[ next="expr" ] }
 
 // The lexer uses curly braces to determine its state. To avoid inconsistencies
 // between the parser and lexer (i.e. the lexer sees a string where the parser

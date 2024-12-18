@@ -1365,13 +1365,13 @@ final class NixStatementUpDownMoverTest {
                         assert a;
                         <selection>assert b;
                         \s
-                        <caret></selection>""");
+                        <caret></selection>_""");
                 doMoveUp();
                 expect("""
                         <selection>assert b;
                         \s
                         <caret></selection>assert a;
-                        """);
+                        _""");
             }
 
             @Test
@@ -1381,21 +1381,21 @@ final class NixStatementUpDownMoverTest {
                         assert a;
                         \s
                         <caret></selection>assert b;
-                        """);
+                        _""");
                 doMoveDown();
                 expect("""
                         assert b;
                         <selection>\s
                         assert a;
                         \s
-                        <caret></selection>""");
+                        <caret></selection>_""");
                 doMoveUp();
                 expect("""
                         <selection>\s
                         assert a;
                         \s
                         <caret></selection>assert b;
-                        """);
+                        _""");
             }
 
             @Test
