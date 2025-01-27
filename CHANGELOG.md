@@ -10,6 +10,7 @@
 - Support for simple spell checking
 - Automatic insertion of closing quotes
 - Support for *Code | Move Element Left/Right* (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>←/→</kbd>)
+- Support for IDEA 2025.1
 
 ### Changed
 
