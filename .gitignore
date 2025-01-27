@@ -17,6 +17,7 @@ hs_err_pid*
 # IntelliJ
 *.iml
 .idea/*
+!.idea/icon.svg
 !.idea/codeStyles/
 !.idea/runConfigurations/
 out/
