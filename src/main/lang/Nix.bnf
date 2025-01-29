@@ -193,7 +193,9 @@ expr_uri ::= URI
 ;{ extends("expr_lookup_path|expr_std_path")=expr_path }
 expr_path ::= expr_lookup_path | expr_std_path
 expr_lookup_path ::= SPATH
-expr_std_path ::= PATH_SEGMENT (PATH_SEGMENT | antiquotation)* PATH_END
+expr_std_path ::= PATH_SEGMENT (PATH_SEGMENT | antiquotation)* PATH_END {
+  mixin="org.nixos.idea.psi.impl.NixExprStdPathMixin"
+}
 expr_parens ::= LPAREN expr recover_parens RPAREN { pin=1 }
 expr_attrs ::= [ REC | LET ] LCURLY recover_set (bind recover_set)* RCURLY { pin=2 }
 expr_list ::= LBRAC recover_list (expr_select recover_list)* RBRAC { pin=1 methods=[ items="expr" ] }

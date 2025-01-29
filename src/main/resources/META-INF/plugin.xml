@@ -50,6 +50,10 @@
         <searcher forClass="com.intellij.find.usages.api.UsageSearchParameters"
                   implementationClass="org.nixos.idea.lang.references.NixUsageSearcher"/>
 
+        <psi.referenceContributor
+                language="Nix"
+                implementation="org.nixos.idea.imports.NixFilePathReferenceContributor" />
+
         <projectConfigurable
                 parentId="build"
                 displayName="NixIDEA Settings"
