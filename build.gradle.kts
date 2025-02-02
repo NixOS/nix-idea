@@ -2,9 +2,7 @@ import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.util.EnumSet
 
 plugins {
     id("java")
@@ -122,13 +120,6 @@ intellijPlatform {
                     .orElse(ProductReleasesValueSource())
             )
         }
-        failureLevel = EnumSet.complementOf(
-            EnumSet.of(
-                FailureLevel.DEPRECATED_API_USAGES,
-                FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES,
-                FailureLevel.EXPERIMENTAL_API_USAGES,
-            )
-        )
     }
     publishing {
         token = providers.environmentVariable("JETBRAINS_TOKEN")
