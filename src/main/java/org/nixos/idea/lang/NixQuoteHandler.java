@@ -6,10 +6,12 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.highlighter.HighlighterIterator;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.tree.TokenSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.psi.NixTypes;
+
+import static org.nixos.idea.psi.NixTokenSets.CLOSING_QUOTES;
+import static org.nixos.idea.psi.NixTokenSets.STRING_ANY;
 
 /**
  * Quote handler for the Nix Language.
@@ -41,14 +43,9 @@ import org.nixos.idea.psi.NixTypes;
  */
 public final class NixQuoteHandler implements MultiCharQuoteHandler {
 
-    private static final TokenSet CLOSING_QUOTE = TokenSet.create(NixTypes.STRING_CLOSE, NixTypes.IND_STRING_CLOSE);
-    private static final TokenSet OPENING_QUOTE = TokenSet.create(NixTypes.STRING_OPEN, NixTypes.IND_STRING_OPEN);
-    private static final TokenSet STRING_CONTENT = TokenSet.create(NixTypes.STR, NixTypes.STR_ESCAPE, NixTypes.IND_STR, NixTypes.IND_STR_ESCAPE);
-    private static final TokenSet STRING_ANY = TokenSet.orSet(CLOSING_QUOTE, OPENING_QUOTE, STRING_CONTENT);
-
     @Override
     public boolean isClosingQuote(HighlighterIterator iterator, int offset) {
-        return CLOSING_QUOTE.contains(iterator.getTokenType());
+        return CLOSING_QUOTES.contains(iterator.getTokenType());
     }
 
     @Override
@@ -75,7 +72,7 @@ public final class NixQuoteHandler implements MultiCharQuoteHandler {
                 IElementType lastToken = iterator.getTokenType();
                 iterator.advance();
                 if (iterator.atEnd() || iterator.getStart() >= lineEnd) {
-                    return STRING_ANY.contains(lastToken) && !CLOSING_QUOTE.contains(lastToken);
+                    return STRING_ANY.contains(lastToken) && !CLOSING_QUOTES.contains(lastToken);
                 }
             }
         } else if (openingToken == NixTypes.IND_STRING_OPEN) {
@@ -84,7 +81,7 @@ public final class NixQuoteHandler implements MultiCharQuoteHandler {
                 IElementType lastToken = iterator.getTokenType();
                 iterator.advance();
                 if (iterator.atEnd()) {
-                    return STRING_ANY.contains(lastToken) && !CLOSING_QUOTE.contains(lastToken);
+                    return STRING_ANY.contains(lastToken) && !CLOSING_QUOTES.contains(lastToken);
                 }
             }
         }
