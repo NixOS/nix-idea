@@ -1,4 +1,4 @@
-package org.nixos.idea.settings;
+package org.nixos.idea.settings.ui;
 
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.lsp.ui.CommandSuggestionsPopup;
+import org.nixos.idea.settings.NixExternalFormatterSettings;
 
 import javax.swing.*;
 import java.util.List;
@@ -29,7 +30,7 @@ public class NixLangSettingsConfigurable implements SearchableConfigurable, Conf
 
     @Override
     public @NotNull @NonNls String getId() {
-        return "org.nixos.idea.settings.NixLangSettingsConfigurable";
+        return "org.nixos.idea.settings.ui.NixLangSettingsConfigurable";
     }
 
     @Override

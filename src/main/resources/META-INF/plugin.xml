@@ -66,11 +66,11 @@
         <applicationConfigurable
                 parentId="language"
                 displayName="Nix Symbols"
-                id="org.nixos.idea.settings.NixSymbolConfigurable"
-                instance="org.nixos.idea.settings.NixSymbolConfigurable"/>
+                id="org.nixos.idea.settings.ui.NixSymbolConfigurable"
+                instance="org.nixos.idea.settings.ui.NixSymbolConfigurable"/>
 
         <colorSettingsPage
-                implementation="org.nixos.idea.settings.NixColorSettingsPage"/>
+                implementation="org.nixos.idea.settings.ui.NixColorSettingsPage"/>
 
         <applicationService
                 serviceImplementation="org.nixos.idea.settings.NixExternalFormatterSettings"/>
@@ -78,8 +78,8 @@
         <applicationConfigurable
                 parentId="language"
                 displayName="Nix"
-                id="org.nixos.idea.settings.NixLangSettingsConfigurable"
-                instance="org.nixos.idea.settings.NixLangSettingsConfigurable"/>
+                id="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"
+                instance="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"/>
 
         <formattingService implementation="org.nixos.idea.format.NixExternalFormatter"/>
 

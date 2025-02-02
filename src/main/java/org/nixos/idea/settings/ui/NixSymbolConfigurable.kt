@@ -1,4 +1,4 @@
-package org.nixos.idea.settings
+package org.nixos.idea.settings.ui
 
 import com.intellij.openapi.options.BoundSearchableConfigurable
 import com.intellij.openapi.options.Configurable
@@ -9,9 +9,10 @@ import com.intellij.ui.dsl.builder.bind
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.builder.selected
+import org.nixos.idea.settings.NixSymbolSettings
 
 class NixSymbolConfigurable :
-    BoundSearchableConfigurable("Nix Symbols", "org.nixos.idea.settings.NixSymbolConfigurable"),
+    BoundSearchableConfigurable("Nix Symbols", "org.nixos.idea.settings.ui.NixSymbolConfigurable"),
     Configurable.Beta {
 
     override fun createPanel(): DialogPanel {
