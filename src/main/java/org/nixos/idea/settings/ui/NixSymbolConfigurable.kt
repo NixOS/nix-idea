@@ -12,7 +12,7 @@ import com.intellij.ui.dsl.builder.selected
 import org.nixos.idea.settings.NixSymbolSettings
 
 class NixSymbolConfigurable :
-    BoundSearchableConfigurable("Nix Symbols", "org.nixos.idea.settings.ui.NixSymbolConfigurable"),
+    BoundSearchableConfigurable("Symbols", "org.nixos.idea.settings.ui.NixSymbolConfigurable"),
     Configurable.Beta {
 
     override fun createPanel(): DialogPanel {

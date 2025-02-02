@@ -73,8 +73,8 @@
                 instance="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"/>
 
         <applicationConfigurable
-                parentId="language"
-                displayName="Nix Symbols"
+                parentId="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"
+                displayName="Symbols"
                 id="org.nixos.idea.settings.ui.NixSymbolConfigurable"
                 instance="org.nixos.idea.settings.ui.NixSymbolConfigurable"/>
 

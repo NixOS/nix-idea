@@ -5,8 +5,8 @@
                 serviceImplementation="org.nixos.idea.lsp.NixLspSettings"/>
 
         <applicationConfigurable
-                parentId="language"
-                displayName="Nix Language Server (LSP)"
+                parentId="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"
+                displayName="Language Server (LSP)"
                 id="org.nixos.idea.lsp.NixLspSettingsConfigurable"
                 instance="org.nixos.idea.lsp.NixLspSettingsConfigurable"/>
 

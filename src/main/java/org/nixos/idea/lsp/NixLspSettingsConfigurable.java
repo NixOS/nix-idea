@@ -38,7 +38,7 @@ public class NixLspSettingsConfigurable implements SearchableConfigurable, Confi
 
     @Override
     public @NlsContexts.ConfigurableName String getDisplayName() {
-        return "Nix Language Server (LSP)";
+        return "Language Server (LSP)";
     }
 
     @Override
