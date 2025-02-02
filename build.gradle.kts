@@ -62,8 +62,6 @@ dependencies {
         create(platformType, platformVersion)
         testFramework(TestFrameworkType.Platform)
         //testFramework(TestFrameworkType.JUnit5)
-        instrumentationTools()
-        pluginVerifier()
     }
 }
 
