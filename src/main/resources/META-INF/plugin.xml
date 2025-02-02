@@ -52,7 +52,7 @@
 
         <psi.referenceContributor
                 language="Nix"
-                implementation="org.nixos.idea.imports.NixFilePathReferenceContributor" />
+                implementation="org.nixos.idea.imports.NixFilePathReferenceContributor"/>
 
         <projectConfigurable
                 parentId="build"
@@ -61,7 +61,16 @@
                 instance="org.nixos.idea.settings.NixIDEASettings"/>
 
         <applicationService
+                serviceImplementation="org.nixos.idea.settings.NixExternalFormatterSettings"/>
+
+        <applicationService
                 serviceImplementation="org.nixos.idea.settings.NixSymbolSettings"/>
+
+        <applicationConfigurable
+                parentId="language"
+                displayName="Nix"
+                id="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"
+                instance="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"/>
 
         <applicationConfigurable
                 parentId="language"
@@ -71,15 +80,6 @@
 
         <colorSettingsPage
                 implementation="org.nixos.idea.settings.ui.NixColorSettingsPage"/>
-
-        <applicationService
-                serviceImplementation="org.nixos.idea.settings.NixExternalFormatterSettings"/>
-
-        <applicationConfigurable
-                parentId="language"
-                displayName="Nix"
-                id="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"
-                instance="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"/>
 
         <formattingService implementation="org.nixos.idea.format.NixExternalFormatter"/>
 
