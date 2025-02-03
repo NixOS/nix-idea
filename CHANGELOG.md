@@ -6,6 +6,8 @@
 
 ### Changed
 
+- Settings have been refactored. Different pages are now merged into one hierarchy.
+
 ### Deprecated
 
 ### Removed
