@@ -1,4 +1,4 @@
-package org.nixos.idea.lsp.ui;
+package org.nixos.idea.settings.ui;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.CustomShortcutSet;
