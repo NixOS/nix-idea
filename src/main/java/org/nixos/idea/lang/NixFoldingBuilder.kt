@@ -78,7 +78,7 @@ class NixFoldingBuilder : FoldingBuilderEx() {
 
             override fun visitExprList(o: NixExprList) {
                 descriptors.add(FoldingDescriptor(o, o.textRange))
-                o.exprList.forEach { it.accept(this) }
+                o.items.forEach { it.accept(this) }
             }
 
             override fun visitExprSelect(o: NixExprSelect) {
