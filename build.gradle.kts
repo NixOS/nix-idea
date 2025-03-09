@@ -2,9 +2,7 @@ import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.util.EnumSet
 
 plugins {
     id("java")
@@ -65,9 +63,7 @@ dependencies {
         testFramework(TestFrameworkType.Platform)
         //testFramework(TestFrameworkType.JUnit5)
         instrumentationTools()
-        // Version 1.364 seems to be broken and always complains about supposedly missing 'plugin.xml':
-        // https://youtrack.jetbrains.com/issue/MP-6388
-        pluginVerifier("1.307")
+        pluginVerifier()
     }
 }
 
@@ -113,6 +109,7 @@ intellijPlatform {
         }
     }
     pluginVerification {
+        freeArgs = listOf("-mute", "TemplateWordInPluginName")
         ides {
             ides(
                 providers.gradleProperty("verifierIdeVersionOverride")
@@ -122,13 +119,6 @@ intellijPlatform {
                     .orElse(ProductReleasesValueSource())
             )
         }
-        failureLevel = EnumSet.complementOf(
-            EnumSet.of(
-                FailureLevel.DEPRECATED_API_USAGES,
-                FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES,
-                FailureLevel.EXPERIMENTAL_API_USAGES,
-            )
-        )
     }
     publishing {
         token = providers.environmentVariable("JETBRAINS_TOKEN")

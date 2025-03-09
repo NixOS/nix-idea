@@ -4,11 +4,9 @@
 
 ### Added
 
-- Experimental support for resolving variables.
-  The feature is disabled by default since the functionality is rather limited for now.
-  Feel free to comment your feedback at [issue #87](https://github.com/NixOS/nix-idea/issues/87).
-
 ### Changed
+
+- Settings have been refactored. Different pages are now merged into one hierarchy.
 
 ### Deprecated
 
@@ -17,6 +15,19 @@
 ### Fixed
 
 ### Security
+
+## [0.4.0.17] - 2025-01-29
+
+### Added
+
+- Experimental support for resolving variables.
+  The feature is disabled by default since the functionality is rather limited for now.
+  Feel free to comment your feedback at [issue #87](https://github.com/NixOS/nix-idea/issues/87).
+- Support for resolving simple path references
+- Support for simple spell checking
+- Automatic insertion of closing quotes and braces
+- Support for *Code | Move Element Left/Right* (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>←/→</kbd>)
+- Support for IDEA 2025.1
 
 ## [0.4.0.16] - 2024-09-22
 
@@ -255,7 +266,7 @@ the plugin.
 
 - Update project to build for recent IJ versions
 
-[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.16...HEAD
+[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.17...HEAD
 [0.3.0.0]: https://github.com/NixOS/nix-idea/commits/v0.3.0.0
 [0.3.0.3]: https://github.com/NixOS/nix-idea/compare/v0.3.0.0...v0.3.0.3
 [0.3.0.4]: https://github.com/NixOS/nix-idea/compare/v0.3.0.3...v0.3.0.4
@@ -270,6 +281,7 @@ the plugin.
 [0.4.0.14]: https://github.com/NixOS/nix-idea/compare/v0.4.0.13...v0.4.0.14
 [0.4.0.15]: https://github.com/NixOS/nix-idea/compare/v0.4.0.14...v0.4.0.15
 [0.4.0.16]: https://github.com/NixOS/nix-idea/compare/v0.4.0.15...v0.4.0.16
+[0.4.0.17]: https://github.com/NixOS/nix-idea/compare/v0.4.0.16...v0.4.0.17
 [0.4.0.2]: https://github.com/NixOS/nix-idea/compare/v0.4.0.1...v0.4.0.2
 [0.4.0.3]: https://github.com/NixOS/nix-idea/compare/v0.4.0.2...v0.4.0.3
 [0.4.0.4]: https://github.com/NixOS/nix-idea/compare/v0.4.0.3...v0.4.0.4

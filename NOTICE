@@ -14,6 +14,7 @@ License Notice
    image, refitting the image, and compressing the image by removing
    invisible elements.
 
+   .idea/icon.svg
    src/main/resources/META-INF/pluginIcon.svg
    src/main/resources/META-INF/pluginIcon_dark.svg
    src/main/resources/icons/nixSnowflake.svg

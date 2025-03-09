@@ -104,15 +104,17 @@ expr_with ::= WITH expr SEMI expr { pin=1 }
 private recover_let ::= { recoverWhile=let_recover }
 private let_recover ::= braces_recover !(ASSERT | SEMI | IF | THEN | ELSE | LET | IN | WITH) !bind
 
+;{ methods("argument|formal|parameter")=[ identifier="parameter_name" ] }
 expr_lambda ::= lambda_params !missing_semi COLON expr { pin=3 }
 private lambda_params ::= argument [ !missing_semi AT formals ] | formals [ !missing_semi AT argument ]
-argument ::= <<identifier ID>> { implements=parameter }
+argument ::= parameter_name { implements=parameter }
 formals ::= LCURLY ( formal COMMA )* [ ( ELLIPSIS | formal ) ] recover_formals RCURLY { pin=1 }
-formal ::= <<identifier ID>> [ formal_has ] { pin=2 recoverWhile=formal_recover implements=parameter }
+formal ::= parameter_name [ formal_has ] { pin=2 recoverWhile=formal_recover implements=parameter }
 private formal_has ::= HAS expr { pin=1 }
 private formal_recover ::= curly_recover !COMMA
 private recover_formals ::= { recoverWhile=curly_recover }
-fake parameter ::= identifier
+fake parameter ::= parameter_name
+parameter_name ::= ID { implements=identifier }
 
 // Note that the rules for expr_op.* use a special processing mode of
 // Grammar-Kit. Left recursion would not be possible otherwise.
@@ -161,7 +163,7 @@ expr_op_base ::= expr_app
 // Grammar-Kit cannot handle "expr_app ::= expr_app expr_select_or_legacy" or
 // equivalent rules. As a workaround, we use this rule which will only create
 // one AST node for a series of function calls.
-expr_app ::= expr_select ( !missing_semi expr_select ) *
+expr_app ::= expr_select ( !missing_semi expr_select ) * { methods=[ lambda="/expr[0]" ] }
 
 ;{ methods("expr_select")=[ value="/expr[0]" default="/expr[1]" ] }
 expr_select ::= expr_simple [ !missing_semi ( select_attr | legacy_app_or )]
@@ -191,10 +193,12 @@ expr_uri ::= URI
 ;{ extends("expr_lookup_path|expr_std_path")=expr_path }
 expr_path ::= expr_lookup_path | expr_std_path
 expr_lookup_path ::= SPATH
-expr_std_path ::= PATH_SEGMENT (PATH_SEGMENT | antiquotation)* PATH_END
+expr_std_path ::= PATH_SEGMENT (PATH_SEGMENT | antiquotation)* PATH_END {
+  mixin="org.nixos.idea.psi.impl.NixExprStdPathMixin"
+}
 expr_parens ::= LPAREN expr recover_parens RPAREN { pin=1 }
 expr_attrs ::= [ REC | LET ] LCURLY recover_set (bind recover_set)* RCURLY { pin=2 }
-expr_list ::= LBRAC recover_list (expr_select recover_list)* RBRAC { pin=1 }
+expr_list ::= LBRAC recover_list (expr_select recover_list)* RBRAC { pin=1 methods=[ items="expr" ] }
 private recover_parens ::= { recoverWhile=paren_recover }
 private recover_set ::= { recoverWhile=set_recover }
 private recover_list ::= { recoverWhile=list_recover }
@@ -217,7 +221,7 @@ private string_token ::= STR | IND_STR | STR_ESCAPE | IND_STR_ESCAPE
 bind ::= bind_attr | bind_inherit
 bind_attr ::= attr_path ASSIGN bind_value SEMI { pin=2 }
 bind_value ::= <<parseBindValue expr0>> { elementType=expr }
-bind_inherit ::= INHERIT [ LPAREN expr RPAREN ] attr* SEMI { pin=1 }
+bind_inherit ::= INHERIT [ LPAREN expr RPAREN ] attr* SEMI { pin=1 methods=[ source="expr" attributes="attr" ] }
 // Is used in various rules just to provide a better error message when a
 // semicolon is missing. Must always be used with `!`.
 private missing_semi ::= <<parseIsBindValue>> ( RCURLY | IN | bind )
@@ -231,7 +235,7 @@ attr_path ::= attr ( DOT attr )* { methods=[ firstAttr="/attr[0]" ] }
 
 
 // Interface for identifiers.
-meta identifier ::= <<p>>
+fake identifier ::= ID | OR_KW
 
 // The lexer uses curly braces to determine its state. To avoid inconsistencies
 // between the parser and lexer (i.e. the lexer sees a string where the parser

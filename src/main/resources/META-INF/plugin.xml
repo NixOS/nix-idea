@@ -27,9 +27,17 @@
         <additionalTextAttributes scheme="Default" file="colorSchemes/NixDefault.xml"/>
         <additionalTextAttributes scheme="Darcula" file="colorSchemes/NixDarcula.xml"/>
 
+        <spellchecker.support
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixSpellcheckingStrategy"/>
+
         <lang.braceMatcher
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixBraceMatcher"/>
+
+        <lang.quoteHandler
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixQuoteHandler"/>
 
         <lang.commenter
                 language="Nix"
@@ -39,8 +47,16 @@
                 language="Nix"
                 implementationClass="org.nixos.idea.lang.NixFoldingBuilder"/>
 
+        <moveLeftRightHandler
+                language="Nix"
+                implementationClass="org.nixos.idea.lang.NixMoveElementLeftRightHandler"/>
+
         <searcher forClass="com.intellij.find.usages.api.UsageSearchParameters"
                   implementationClass="org.nixos.idea.lang.references.NixUsageSearcher"/>
+
+        <psi.referenceContributor
+                language="Nix"
+                implementation="org.nixos.idea.imports.NixFilePathReferenceContributor"/>
 
         <projectConfigurable
                 parentId="build"
@@ -49,25 +65,25 @@
                 instance="org.nixos.idea.settings.NixIDEASettings"/>
 
         <applicationService
+                serviceImplementation="org.nixos.idea.settings.NixExternalFormatterSettings"/>
+
+        <applicationService
                 serviceImplementation="org.nixos.idea.settings.NixSymbolSettings"/>
 
         <applicationConfigurable
                 parentId="language"
-                displayName="Nix Symbols"
-                id="org.nixos.idea.settings.NixSymbolConfigurable"
-                instance="org.nixos.idea.settings.NixSymbolConfigurable"/>
-
-        <colorSettingsPage
-                implementation="org.nixos.idea.settings.NixColorSettingsPage"/>
-
-        <applicationService
-                serviceImplementation="org.nixos.idea.settings.NixExternalFormatterSettings"/>
+                displayName="Nix"
+                id="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"
+                instance="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"/>
 
         <applicationConfigurable
-                parentId="language"
-                displayName="Nix"
-                id="org.nixos.idea.settings.NixLangSettingsConfigurable"
-                instance="org.nixos.idea.settings.NixLangSettingsConfigurable"/>
+                parentId="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"
+                displayName="Symbols"
+                id="org.nixos.idea.settings.ui.NixSymbolConfigurable"
+                instance="org.nixos.idea.settings.ui.NixSymbolConfigurable"/>
+
+        <colorSettingsPage
+                implementation="org.nixos.idea.settings.ui.NixColorSettingsPage"/>
 
         <formattingService implementation="org.nixos.idea.format.NixExternalFormatter"/>
 

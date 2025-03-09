@@ -1,4 +1,4 @@
-package org.nixos.idea.settings;
+package org.nixos.idea.settings.ui;
 
 import com.intellij.lang.Language;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
