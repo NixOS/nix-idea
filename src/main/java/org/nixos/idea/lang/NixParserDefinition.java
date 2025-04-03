@@ -63,23 +63,22 @@ public class NixParserDefinition implements ParserDefinition {
         NixTokenType rightType = asNixTokenType(right.getElementType());
         if (leftType == NixTypes.SCOMMENT) {
             return SpaceRequirements.MUST_LINE_BREAK;
-        }
-        if (leftType == NixTypes.DOLLAR && rightType == NixTypes.LCURLY) {
+        } else if (NixTokenSets.STRING_CONTENT.contains(leftType) ||
+                   NixTokenSets.STRING_CONTENT.contains(rightType)) {
             return SpaceRequirements.MUST_NOT;
-        }
-        else if (leftType == NixTypes.PATH_SEGMENT) {
-            // path segment, antiquotation or PATH_END on the right
+        } else if (leftType == NixTypes.DOLLAR && rightType == NixTypes.LCURLY) {
             return SpaceRequirements.MUST_NOT;
-        }
-        else if (rightType == NixTypes.PATH_END) {
-            // path segment or antiquotation on the left
+        } else if (leftType == NixTypes.PATH_SEGMENT || rightType == NixTypes.PATH_END) {
+            // PATH_SEGMENT PATH_SEGMENT || PATH_SEGMENT antiquotation || PATH_SEGMENT PATH_END
+            // antiquotation PATH_SEGMENT || antiquotation PATH_END
+            // TODO Incorrect?
+            //  The case "antiquotation PATH_SEGMENT" doesn't seem to be handled.
+            //  Does PATH_END even exist as AST-node, considering that it is zero-length?
             return SpaceRequirements.MUST_NOT;
-        }
-        else if (NixTokenSets.MIGHT_COLLAPSE_WITH_ID.contains(leftType) &&
-                 NixTokenSets.MIGHT_COLLAPSE_WITH_ID.contains(rightType)) {
+        } else if (NixTokenSets.MIGHT_COLLAPSE_WITH_ID.contains(leftType) &&
+                   NixTokenSets.MIGHT_COLLAPSE_WITH_ID_ON_THE_LEFT.contains(rightType)) {
             return SpaceRequirements.MUST;
-        }
-        else {
+        } else {
             return SpaceRequirements.MAY;
         }
     }

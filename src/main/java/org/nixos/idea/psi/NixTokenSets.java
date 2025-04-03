@@ -36,17 +36,23 @@ public final class NixTokenSets {
     /** All tokens representing any part of a string, except interpolations. */
     public static final TokenSet STRING_ANY = TokenSet.orSet(CLOSING_QUOTES, OPENING_QUOTES, STRING_CONTENT);
 
-    /** Tokens would collapse if they were not separated by whitespace. */
+    /** Tokens which collapse with an ID on either side if they were not separated by whitespace. */
     public static final TokenSet MIGHT_COLLAPSE_WITH_ID = TokenSet.orSet(
             KEYWORDS,
             TokenSet.create(
                     NixTypes.ID,
-                    NixTypes.INT,
-                    NixTypes.FLOAT,
                     NixTypes.SPATH,
                     NixTypes.PATH_SEGMENT,
                     NixTypes.PATH_END,
                     NixTypes.URI));
+
+    /** Tokens which would collapse with an ID on the left if they were not separated by whitespace. */
+    public static final TokenSet MIGHT_COLLAPSE_WITH_ID_ON_THE_LEFT = TokenSet.orSet(
+            MIGHT_COLLAPSE_WITH_ID,
+            TokenSet.create(
+                    NixTypes.MINUS, // a-b is parsed as one identifier, not as a - b.
+                    NixTypes.INT,
+                    NixTypes.FLOAT));
 
     private NixTokenSets() {} // Cannot be instantiated
 }
