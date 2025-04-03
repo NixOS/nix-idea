@@ -30,6 +30,11 @@ object UiDslExtensions {
         return bindText(prop.toMutableProperty())
     }
 
+    /**
+     * Enables validations after changes in the text input.
+     * Note that this is the default behavior as long as no other [DialogValidationRequestor] is registered.
+     * This method needs to be called only if you add another requestor, for example via [validateOnReset].
+     */
     fun <T : RawCommandLineEditor> Cell<T>.validateWhenTextChanged(): Cell<T> {
         return validationRequestor(DialogValidationRequestor.WithParameter {
             WHEN_TEXT_CHANGED(it.textField)
