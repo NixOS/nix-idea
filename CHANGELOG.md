@@ -4,6 +4,8 @@
 
 ### Added
 
+- Built-in formatting for the Nix language
+
 ### Changed
 
 - Settings have been refactored. Different pages are now merged into one hierarchy.

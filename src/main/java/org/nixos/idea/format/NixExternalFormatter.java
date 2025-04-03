@@ -43,7 +43,7 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
 
     @Override
     public boolean canFormat(@NotNull PsiFile psiFile) {
-        return psiFile instanceof NixFile;
+        return psiFile instanceof NixFile && NixExternalFormatterSettings.getInstance().isFormatEnabled();
     }
 
     @Override

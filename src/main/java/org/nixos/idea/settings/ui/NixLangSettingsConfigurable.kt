@@ -10,6 +10,7 @@ import com.intellij.ui.dsl.builder.MAX_LINE_LENGTH_WORD_WRAP
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.builder.selected
+import com.intellij.ui.layout.ComponentPredicate
 import org.nixos.idea.settings.NixExternalFormatterSettings
 import org.nixos.idea.settings.ui.UiDslExtensions.bindText
 import org.nixos.idea.settings.ui.UiDslExtensions.placeholderText
@@ -22,12 +23,19 @@ class NixLangSettingsConfigurable :
     BoundSearchableConfigurable("Nix", "org.nixos.idea.settings.ui.NixLangSettingsConfigurable"),
     Configurable.Beta {
 
+    private lateinit var myEnabledCheckBox: Cell<JBCheckBox>
+
+    val isFormatterEnabled: ComponentPredicate
+        get() {
+            createComponent();
+            return myEnabledCheckBox.selected
+        }
+
     override fun createPanel() = panel {
         group("External Formatter", indent = false) {
             val settings = NixExternalFormatterSettings.getInstance()
-            lateinit var enabledCheckBox: Cell<JBCheckBox>
             row {
-                enabledCheckBox = checkBox("Enable external formatter")
+                myEnabledCheckBox = checkBox("Enable external formatter")
                     .bindSelected(settings::isFormatEnabled)
                     .comment(
                         """
@@ -50,7 +58,7 @@ class NixLangSettingsConfigurable :
                             it.text.isNullOrBlank()
                         }
                 }
-            }.enabledIf(enabledCheckBox.selected)
+            }.enabledIf(myEnabledCheckBox.selected)
         }
     }
 
