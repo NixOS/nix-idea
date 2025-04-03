@@ -7,7 +7,7 @@
     <extensions defaultExtensionNs="com.intellij">
 
         <fileType
-                name="Nix file"
+                name="Nix"
                 implementationClass="org.nixos.idea.file.NixFileType"
                 fieldName="INSTANCE"
                 language="Nix"
