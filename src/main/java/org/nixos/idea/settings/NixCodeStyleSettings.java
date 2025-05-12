@@ -29,7 +29,7 @@ public final class NixCodeStyleSettings extends CustomCodeStyleSettings {
     public boolean SPACE_AROUND_IMPLICATION_OPERATOR = true;
     public boolean SPACE_AROUND_UPDATE_ATTRS_OPERATOR = true;
 
-    public @AttributeAlignment int ALIGN_ASSIGNMENTS = AttributeAlignment.DO_NOT_ALIGN;
+    public @AttributeAlignment int ALIGN_ATTRIBUTES = AttributeAlignment.DO_NOT_ALIGN;
 
     @Documented
     @Retention(RetentionPolicy.SOURCE)

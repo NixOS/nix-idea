@@ -45,6 +45,7 @@ final class NixCodeStyleSettingsProvider extends LanguageCodeStyleSettingsProvid
     }
 
     @Override
+    @SuppressWarnings("RedundantLabeledSwitchRuleCodeBlock")
     public void customizeSettings(@NotNull CodeStyleSettingsCustomizable consumer, @NotNull SettingsType settingsType) {
         CodeStyleSettingsCustomizableOptions constants = CodeStyleSettingsCustomizableOptions.getInstance();
         // Note: Standard options are defined in class CodeStyleSettingsPresentations
@@ -148,7 +149,7 @@ final class NixCodeStyleSettingsProvider extends LanguageCodeStyleSettingsProvid
 
                 consumer.showCustomOption(
                         NixCodeStyleSettings.class,
-                        "ALIGN_ASSIGNMENTS",
+                        "ALIGN_ATTRIBUTES",
                         "Align attributes in columns",
                         constants.WRAPPING_FIELDS_VARIABLES_GROUPS,
                         new String[]{

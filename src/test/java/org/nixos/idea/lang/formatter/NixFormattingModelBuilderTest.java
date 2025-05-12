@@ -87,8 +87,11 @@ final class NixFormattingModelBuilderTest {
         void indent() {
             testIndent("""
                 {
+                  // comment
                   x = y;
+                  // comment
                   inherit z;
+                  // comment
                 }
                 """);
         }
@@ -98,8 +101,11 @@ final class NixFormattingModelBuilderTest {
             testIndent("""
                 {
                   x = {
+                    // comment
                     inherit y;
+                    // comment
                     z = "";
+                    // comment
                   };
                 }
                 """);
@@ -109,7 +115,7 @@ final class NixFormattingModelBuilderTest {
         final class Alignment {
             @Test
             void consecutive() {
-                nixSettings().ALIGN_ASSIGNMENTS = NixCodeStyleSettings.AttributeAlignment.ALIGN_CONSECUTIVE;
+                nixSettings().ALIGN_ATTRIBUTES = NixCodeStyleSettings.AttributeAlignment.ALIGN_CONSECUTIVE;
                 testAlignment("""
                     {
                       x.a  = 1;
@@ -123,7 +129,7 @@ final class NixFormattingModelBuilderTest {
 
             @Test
             void siblings() {
-                nixSettings().ALIGN_ASSIGNMENTS = NixCodeStyleSettings.AttributeAlignment.ALIGN_SIBLINGS;
+                nixSettings().ALIGN_ATTRIBUTES = NixCodeStyleSettings.AttributeAlignment.ALIGN_SIBLINGS;
                 testAlignment("""
                     {
                       x.aa  = 1;
@@ -141,7 +147,7 @@ final class NixFormattingModelBuilderTest {
 
             @Test
             void nested() {
-                nixSettings().ALIGN_ASSIGNMENTS = NixCodeStyleSettings.AttributeAlignment.ALIGN_NESTED;
+                nixSettings().ALIGN_ATTRIBUTES = NixCodeStyleSettings.AttributeAlignment.ALIGN_NESTED;
                 testAlignment("""
                     {
                       x = {
@@ -157,7 +163,7 @@ final class NixFormattingModelBuilderTest {
 
             @Test
             void nested_inline() {
-                nixSettings().ALIGN_ASSIGNMENTS = NixCodeStyleSettings.AttributeAlignment.ALIGN_NESTED;
+                nixSettings().ALIGN_ATTRIBUTES = NixCodeStyleSettings.AttributeAlignment.ALIGN_NESTED;
                 testAlignment("""
                     {
                       x.aaa = 1;
