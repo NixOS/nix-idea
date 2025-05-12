@@ -86,9 +86,11 @@ internal object AttributeAlignmentFormatter : FormatterRule<NixExprAttrs>(NixTyp
             private fun isSeparationBetween(before: NixPsiElement, after: NixPsiElement): Boolean {
                 if (PsiTreeUtil.skipWhitespacesAndCommentsForward(before) === after) {
                     var lineFeedCount = 0
+                    // TODO Use util for iteration
                     var c = before.getNextSibling()
                     while (c !== after) {
-                        if (c.textContains('\n') && ++lineFeedCount > 1) {
+                        lineFeedCount += c.text.count { it == '\n' }
+                        if (lineFeedCount > 1) {
                             return true
                         }
                         c = c.getNextSibling()
