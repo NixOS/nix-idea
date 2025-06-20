@@ -24,9 +24,14 @@ out/
 !src/**/out/
 
 # Gradle
-.gradle/
+/.gradle/
+/gradle/plugins/.gradle/
 build/
 !src/**/build/
+
+# Kotlin Gradle plugin (https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects)
+/.kotlin/
+/gradle/plugins/.kotlin/
 
 /.intellijPlatform
 src/gen
