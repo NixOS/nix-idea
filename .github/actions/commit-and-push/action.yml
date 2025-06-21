@@ -1,0 +1,29 @@
+name: Commit and Push
+description: Commits all changes and pushes them back to the repository
+inputs:
+  branch:
+    description: The branch which shall be updated
+    default: ${{ github.event_name == 'release' && 'refs/heads/master' || github.ref }}
+  message:
+    description: The comment message
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Commit files
+      shell: bash
+      env:
+        COMMIT_MESSAGE: ${{ inputs.message }}
+      run: |
+        git -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+          commit -am "$COMMIT_MESSAGE"
+    - name: Push changes
+      shell: bash
+      env:
+        BASE_COMMIT: ${{ github.sha }}
+        TARGET_BRANCH: ${{ inputs.branch }}
+      run: |
+        git push origin \
+          --force-with-lease="$TARGET_BRANCH:$BASE_COMMIT" \
+          "HEAD:$TARGET_BRANCH"
