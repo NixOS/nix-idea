@@ -32,7 +32,7 @@ jobs:
     outputs:
       build-result-artifact-id: ${{ steps.upload-build-result.outputs.artifact-id }}
       metadata-artifact-id: ${{ steps.upload-metadata.outputs.artifact-id }}
-      idea-releases: ${{ steps.metadata.outputs.products-releases }}
+      products-releases: ${{ steps.get-products-releases.outputs.products-releases }}
 
     steps:
     # Setup environment
@@ -44,10 +44,10 @@ jobs:
         publish-caches: true
     # Collect metadata
     - name: Collect metadata for upcoming steps and jobs
-      id: metadata
-      run: |
-        ./gradlew --stacktrace metadata
-        echo "products-releases=$(./gradlew -q printProductsReleases | jq -Rnc '[inputs]')" >> "$GITHUB_OUTPUT"
+      run: ./gradlew --stacktrace metadata
+    - name: Read productsReleases.txt for compatibility testing matrix
+      id: get-products-releases
+      run: echo "products-releases=$(jq -Rnc '[inputs]' < gradle/productsReleases.txt)" >> "$GITHUB_OUTPUT"
     # Build
     - name: Build project
       run: ./gradlew --stacktrace assemble buildPlugin
@@ -87,7 +87,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        idea-release: ${{ fromJSON(needs.build.outputs.idea-releases) }}
+        idea-release: ${{ fromJSON(needs.build.outputs.products-releases) }}
 
     steps:
     # Setup environment

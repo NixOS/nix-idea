@@ -113,8 +113,12 @@ intellijPlatform {
                 providers.gradleProperty("verifierIdeVersionOverride")
                     // Verify only against the IDE specified by the property
                     .map { listOf(it) }
-                    // If property is not set, verify against the recommended list of IDEs
-                    .orElse(ProductReleasesValueSource())
+                    // If property is not set, verify against the IDEs in gradle/productsReleases.txt
+                    .orElse(
+                        layout.projectDirectory.file("gradle/productsReleases.txt")
+                            .let { providers.fileContents(it).asText }
+                            .map { it.lines().map(String::trim).filter(String::isNotEmpty) }
+                    )
             )
         }
     }
@@ -172,7 +176,7 @@ tasks {
         systemProperty("plugin.testDataPath", rootProject.rootDir.resolve("src/test/testData").path)
     }
 
-    task<MetadataTask>("metadata") {
+    register<MetadataTask>("metadata") {
         outputDir = layout.buildDirectory.dir("metadata")
         file("version.txt", pluginVersion)
         file("zipfile.txt") { buildPlugin.get().archiveFile.get().toString() }
@@ -186,6 +190,16 @@ tasks {
                 )
             }
         }
+    }
+
+    register<MetadataTask>("updateProductsReleases") {
+        doNotTrackState("Updates files outside of build directory")
+        outputDir = layout.projectDirectory.dir("gradle")
+        file(
+            "productsReleases.txt",
+            intellijPlatform.pluginVerification.ides.ProductReleasesValueSource().map {
+                it.joinToString("\n", "", "\n")
+            })
     }
 
     generateLexer {
