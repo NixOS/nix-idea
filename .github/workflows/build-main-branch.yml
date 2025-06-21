@@ -33,13 +33,15 @@ jobs:
     - name: Download build result
       uses: actions/download-artifact@v4
       with:
-        name: ${{ needs.build.outputs.build-artifact }}
+        artifact-ids: ${{ needs.build.outputs.build-artifact-id }}
         path: build/distributions/
+        merge-multiple: true
     - name: Download metadata
       uses: actions/download-artifact@v4
       with:
-        name: ${{ needs.build.outputs.metadata-artifact }}
+        artifact-ids: ${{ needs.build.outputs.metadata-artifact-id }}
         path: build/metadata/
+        merge-multiple: true
     # Read metadata
     - name: Read metadata
       id: metadata

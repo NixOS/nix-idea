@@ -4,12 +4,12 @@ on:
   pull_request:
   workflow_call:
     outputs:
-      metadata-artifact:
-        description: The name of the artifact containing the result of the metadata task
-        value: metadata
-      build-artifact:
-        description: The name of the artifact containing the build result
-        value: build-result
+      metadata-artifact-id:
+        description: The id of the artifact containing the result of the metadata task
+        value: ${{ jobs.build.outputs.metadata-artifact-id }}
+      build-artifact-id:
+        description: The id of the artifact containing the build result
+        value: ${{ jobs.build.outputs.build-result-artifact-id }}
   workflow_dispatch:
 
 jobs:
@@ -30,6 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: gradle-wrapper-validation
     outputs:
+      build-result-artifact-id: ${{ steps.upload-build-result.outputs.artifact-id }}
+      metadata-artifact-id: ${{ steps.upload-metadata.outputs.artifact-id }}
       idea-releases: ${{ steps.metadata.outputs.products-releases }}
 
     steps:
@@ -62,12 +64,14 @@ jobs:
         path: build/reports/
         if-no-files-found: ignore
     - name: Upload build result
+      id: upload-build-result
       uses: actions/upload-artifact@v4
       with:
         name: build-result
         path: build/distributions/
         if-no-files-found: error
     - name: Upload metadata
+      id: upload-metadata
       uses: actions/upload-artifact@v4
       with:
         name: metadata
