@@ -1,0 +1,107 @@
+name: Check Against Latest Versions of IDEA
+
+on:
+  schedule:
+    - cron: '35 14 * * 5' # Every Friday 14:35 UTC
+  workflow_dispatch:
+    inputs:
+      update_repo:
+        description: 'Push updated files to repository'
+        default: false
+        type: boolean
+
+jobs:
+  update-products-releases:
+
+    name: Check for New Product Releases of IDEA
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+      products-releases: ${{ steps.get-new-products-releases.outputs.products-releases }}
+      has-changed: ${{ steps.diff.outputs.has-changes }}
+
+    steps:
+      # Setup environment
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up build tools
+        uses: ./.github/actions/setup-tools
+        with:
+          publish-caches: true
+      # Update product releases (gradle/productsReleases.txt)
+      - name: Update product releases
+        run: ./gradlew --stacktrace updateProductsReleases
+      # Prepare job output
+      - name: Add resolved product releases to job summary
+        run: |
+          cat << EOF >> "$GITHUB_STEP_SUMMARY"
+          ### Product Releases
+
+          \`\`\`
+          $(cat gradle/productsReleases.txt)
+          \`\`\`
+
+          EOF
+      - name: Check diff
+        id: diff
+        run: |
+          diff_text=$(git diff)
+          if [ -z "$diff_text" ]; then
+            echo "has-changes=" >> "$GITHUB_OUTPUT"
+            diff_text='No changes. File at `gradle/productsReleases.txt` is up-to-date.'
+          else
+            echo "has-changes=true" >> "$GITHUB_OUTPUT"
+            diff_text=$'```diff\n'"$diff_text"$'\n```'
+          fi
+
+          cat << EOF >> "$GITHUB_STEP_SUMMARY"
+          ### Difference
+
+          ${diff_text}
+
+          ### Gradle Summary
+
+          EOF
+      - name: Read productsReleases.txt for compatibility testing matrix
+        id: get-new-products-releases
+        run: echo "products-releases=$(jq -Rnc '[inputs]' < gradle/productsReleases.txt)" >> "$GITHUB_OUTPUT"
+      # Upload new product releases
+      - name: Upload new product releases
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: products-releases
+          path: gradle/productsReleases.txt
+          if-no-files-found: error
+      # Build the project to populate the build caches, and
+      # to verify that the build is working.
+      - name: Build project
+        run: ./gradlew --stacktrace assemble buildPlugin verifyPluginStructure check
+
+  check-compatibility:
+
+    uses: ./.github/workflows/check-compatibility.yml
+    needs: update-products-releases
+    with:
+      products_releases: ${{ needs.update-products-releases.outputs.products-releases }}
+
+  push-to-repository:
+
+    name: Push Updated Files To Repository
+    runs-on: ubuntu-latest
+    needs: [ update-products-releases, check-compatibility ]
+    if: ${{ inputs.update_repo && needs.update-products-releases.outputs.has-changed }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Download new product releases
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ needs.update-products-releases.outputs.artifact-id }}
+          path: gradle/
+          merge-multiple: true
+      - name: Commit and push changes
+        uses: ./.github/actions/commit-and-push
+        with:
+          message: Update IDEA releases for testing compatibility
