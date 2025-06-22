@@ -19,7 +19,6 @@ val pluginGroup: String by project
 val pluginName: String by project
 val pluginVersion: String by project
 val pluginSinceBuild: String by project
-val pluginUntilBuild: String by project
 
 val platformType: String by project
 val platformVersion: String by project
@@ -78,7 +77,6 @@ intellijPlatform {
         }
         ideaVersion {
             sinceBuild = pluginSinceBuild
-            untilBuild = pluginUntilBuild
         }
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         description = providers.provider {

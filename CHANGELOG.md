@@ -4,8 +4,13 @@
 
 ### Added
 
+- Support for IDEA 2025.2 and potentially future versions
+
 ### Changed
 
+- The `until-build` attribute has been removed from plugin configuration.
+  The plugin should now continue to work with future versions of IDEA without
+  requiring a new release as long as IDEA's API does not break.
 - Settings have been refactored. Different pages are now merged into one hierarchy.
 
 ### Deprecated
