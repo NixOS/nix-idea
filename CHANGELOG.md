@@ -4,14 +4,7 @@
 
 ### Added
 
-- Support for IDEA 2025.2 and potentially future versions
-
 ### Changed
-
-- The `until-build` attribute has been removed from plugin configuration.
-  The plugin should now continue to work with future versions of IDEA without
-  requiring a new release as long as IDEA's API does not break.
-- Settings have been refactored. Different pages are now merged into one hierarchy.
 
 ### Deprecated
 
@@ -20,6 +13,19 @@
 ### Fixed
 
 ### Security
+
+## [0.4.0.18] - 2025-07-04
+
+### Added
+
+- Support for IDEA 2025.2 and potentially future versions
+
+### Changed
+
+- The `until-build` attribute has been removed from plugin configuration.
+  The plugin should now continue to work with future versions of IDEA without
+  requiring a plugin update as long as IDEA's API does not break.
+- Settings have been refactored. Different pages are now merged into one hierarchy.
 
 ## [0.4.0.17] - 2025-01-29
 
@@ -271,7 +277,7 @@ the plugin.
 
 - Update project to build for recent IJ versions
 
-[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.17...HEAD
+[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.18...HEAD
 [0.3.0.0]: https://github.com/NixOS/nix-idea/commits/v0.3.0.0
 [0.3.0.3]: https://github.com/NixOS/nix-idea/compare/v0.3.0.0...v0.3.0.3
 [0.3.0.4]: https://github.com/NixOS/nix-idea/compare/v0.3.0.3...v0.3.0.4
@@ -287,6 +293,7 @@ the plugin.
 [0.4.0.15]: https://github.com/NixOS/nix-idea/compare/v0.4.0.14...v0.4.0.15
 [0.4.0.16]: https://github.com/NixOS/nix-idea/compare/v0.4.0.15...v0.4.0.16
 [0.4.0.17]: https://github.com/NixOS/nix-idea/compare/v0.4.0.16...v0.4.0.17
+[0.4.0.18]: https://github.com/NixOS/nix-idea/compare/v0.4.0.17...v0.4.0.18
 [0.4.0.2]: https://github.com/NixOS/nix-idea/compare/v0.4.0.1...v0.4.0.2
 [0.4.0.3]: https://github.com/NixOS/nix-idea/compare/v0.4.0.2...v0.4.0.3
 [0.4.0.4]: https://github.com/NixOS/nix-idea/compare/v0.4.0.3...v0.4.0.4
