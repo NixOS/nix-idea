@@ -51,17 +51,10 @@ jobs:
     - name: Update files with Gradle
       run: ./gradlew --stacktrace metadata patchChangelog --release-note="$(<release_note.md)" bumpVersion
     # Commit and push
-    - name: Commit files
-      run: |
-        version="$(cat build/metadata/version.txt)"
-        git -c user.name='github-actions[bot]' \
-            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-          commit -am "Bump version after releasing v$version"
-    - name: Push changes
-      env:
-        BASE_COMMIT: ${{ github.sha }}
-        TARGET_BRANCH: ${{ github.event_name == 'release' && 'refs/heads/master' || github.ref }}
-      run: |
-        git push origin \
-          --force-with-lease="$TARGET_BRANCH:$BASE_COMMIT" \
-          "HEAD:$TARGET_BRANCH"
+    - name: Read version
+      id: get-version
+      run: echo "version=$(cat build/metadata/version.txt)" >> "$GITHUB_OUTPUT"
+    - name: Commit and push changes
+      uses: ./.github/actions/commit-and-push
+      with:
+        message: Bump version after releasing v${{ steps.get-version.outputs.version }}

@@ -1,0 +1,44 @@
+name: Test Plugin Compatibility
+
+on:
+  workflow_call:
+    inputs:
+      products_releases:
+        description: 'JSON list of releases to test'
+        required: true
+        type: string
+
+jobs:
+  check-compatibility:
+
+    name: Test Plugin Compatibility (${{ matrix.idea-release }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        idea-release: ${{ fromJSON(inputs.products_releases) }}
+
+    steps:
+    # Setup environment
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Set up build tools
+      uses: ./.github/actions/setup-tools
+    # Setup caches for Plugin Verifier
+    - name: Set up cache for IntelliJ Plugin Verifier
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pluginVerifier/ides
+        key: pluginVerifier-${{ matrix.idea-release }}-${{ runner.os }}
+    # Run checks
+    - name: Check plugin compatibility
+      run: ./gradlew --stacktrace -PverifierIdeVersionOverride="${{ matrix.idea-release }}" verifyPlugin
+    # Upload artifacts
+    - name: Upload build reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: compatibility-reports-${{ matrix.idea-release }}
+        path: build/reports/
+        if-no-files-found: ignore
