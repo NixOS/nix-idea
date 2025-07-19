@@ -6,6 +6,7 @@ import com.intellij.codeInsight.editorActions.moveUpDown.LineRange;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -91,6 +92,9 @@ public final class NixStatementUpDownMover extends LineMover {
         Collection<ElementInfo> unmodifiableView = Collections.unmodifiableCollection(elements);
         while (!elements.isEmpty()) {
             ElementInfo elementInfo = elements.removeFirst();
+            if (tryMoveComments(request, elementInfo)) {
+                return;
+            }
             if (tryMoveSubElements(request, elementInfo)) {
                 return;
             }
@@ -102,6 +106,44 @@ public final class NixStatementUpDownMover extends LineMover {
         // We don't fall back to the default behavior.
         // If we don't know how to move the lines in a meaningful way, we will not move them.
         request.info().prohibitMove();
+    }
+
+    /**
+     * Try moving elements from list-like elements as reported by {@link NixMoveElementLeftRightHandler}.
+     */
+    private static boolean tryMoveComments(@NotNull MoveRequest request, @NotNull ElementInfo elementInfo) {
+        PsiElement first = elementInfo.selection().firstAfterExpansion();
+        PsiElement last = elementInfo.selection().lastAfterExpansion();
+        if (first == null || last == null) {
+            return false;
+        }
+
+        PsiElement next = asCodeElementForward(first);
+        if (next != null && next.getStartOffsetInParent() <= last.getStartOffsetInParent()) {
+            return false;
+        }
+
+        if (tryMoveOverBlankLine(request, first, last)) {
+            return true;
+        }
+
+        if (request.down()) {
+            PsiElement nextLine = PsiTreeUtil.nextLeaf(last);
+            for (PsiElement cur = nextLine;
+                 cur != null && !(cur instanceof PsiWhiteSpace && cur.textContains('\n'));
+                 cur = PsiTreeUtil.nextLeaf(cur)) {
+                nextLine = cur;
+            }
+            return nextLine != null && tryMoveOver(request, first, last, nextLine);
+        } else {
+            PsiElement prevLine = PsiTreeUtil.prevLeaf(last);
+            for (PsiElement cur = prevLine;
+                 cur != null && !(cur instanceof PsiWhiteSpace && cur.textContains('\n'));
+                 cur = PsiTreeUtil.prevLeaf(cur)) {
+                prevLine = cur;
+            }
+            return prevLine != null && tryMoveOver(request, first, last, prevLine);
+        }
     }
 
     /**
@@ -183,23 +225,12 @@ public final class NixStatementUpDownMover extends LineMover {
                 insertionPoint = findNextInsertionPoint(block.parents(), block.lastInParent());
             }
             if (insertionPoint != null) {
-                // TODO Do I need `next`?
-                PsiElement next = nextLeaf(block.last());
-                if (next == null) {
-                    assert false : "Should be unreachable";
-                } else {
-                    return tryMoveOver(request, block.first(), block.last(), next, insertionPoint);
-                }
+                return tryMoveOver(request, block.first(), block.last(), insertionPoint);
             }
         } else {
             PsiElement insertionPoint = findPreviousInsertionPoint(block.parents(), block.firstInParent());
             if (insertionPoint != null) {
-                PsiElement previous = prevLeaf(block.first());
-                if (previous == null) {
-                    assert false : "Should be unreachable";
-                } else {
-                    return tryMoveOver(request, block.first(), block.last(), insertionPoint, previous);
-                }
+                return tryMoveOver(request, block.first(), block.last(), insertionPoint);
             }
         }
 
@@ -313,7 +344,7 @@ public final class NixStatementUpDownMover extends LineMover {
                 if (INSERTION_POINT_TOKENS.contains(cur.getNode().getElementType())) {
                     PsiElement childExpression = PsiTreeUtil.skipWhitespacesAndCommentsForward(cur);
                     if (childExpression == null) {
-                        return parentLineStart;
+                        return parentLineStart; // TODO wrong?
                     }
 
                     PsiElement insertionPoint = findPreviousInsertionPoint(childExpression, null, null);
@@ -327,9 +358,17 @@ public final class NixStatementUpDownMover extends LineMover {
                     }
                 }
             }
+            return parentLineStart;
+        } else if (parent instanceof NixStatementLike stmt) {
+            PsiElement terminator = findStatementTerminator(stmt);
+            PsiElement next = PsiTreeUtil.skipWhitespacesAndCommentsForward(terminator);
+            if (next != null) {
+                PsiElement startOfLine = expandLine(next, true);
+            }
+            return parentLineStart;
         }
 
-        return parent instanceof NixStatementLike ? parentLineStart : null;
+        return null;
     }
 
     private static @Nullable PsiElement findNextInsertionPoint(@NotNull Iterable<ElementInfo> parents, @NotNull PsiElement after) {
@@ -434,6 +473,38 @@ public final class NixStatementUpDownMover extends LineMover {
 
         info.toMove = range;
         info.toMove2 = new LineRange(target, target + 1);
+        return true;
+    }
+
+    /**
+     * Move the given lines.
+     * The line range defined by {@code moveFirst} and {@code moveLast} will be moved over {@code target}.
+     *
+     * @return {@code true}
+     */
+    private static boolean tryMoveOver(
+            @NotNull MoveRequest request,
+            @NotNull PsiElement moveFirst,
+            @NotNull PsiElement moveLast,
+            @NotNull PsiElement target
+    ) {
+        MoveInfo info = request.info();
+        Document document = request.document();
+        info.toMove = createRange(document, info.toMove, moveFirst, moveLast);
+
+        TextRange textRange = target.getTextRange();
+        if (textRange.getStartOffset() > moveLast.getTextRange().getStartOffset()) {
+            int endOffset = textRange.getEndOffset();
+            int endLine = document.getLineNumber(endOffset) + 1;
+            info.toMove2 = new LineRange(info.toMove.endLine, endLine);
+        } else {
+            int startOffset = textRange.getStartOffset();
+            int startLine = document.getLineNumber(startOffset);
+            info.toMove2 = new LineRange(startLine, info.toMove.startLine);
+        }
+
+        assert Integer.max(info.toMove.startLine, info.toMove2.endLine) > Integer.min(info.toMove.endLine, info.toMove2.startLine)
+                : "Overlapping ranges";
         return true;
     }
 
@@ -629,6 +700,7 @@ public final class NixStatementUpDownMover extends LineMover {
          * This is either the same element as {@link #firstElement()}, or a comment.
          */
         private @Nullable PsiElement firstOfLine(@NotNull ElementInfo parent) {
+            // TODO Inline method?
             PsiElement firstInLine = firstAfterExpansion();
             PsiElement elementBeforeSelection = PsiTreeUtil.skipWhitespacesAndCommentsBackward(firstElement);
             if (elementBeforeSelection != null &&

@@ -96,7 +96,7 @@ private expr0 ::=
   | expr_op
 
 expr_assert ::= ASSERT expr SEMI expr { pin=1 implements=statement_like methods=[ assertion="/expr[0]" next="/expr[1]" ] }
-expr_if ::= IF expr then else { pin=1 implements=statement_like methods=[ next="/expr[2]" ] } // TODO Remove statement_like?
+expr_if ::= IF expr then else { pin=1 }
 private then ::= THEN expr { pin=1 }
 private else ::= ELSE expr { pin=1 }
 expr_let ::= LET !LCURLY recover_let (bind recover_let)* IN expr { pin=2 implements=statement_like methods=[ next="expr" ] }
