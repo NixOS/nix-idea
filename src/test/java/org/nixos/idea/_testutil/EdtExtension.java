@@ -69,7 +69,9 @@ final class EdtExtension implements InvocationInterceptor {
     private static void runAndWait(Invocation<?> invocation) throws Throwable {
         ThrowableCollector uncaughtExceptions = new ThrowableCollector(TestAbortedException.class::isInstance);
         try (var ignored = wrap(uncaughtExceptions)) {
-            uncaughtExceptions.execute(() -> EdtTestUtil.runInEdtAndWait(invocation::proceed));
+            // Call uncaughtExceptions.execute(...) inside EdtTestUtil.runInEdtAndWait(...)
+            // to avoid race conditions when multiple exceptions are reported.
+            EdtTestUtil.runInEdtAndWait(() -> uncaughtExceptions.execute(invocation::proceed));
         }
     }
 
