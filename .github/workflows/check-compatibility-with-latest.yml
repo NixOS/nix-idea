@@ -77,6 +77,13 @@ jobs:
       # to verify that the build is working.
       - name: Build project
         run: ./gradlew --stacktrace assemble buildPlugin verifyPluginStructure check
+      - name: Upload build reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-reports
+          path: build/reports/
+          if-no-files-found: ignore
 
   check-compatibility:
 
