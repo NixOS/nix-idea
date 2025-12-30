@@ -1,16 +1,21 @@
 package org.nixos.idea.lsp
 
+import com.intellij.json.JsonFileType
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.options.BoundSearchableConfigurable
 import com.intellij.openapi.options.Configurable
-import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.project.Project
 import com.intellij.platform.lsp.api.LspServerManager
+import com.intellij.ui.EditorTextField
 import com.intellij.ui.RawCommandLineEditor
 import com.intellij.ui.components.JBCheckBox
+import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Cell
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.builder.selected
+import com.intellij.ui.dsl.builder.toMutableProperty
 import org.nixos.idea.settings.ui.CommandSuggestionsPopup
 import org.nixos.idea.settings.ui.UiDslExtensions.bindText
 import org.nixos.idea.settings.ui.UiDslExtensions.placeholderText
@@ -18,13 +23,14 @@ import org.nixos.idea.settings.ui.UiDslExtensions.suggestionsPopup
 import org.nixos.idea.settings.ui.UiDslExtensions.validateOnReset
 import org.nixos.idea.settings.ui.UiDslExtensions.validateWhenTextChanged
 import org.nixos.idea.settings.ui.UiDslExtensions.warnOnInput
+import java.awt.Dimension
 
-class NixLspSettingsConfigurable :
+class NixLspSettingsConfigurable(val project: Project) :
     BoundSearchableConfigurable("Language Server (LSP)", "org.nixos.idea.lsp.NixLspSettingsConfigurable"),
     Configurable.Beta {
 
     override fun createPanel() = panel {
-        val settings = NixLspSettings.getInstance()
+        val settings = NixLspSettings.getInstance(project)
         lateinit var enabledCheckBox: Cell<JBCheckBox>
         row {
             enabledCheckBox = checkBox("Enable language server")
@@ -43,6 +49,17 @@ class NixLspSettingsConfigurable :
                         it.text.isNullOrBlank()
                     }
             }
+
+            row {
+                label("Workspace configuration:").resizableColumn()
+            }
+            row {
+                cell(createJsonEditorTextField()).align(Align.FILL)
+                    .bind(
+                        EditorTextField::getText, EditorTextField::setText,
+                        settings::configuration.toMutableProperty()
+                    )
+            }.resizableRow()
         }.enabledIf(enabledCheckBox.selected)
     }
 
@@ -50,9 +67,21 @@ class NixLspSettingsConfigurable :
     override fun apply() {
         super.apply()
         reset() // Update UI components to use normalized property values
-        for (project in ProjectManager.getInstance().openProjects) {
-            LspServerManager.getInstance(project).stopAndRestartIfNeeded(NixLspServerSupportProvider::class.java)
+        LspServerManager.getInstance(project).stopAndRestartIfNeeded(NixLspServerSupportProvider::class.java)
+    }
+
+    private fun NixLspSettingsConfigurable.createJsonEditorTextField(): EditorTextField {
+        val editorTextField = object : EditorTextField(null, project, JsonFileType.INSTANCE, false, false) {
+            override fun createEditor(): EditorEx {
+                val editor = super.createEditor()
+                editor.setHorizontalScrollbarVisible(true)
+                editor.setVerticalScrollbarVisible(true)
+                editor.settings.isUseSoftWraps = true
+                return editor
+            }
         }
+        editorTextField.preferredSize = Dimension(0, 150)
+        return editorTextField
     }
 }
 
