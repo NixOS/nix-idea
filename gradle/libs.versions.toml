@@ -11,8 +11,8 @@ junit4 = { module = "junit:junit", version = "4.13.2" }
 
 [plugins]
 # read more: https://github.com/JetBrains/intellij-platform-gradle-plugin
-jetbrains-intellij-platform = { id = "org.jetbrains.intellij.platform", version = "2.6.0" }
+jetbrains-intellij-platform = { id = "org.jetbrains.intellij.platform", version = "2.10.5" }
 # read more: https://github.com/JetBrains/gradle-changelog-plugin
-jetbrains-changelog = { id = "org.jetbrains.changelog", version = "2.2.1" }
+jetbrains-changelog = { id = "org.jetbrains.changelog", version = "2.5.0" }
 # read more: https://github.com/JetBrains/gradle-grammar-kit-plugin
-jetbrains-grammarkit = { id = "org.jetbrains.grammarkit", version = "2022.3.2.2" }
+jetbrains-grammarkit = { id = "org.jetbrains.grammarkit", version = "2023.3.0.1" }
