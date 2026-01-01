@@ -12,6 +12,7 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Cell
+import com.intellij.ui.dsl.builder.LabelPosition
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.builder.selected
@@ -49,12 +50,10 @@ class NixLspSettingsConfigurable(val project: Project) :
                         it.text.isNullOrBlank()
                     }
             }
-
             row {
-                label("Workspace configuration:").resizableColumn()
-            }
-            row {
-                cell(createJsonEditorTextField()).align(Align.FILL)
+                cell(createJsonEditorTextField())
+                    .align(Align.FILL)
+                    .label("Workspace configuration:", LabelPosition.TOP)
                     .bind(
                         EditorTextField::getText, EditorTextField::setText,
                         settings::configuration.toMutableProperty()
@@ -80,7 +79,6 @@ class NixLspSettingsConfigurable(val project: Project) :
                 return editor
             }
         }
-        editorTextField.preferredSize = Dimension(0, 150)
         return editorTextField
     }
 }
