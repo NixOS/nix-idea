@@ -73,8 +73,6 @@ class NixLspSettingsConfigurable(val project: Project) :
         val editorTextField = object : EditorTextField(null, project, JsonFileType.INSTANCE, false, false) {
             override fun createEditor(): EditorEx {
                 val editor = super.createEditor()
-                editor.setHorizontalScrollbarVisible(true)
-                editor.setVerticalScrollbarVisible(true)
                 editor.settings.isUseSoftWraps = true
                 return editor
             }
