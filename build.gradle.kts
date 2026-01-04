@@ -143,7 +143,7 @@ grammarKit {
 
     // tag or short commit hash of Grammar-Kit to use
     // -> https://github.com/JetBrains/Grammar-Kit
-    grammarKitRelease = "2022.3.2"
+    grammarKitRelease = "2023.3"
 }
 
 val lexerSource = layout.buildDirectory.dir("generated/sources/lexer/java/main")

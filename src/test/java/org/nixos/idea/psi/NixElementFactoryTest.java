@@ -76,7 +76,7 @@ final class NixElementFactoryTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
+    @CsvSource(quoteCharacter = '"', value = {
             "IND_STRING, ''abc''",
             "EXPR_VAR, x",
             "EXPR_SELECT, x.y",

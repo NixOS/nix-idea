@@ -15,7 +15,6 @@ import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
@@ -109,7 +108,7 @@ final class IdeaPlatformExtension implements ParameterResolver, TestInstancePreC
         return Map.entry(type, resolver);
     }
 
-    private static final class FixtureClosableWrapper implements CloseableResource {
+    private static final class FixtureClosableWrapper implements AutoCloseable {
         private final IdeaProjectTestFixture myFixture;
 
         private FixtureClosableWrapper(ExtensionContext context) throws Exception {
