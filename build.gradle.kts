@@ -56,9 +56,14 @@ dependencies {
     testImplementation(libs.junit5.platform.testkit)
     testImplementation(libs.junit4)
     testRuntimeOnly(libs.junit5.vintage.engine)
+    testImplementation(libs.bytebuddy)
+    testImplementation(libs.bytebuddy.agent)
 
     intellijPlatform {
         create(platformType, platformVersion)
+        // Required for platform version 2025.2 and higher:
+        //bundledModule("intellij.spellchecker")
+
         testFramework(TestFrameworkType.Platform)
         //testFramework(TestFrameworkType.JUnit5)
     }

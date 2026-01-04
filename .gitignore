@@ -19,6 +19,7 @@ hs_err_pid*
 .idea/*
 !.idea/icon.svg
 !.idea/codeStyles/
+!.idea/inspectionProfiles/
 !.idea/runConfigurations/
 out/
 !src/**/out/
