@@ -1,10 +1,8 @@
 <idea-plugin>
+    <depends>com.intellij.modules.json</depends>
     <extensions defaultExtensionNs="com.intellij">
 
-        <applicationService
-                serviceImplementation="org.nixos.idea.lsp.NixLspSettings"/>
-
-        <applicationConfigurable
+        <projectConfigurable
                 parentId="org.nixos.idea.settings.ui.NixLangSettingsConfigurable"
                 displayName="Language Server (LSP)"
                 id="org.nixos.idea.lsp.NixLspSettingsConfigurable"
