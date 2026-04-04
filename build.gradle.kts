@@ -61,6 +61,13 @@ dependencies {
         create(platformType, platformVersion)
         testFramework(TestFrameworkType.Platform)
         //testFramework(TestFrameworkType.JUnit5)
+
+        // version of IntelliJ patched JFlex
+        // -> https://github.com/JetBrains/intellij-deps-jflex
+        jflex("1.9.2")
+        // tag or short commit hash of Grammar-Kit to use
+        // -> https://github.com/JetBrains/Grammar-Kit
+        grammarKit("2023.3")
     }
 }
 
@@ -107,7 +114,7 @@ intellijPlatform {
     pluginVerification {
         freeArgs = listOf("-mute", "TemplateWordInPluginName")
         ides {
-            ides(
+            create(
                 providers.gradleProperty("verifierIdeVersionOverride")
                     // Verify only against the IDE specified by the property
                     .map { listOf(it) }
@@ -134,16 +141,6 @@ changelog {
     // Workarounds because our version numbers do not match the format of semantic versioning:
     headerParserRegex = "^[-._+0-9a-zA-Z]+\$"
     combinePreReleases = false
-}
-
-grammarKit {
-    // version of IntelliJ patched JFlex
-    // -> https://github.com/JetBrains/intellij-deps-jflex
-    jflexRelease = "1.9.2"
-
-    // tag or short commit hash of Grammar-Kit to use
-    // -> https://github.com/JetBrains/Grammar-Kit
-    grammarKitRelease = "2023.3"
 }
 
 val lexerSource = layout.buildDirectory.dir("generated/sources/lexer/java/main")
