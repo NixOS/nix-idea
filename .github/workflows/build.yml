@@ -67,8 +67,8 @@ jobs:
       id: upload-build-result
       uses: actions/upload-artifact@v7
       with:
-        name: build-result
-        path: build/distributions/
+        archive: false
+        path: build/distributions/*
         if-no-files-found: error
     - name: Upload metadata
       id: upload-metadata

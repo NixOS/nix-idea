@@ -34,6 +34,7 @@ jobs:
       uses: actions/download-artifact@v8
       with:
         artifact-ids: ${{ needs.build.outputs.build-artifact-id }}
+        skip-decompress: true
         path: build/distributions/
         merge-multiple: true
     - name: Download metadata
