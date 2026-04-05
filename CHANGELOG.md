@@ -4,6 +4,8 @@
 
 ### Added
 
+- Language Server support using IDEA's LSP API now available without ultimate subscription
+
 ### Changed
 
 ### Deprecated
