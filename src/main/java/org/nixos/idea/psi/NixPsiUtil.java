@@ -72,7 +72,7 @@ public final class NixPsiUtil {
             NixStdString string = stringAttr.getStdString();
             List<NixStringPart> stringParts = string == null ? null : string.getStringParts();
             return stringParts != null && stringParts.size() == 1 &&
-                    stringParts.get(0) instanceof NixStringText text
+                    stringParts.getFirst() instanceof NixStringText text
                     ? NixStringUtil.parse(text)
                     : null;
         } else {

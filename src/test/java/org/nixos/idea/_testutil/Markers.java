@@ -326,7 +326,7 @@ public final class Markers extends AbstractCollection<Markers.Marker> {
         } else if (myMarkers.size() > 1) {
             throw new IllegalStateException("Multiple markers: " + myMarkers);
         } else {
-            return Optional.of(myMarkers.get(0));
+            return Optional.of(myMarkers.getFirst());
         }
     }
 
@@ -351,7 +351,7 @@ public final class Markers extends AbstractCollection<Markers.Marker> {
     }
 
     private <T> List<T> as(@NotNull Function<Marker, T> mapper) {
-        return new AbstractList<T>() {
+        return new AbstractList<>() {
             @Override
             public T get(int index) {
                 return mapper.apply(myMarkers.get(index));

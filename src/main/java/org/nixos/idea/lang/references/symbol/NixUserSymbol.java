@@ -45,7 +45,7 @@ public final class NixUserSymbol extends NixSymbol
 
     @Override
     public @NotNull String getName() {
-        return myPath.get(myPath.size() - 1);
+        return myPath.getLast();
     }
 
     public @NotNull Collection<NixSymbolDeclaration> getDeclarations() {

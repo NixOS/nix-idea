@@ -26,7 +26,7 @@ final class ExtensionTestUtil {
         if (executions.size() != 1) {
             throw new IllegalStateException("Expected exactly one test execution, got: " + executions);
         }
-        TerminationInfo terminationInfo = executions.get(0).getTerminationInfo();
+        TerminationInfo terminationInfo = executions.getFirst().getTerminationInfo();
         TestExecutionResult executionResult = terminationInfo.getExecutionResult();
         if (executionResult.getStatus() != TestExecutionResult.Status.SUCCESSFUL) {
             throw executionResult.getThrowable().orElseThrow();

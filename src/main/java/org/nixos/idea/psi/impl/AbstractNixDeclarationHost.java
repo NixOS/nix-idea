@@ -205,7 +205,7 @@ abstract class AbstractNixDeclarationHost extends AbstractNixPsiElement implemen
             NixUserSymbol symbol = mySymbols.computeIfAbsent(attributePathCopy,
                     path -> new NixUserSymbol(AbstractNixDeclarationHost.this, path, type));
             if (exposeAsVariable && attributePath.size() == 1) {
-                myVariables.add(attributePath.get(0));
+                myVariables.add(attributePath.getFirst());
             }
 
             NixSymbolDeclaration declaration = new NixSymbolDeclaration(element, identifier, symbol, elementName, elementType);

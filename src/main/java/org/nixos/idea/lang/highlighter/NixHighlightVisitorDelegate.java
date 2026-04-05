@@ -120,7 +120,7 @@ abstract class NixHighlightVisitorDelegate {
             if (bind instanceof NixBindAttr bindAttr) {
                 if (fullPath) {
                     List<NixAttr> attrs = bindAttr.getAttrPath().getAttrList();
-                    NixAttr first = attrs.get(0);
+                    NixAttr first = attrs.getFirst();
                     if (!(first instanceof NixStdAttr)) {
                         continue;
                     }
