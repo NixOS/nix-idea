@@ -10,6 +10,8 @@
 
 ### Removed
 
+- Support for IDEA 2025.1 and previous versions
+
 ### Fixed
 
 ### Security

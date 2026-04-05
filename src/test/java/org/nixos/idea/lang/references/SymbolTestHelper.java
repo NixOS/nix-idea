@@ -73,7 +73,7 @@ public final class SymbolTestHelper {
         } else if (typedDeclarations.size() > 1) {
             return fail("Multiple declarations found: " + declarations);
         } else {
-            return typedDeclarations.get(0);
+            return typedDeclarations.getFirst();
         }
     }
 
@@ -117,12 +117,12 @@ public final class SymbolTestHelper {
     //region findUsages
 
     @SuppressWarnings("UnstableApiUsage")
-    public @NotNull Collection<Usage> findUsages(@NotNull SearchTarget target, @NotNull PsiFile file) {
+    public @NotNull Collection<? extends Usage> findUsages(@NotNull SearchTarget target, @NotNull PsiFile file) {
         return findUsages(target, new LocalSearchScope(file));
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public @NotNull Collection<Usage> findUsages(@NotNull SearchTarget target, @NotNull SearchScope scope) {
+    public @NotNull Collection<? extends Usage> findUsages(@NotNull SearchTarget target, @NotNull SearchScope scope) {
         return SearchService.getInstance().searchParameters(new UsageSearchParameters() {
             @Override
             public @NotNull SearchTarget getTarget() {

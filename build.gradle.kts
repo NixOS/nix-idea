@@ -31,12 +31,12 @@ java {
     // https://github.com/gradle/gradle/issues/16256 - Ability to set a min language version for a toolchain
     // https://github.com/gradle/gradle/issues/17444 - Toolchains feature does not appear to treat Java as backwards compatible
     // https://github.com/gradle/gradle/issues/18894 - More flexibility in querying Java toolchains
-    sourceCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget.set(JvmTarget.JVM_21)
     }
 }
 
@@ -59,6 +59,7 @@ dependencies {
 
     intellijPlatform {
         create(platformType, platformVersion)
+        bundledModule("intellij.spellchecker")
         testFramework(TestFrameworkType.Platform)
         //testFramework(TestFrameworkType.JUnit5)
 
