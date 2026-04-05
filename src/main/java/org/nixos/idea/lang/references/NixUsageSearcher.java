@@ -42,7 +42,7 @@ public final class NixUsageSearcher implements UsageSearcher, LeafOccurrenceMapp
             String name = symbol.getName();
             return SearchService.getInstance()
                     .searchWord(parameters.getProject(), name)
-                    .inContexts(SearchContext.IN_CODE_HOSTS, SearchContext.IN_CODE)
+                    .inContexts(SearchContext.inCodeHosts(), SearchContext.inCode())
                     .inScope(parameters.getSearchScope())
                     .inFilesWithLanguage(NixLanguage.INSTANCE)
                     .buildQuery(LeafOccurrenceMapper.withPointer(symbol.createPointer(), this));
