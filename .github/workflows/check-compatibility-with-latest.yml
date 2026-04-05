@@ -23,7 +23,7 @@ jobs:
     steps:
       # Setup environment
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Set up build tools
         uses: ./.github/actions/setup-tools
         with:
@@ -68,7 +68,7 @@ jobs:
       # Upload new product releases
       - name: Upload new product releases
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: products-releases
           path: gradle/productsReleases.txt
@@ -79,7 +79,7 @@ jobs:
         run: ./gradlew --stacktrace assemble buildPlugin verifyPluginStructure check
       - name: Upload build reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-reports
           path: build/reports/
@@ -101,9 +101,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Download new product releases
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           artifact-ids: ${{ needs.update-products-releases.outputs.artifact-id }}
           path: gradle/

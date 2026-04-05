@@ -22,12 +22,12 @@ jobs:
     steps:
     # Setup environment
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Set up build tools
       uses: ./.github/actions/setup-tools
     # Setup caches for Plugin Verifier
     - name: Set up cache for IntelliJ Plugin Verifier
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cache/pluginVerifier/ides
         key: pluginVerifier-${{ matrix.idea-release }}-${{ runner.os }}
@@ -37,7 +37,7 @@ jobs:
     # Upload artifacts
     - name: Upload build reports
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: reports-${{ matrix.idea-release }}
         path: build/reports/

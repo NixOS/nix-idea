@@ -19,7 +19,7 @@ jobs:
     steps:
     # Setup environment
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Set up build tools
       uses: ./.github/actions/setup-tools
     # Fail if the release was not triggered from the master branch
@@ -39,7 +39,7 @@ jobs:
         fi
     # Update files
     - name: Obtain release notes
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         script: |
           await require('.github/scripts/get-release-notes.js')({

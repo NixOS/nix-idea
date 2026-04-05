@@ -20,9 +20,9 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Validate Gradle Wrapper
-      uses: gradle/actions/wrapper-validation@v4
+      uses: gradle/actions/wrapper-validation@v6
 
   build:
 
@@ -37,7 +37,7 @@ jobs:
     steps:
     # Setup environment
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Set up build tools
       uses: ./.github/actions/setup-tools
       with:
@@ -58,21 +58,21 @@ jobs:
     # Upload artifacts
     - name: Upload build reports
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: build-reports
         path: build/reports/
         if-no-files-found: ignore
     - name: Upload build result
       id: upload-build-result
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: build-result
         path: build/distributions/
         if-no-files-found: error
     - name: Upload metadata
       id: upload-metadata
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: metadata
         path: build/metadata/
