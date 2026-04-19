@@ -16,6 +16,8 @@
 
 ### Fixed
 
+- Freezing UI caused by performance bug in parser ([#95](https://github.com/NixOS/nix-idea/issues/95))
+
 ### Security
 
 ## [0.4.0.18] - 2025-07-04
