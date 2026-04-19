@@ -36,6 +36,10 @@ public final class ParsingFailTest extends ParsingTestCase {
     doTest(true);
   }
 
+  public void testIncompleteAttrPath() {
+    doTest(true);
+  }
+
   public void testIncompleteExpressionsInBraces() {
     doTest(true);
   }

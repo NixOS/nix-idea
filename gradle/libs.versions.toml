@@ -8,6 +8,8 @@ junit5-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit5-platform-testkit = { module = "org.junit.platform:junit-platform-testkit" }
 junit5-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine" }
 junit4 = { module = "junit:junit", version = "4.13.2" }
+bytebuddy = { module = "net.bytebuddy:byte-buddy", version = "1.18.8" }
+bytebuddy-agent = { module = "net.bytebuddy:byte-buddy-agent", version = "1.18.8" }
 
 [plugins]
 # read more: https://github.com/JetBrains/intellij-platform-gradle-plugin
