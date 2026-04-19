@@ -234,7 +234,8 @@ attr ::= std_attr | string_attr
 std_attr ::= ID | OR_KW { implements=identifier }
 string_attr ::= std_string | antiquotation
 
-attr_path ::= attr ( DOT attr )* { methods=[ firstAttr="/attr[0]" ] }
+attr_path ::= attr ( attr_path_inner )* { methods=[ firstAttr="/attr[0]" ] }
+private attr_path_inner ::= DOT attr { pin=1 }
 
 
 // Interface for identifiers.
