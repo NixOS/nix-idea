@@ -4,6 +4,7 @@ import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
@@ -29,6 +30,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 
 @NullMarked
@@ -52,6 +54,7 @@ final class BenchmarkExtension implements TestTemplateInvocationContextProvider 
     private static final class Recorder implements AutoCloseable {
 
         private final ExtensionContext myContext;
+        private final Benchmark myAnnotation;
         private final ThreadMXBean myThreadMXBean;
         private final ParserInstrumentation myParserInstrumentation = new ParserInstrumentation();
 
@@ -60,6 +63,7 @@ final class BenchmarkExtension implements TestTemplateInvocationContextProvider 
 
         private Recorder(ExtensionContext context) {
             myContext = context;
+            myAnnotation = findAnnotation(context.getRequiredTestMethod(), Benchmark.class).orElseThrow();
             myThreadMXBean = ManagementFactory.getThreadMXBean();
             myThreadMXBean.setThreadCpuTimeEnabled(true);
         }
@@ -88,6 +92,11 @@ final class BenchmarkExtension implements TestTemplateInvocationContextProvider 
             long cpuTimeMax = Arrays.stream(cpuTimes).max().orElse(-1);
             long cpuTimeMin = Arrays.stream(cpuTimes).min().orElse(-1);
             long cpuTimeMinMedian = median(cpuTimes);
+
+            long ms = nanoTimeMedian / 1_000_000;
+            if (myAnnotation.ms() != -1 && ms > myAnnotation.ms()) {
+                Assertions.fail("Took " + ms + " ms, but only " + myAnnotation.ms() + " ms are allowed");
+            }
 
             new ReportEntry(myContext)
                     .put("nanoTimeMedian", String.valueOf(nanoTimeMedian))

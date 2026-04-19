@@ -15,12 +15,12 @@ final class ParsingBenchmark {
         myFixture = fixture;
     }
 
-    @Benchmark
+    @Benchmark(ms = 100)
     void issue95() {
         parse("Issue95.nix");
     }
 
-    @Benchmark
+    @Benchmark(ms = 100)
     void recursiveMissingSemicolon() {
         parse("RecursiveMissingSemicolon.nix");
     }

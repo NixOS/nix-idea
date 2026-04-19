@@ -15,4 +15,5 @@ import java.lang.annotation.Target;
 @TestTemplate
 @ExtendWith(BenchmarkExtension.class)
 public @interface Benchmark {
+    int ms() default -1;
 }
