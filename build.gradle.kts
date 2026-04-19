@@ -48,6 +48,7 @@ repositories {
     }
 }
 
+val bytebuddyAgent by configurations.creating
 dependencies {
     compileOnly(libs.jetbrains.annotations)
 
@@ -58,6 +59,7 @@ dependencies {
     testRuntimeOnly(libs.junit5.vintage.engine)
     testImplementation(libs.bytebuddy)
     testImplementation(libs.bytebuddy.agent)
+    bytebuddyAgent(libs.bytebuddy.agent)
 
     intellijPlatform {
         create(platformType, platformVersion)
@@ -230,6 +232,10 @@ tasks {
         useJUnitPlatform {
             excludeTags("mock")
         }
+
+        jvmArgs(
+            "-javaagent:${bytebuddyAgent.singleFile}"
+        )
     }
 
 }
