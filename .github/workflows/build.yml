@@ -61,7 +61,9 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: build-reports
-        path: build/reports/
+        path: |
+          build/reports/
+          build/junit-jupiter/
         if-no-files-found: ignore
     - name: Upload build result
       id: upload-build-result
