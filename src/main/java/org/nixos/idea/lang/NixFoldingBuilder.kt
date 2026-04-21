@@ -1,13 +1,14 @@
 package org.nixos.idea.lang
 
 import com.intellij.lang.ASTNode
-import com.intellij.lang.folding.FoldingBuilderEx
+import com.intellij.lang.folding.CustomFoldingBuilder
 import com.intellij.lang.folding.FoldingDescriptor
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
-import com.intellij.util.containers.toArray
+import com.intellij.psi.PsiWhiteSpace
+import org.nixos.idea.psi.NixAntiquotation
 import org.nixos.idea.psi.NixBindInherit
 import org.nixos.idea.psi.NixElementVisitor
 import org.nixos.idea.psi.NixExprAttrs
@@ -18,10 +19,13 @@ import org.nixos.idea.psi.NixFormals
 import org.nixos.idea.psi.NixString
 import org.nixos.idea.psi.NixTypes
 
-class NixFoldingBuilder : FoldingBuilderEx() {
-    override fun buildFoldRegions(root: PsiElement, document: Document, quick: Boolean): Array<FoldingDescriptor> {
-        val descriptors = mutableListOf<FoldingDescriptor>()
-
+class NixFoldingBuilder : CustomFoldingBuilder() {
+    override fun buildLanguageFoldRegions(
+        descriptors: MutableList<FoldingDescriptor>,
+        root: PsiElement,
+        document: Document,
+        quick: Boolean
+    ) {
         root.accept(object : NixElementVisitor<Unit>() {
             override fun visitElement(o: PsiElement) {
                 super.visitElement(o)
@@ -41,6 +45,11 @@ class NixFoldingBuilder : FoldingBuilderEx() {
             override fun visitString(o: NixString) {
                 descriptors.add(FoldingDescriptor(o.node, o.textRange, null, "\" ... \""))
                 super.visitString(o)
+            }
+
+            override fun visitAntiquotation(o: NixAntiquotation) {
+                descriptors.add(FoldingDescriptor(o.node, o.textRange, null, "\${ ... }"))
+                return super.visitAntiquotation(o)
             }
 
             override fun visitExprList(o: NixExprList) {
@@ -78,7 +87,7 @@ class NixFoldingBuilder : FoldingBuilderEx() {
                             ),
                             null,
                             placeholderText
-                            )
+                        )
                     )
                 }
                 super.visitBindInherit(o)
@@ -93,19 +102,53 @@ class NixFoldingBuilder : FoldingBuilderEx() {
                 if (o.tokenType == NixTypes.MCOMMENT) {
                     descriptors.add(FoldingDescriptor(o.node, o.textRange, null, "/* ... */"))
                 }
+
+                if (o.tokenType == NixTypes.SCOMMENT && findNextAdjacentSComment( o, { it.prevSibling }) == null ) {
+                    val end = findLastSComment(o, { it.nextSibling })
+                    if (end != o) {
+                        descriptors.add(
+                            FoldingDescriptor(
+                                o.node,
+                                TextRange(o.textRange.startOffset, end.textRange.endOffset),
+                                null,
+                                "# ...",
+                            )
+                        )
+                    }
+                }
+
                 super.visitComment(o)
             }
 
-        })
+            private fun findNextAdjacentSComment(o: PsiComment, nextFn: (PsiElement) -> PsiElement?): PsiComment? {
+                val ws = nextFn(o) ?: return null
+                if (ws is PsiWhiteSpace && ws.text.count { it == '\n' } > 1) {
+                    return null
+                }
 
-        return descriptors.toArray(FoldingDescriptor.EMPTY_ARRAY)
+                val next = nextFn(ws)
+                return if (next is PsiComment && next.tokenType == NixTypes.SCOMMENT) {
+                    next
+                } else {
+                    null
+                }
+            }
+
+            private fun findLastSComment(o: PsiComment, nextFn: (PsiElement) -> PsiElement?): PsiComment {
+                var result = o;
+                while (true) {
+                    result = findNextAdjacentSComment(result, nextFn) ?: return result
+                }
+            }
+
+        })
     }
 
-    override fun getPlaceholderText(node: ASTNode): String? {
+    override fun getLanguagePlaceholderText(node: ASTNode, textRange: TextRange): String? {
         return null
     }
 
-    override fun isCollapsedByDefault(node: ASTNode): Boolean {
+    override fun isRegionCollapsedByDefault(node: ASTNode): Boolean {
         return false
     }
 }
