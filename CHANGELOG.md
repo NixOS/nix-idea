@@ -4,6 +4,8 @@
 
 ### Added
 
+- Code folding for various expressions ([#99](https://github.com/NixOS/nix-idea/pull/99))
+
 ### Changed
 
 ### Deprecated
