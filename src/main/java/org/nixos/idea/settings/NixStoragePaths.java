@@ -9,10 +9,15 @@ import com.intellij.openapi.components.Storage;
 public final class NixStoragePaths {
 
     /**
-     * Location and configuration of external tools.
+     * Storage location of non-system dependent settings for this plugin.
+     * This constant must be used with {@link RoamingType#DEFAULT}.
+     */
+    public static final String DEFAULT = "nix-idea.xml";
+
+    /**
+     * Storage location of settings for external tools.
      * The settings in the file are considered system dependent.
-     * This constant must be used with {@link RoamingType#DISABLED}.
-     * TODO: Use RoamingType.LOCAL with 2024.1
+     * This constant must be used with {@link RoamingType#LOCAL}.
      */
     public static final String TOOLS = "nix-idea-tools.xml";
 

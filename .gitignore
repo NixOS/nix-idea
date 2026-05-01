@@ -8,20 +8,31 @@
 
 # Package Files #
 *.jar
-!gradle/wrapper/gradle-wrapper.jar
 *.war
 *.ear
-
-out
-.idea/workspace.xml
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-
-**/.idea
+# IntelliJ
 *.iml
-**/.gradle
-build
+.idea/*
+!.idea/icon.svg
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/runConfigurations/
+out/
+!src/**/out/
 
+# Gradle
+/.gradle/
+/gradle/plugins/.gradle/
+build/
+!src/**/build/
+
+# Kotlin Gradle plugin (https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects)
+/.kotlin/
+/gradle/plugins/.kotlin/
+
+/.intellijPlatform
 src/gen

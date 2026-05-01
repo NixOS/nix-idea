@@ -2,9 +2,13 @@ package org.nixos.idea.lsp;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.platform.lsp.api.LspServer;
 import com.intellij.platform.lsp.api.LspServerSupportProvider;
+import com.intellij.platform.lsp.api.lsWidget.LspServerWidgetItem;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.file.NixFileType;
+import org.nixos.idea.icon.NixIcons;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class NixLspServerSupportProvider implements LspServerSupportProvider {
@@ -18,9 +22,8 @@ public final class NixLspServerSupportProvider implements LspServerSupportProvid
         }
     }
 
-    // TODO: Uncomment with IDEA 2024.1
-    //@Override
-    //public @NotNull LspServerWidgetItem createLspServerWidgetItem(@NotNull LspServer lspServer, @Nullable VirtualFile currentFile) {
-    //    return new LspServerWidgetItem(lspServer, currentFile, NixIcons.FILE, NixLspSettingsConfigurable.class);
-    //}
+    @Override
+    public @NotNull LspServerWidgetItem createLspServerWidgetItem(@NotNull LspServer lspServer, @Nullable VirtualFile currentFile) {
+        return new LspServerWidgetItem(lspServer, currentFile, NixIcons.FILE, NixLspSettingsConfigurable.class);
+    }
 }

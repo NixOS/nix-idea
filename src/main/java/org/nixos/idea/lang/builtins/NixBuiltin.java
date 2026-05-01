@@ -200,7 +200,11 @@ public final class NixBuiltin {
         this.global = GLOBAL_SCOPE.contains(name);
     }
 
-    public HighlightingType highlightingType() {
+    public @NotNull String name() {
+        return name;
+    }
+
+    public @NotNull HighlightingType highlightingType() {
         return highlightingType;
     }
 

@@ -1,12 +1,12 @@
 package org.nixos.idea.file;
 
-import org.nixos.idea.icon.NixIcons;
-import org.nixos.idea.lang.NixLanguage;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.nixos.idea.icon.NixIcons;
+import org.nixos.idea.lang.NixLanguage;
 
-import javax.swing.*;
+import javax.swing.Icon;
 
 public class NixFileType extends LanguageFileType {
 
@@ -19,13 +19,13 @@ public class NixFileType extends LanguageFileType {
     @NotNull
     @Override
     public String getName() {
-        return "Nix file";
+        return "Nix";
     }
 
     @NotNull
     @Override
     public String getDescription() {
-        return "Nix language file";
+        return "Nix language";
     }
 
     @NotNull

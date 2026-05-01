@@ -11,8 +11,8 @@ Nix File(0,19)
       PsiWhiteSpace(' ')(6,7)
       NixExprVarImpl(EXPR_VAR)(7,9)
         PsiElement(ID)('v1')(7,9)
-    PsiErrorElement:';' expected, got 'k2'(9,9)
-      <empty list>
+      PsiErrorElement:';' expected, got 'k2'(9,9)
+        <empty list>
     PsiWhiteSpace('\n')(9,10)
     NixBindAttrImpl(BIND_ATTR)(10,17)
       NixAttrPathImpl(ATTR_PATH)(10,12)

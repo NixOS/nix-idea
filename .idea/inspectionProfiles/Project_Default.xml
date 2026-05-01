@@ -1,0 +1,15 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="NewClassNamingConvention" enabled="true" level="WARNING" enabled_by_default="true">
+      <extension name="JUnitTestClassNamingConvention" enabled="true">
+        <option name="m_regex" value="[A-Z][A-Za-z\d]*Test(Case)?|[A-Z][A-Za-z\d]*Benchmark" />
+        <option name="m_minLength" value="5" />
+        <option name="m_maxLength" value="255" />
+      </extension>
+    </inspection_tool>
+    <inspection_tool class="SwitchStatementWithTooFewBranches" enabled="true" level="INFORMATION" enabled_by_default="true" editorAttributes="INFORMATION_ATTRIBUTES">
+      <option name="m_limit" value="2" />
+    </inspection_tool>
+  </profile>
+</component>

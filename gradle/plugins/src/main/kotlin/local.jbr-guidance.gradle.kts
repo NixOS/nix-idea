@@ -3,7 +3,8 @@ import org.gradle.tooling.Failure
 import org.gradle.tooling.events.FailureResult
 import org.gradle.tooling.events.FinishEvent
 import org.gradle.tooling.events.OperationCompletionListener
-import org.jetbrains.intellij.tasks.RunIdeBase
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import java.util.function.Predicate
 
 val jbrHome = rootProject.file("jbr")
@@ -15,20 +16,13 @@ task<Exec>("jbr") {
 }
 
 jbrHome.resolve("bin/java").takeIf { it.exists() }
-    ?.also { jbrExecutable ->
-        // Override JVM of gradle-intellij-plugin with JVM at `jbr/bin/java`
-        // https://github.com/JetBrains/gradle-intellij-plugin/issues/1437#issuecomment-1987310948
-        tasks.withType<RunIdeBase> {
-            projectExecutable = jbrExecutable.toString()
-        }
-        pluginManager.withPlugin("org.jetbrains.intellij") {
-            // Uses `withPlugin` because the following code must run after the gradle-intellij-plugin got applied.
-            // We must also use `afterEvaluate`, as the gradle-intellij-plugin uses `afterEvaluate` as well.
-            // Otherwise, gradle-intellij-plugin would just overwrite our configuration.
-            afterEvaluate {
-                tasks.withType<Test> {
-                    executable = jbrExecutable.toString()
-                }
+    ?.also { _ ->
+        // Use JVM at `jbr/bin/java`. The JVM otherwise downloaded by intellij-platform-gradle-plugin wouldn't work on NixOS.
+        // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1437#issuecomment-1987310948
+        // VerifyPluginTask doesn't execute the JVM, so we can ignore this task for the sake of consistency with other platforms.
+        tasks.configureEach {
+            if (this is RuntimeAware && this !is VerifyPluginTask) {
+                runtimeDirectory = jbrHome
             }
         }
     }
@@ -36,8 +30,8 @@ jbrHome.resolve("bin/java").takeIf { it.exists() }
         // There is no JVM at `jbr/bin/java`. Monitor the build and provide some helpful message when it fails.
         val service = gradle.sharedServices.registerIfAbsent("jbr-guidance", JbrGuidance::class) {}
         serviceOf<BuildEventsListenerRegistry>().onTaskCompletion(service)
-        // If the configuration cache is enabled, the JBR failure was triggered during serialization
-        // before any task gets executed. (As of gradle-intellij-plugin 1.17.2 and Gradle 8.6.)
+        // If the configuration cache is enabled, the JBR failure may be triggered during serialization
+        // before any task gets executed. (As of intellij-platform-gradle-plugin 2.0.0 and Gradle 8.6.)
         // Unfortunately, only failures in tasks are reported to the JbrGuidance build service.
         // If there are tasks scheduled, but none of them is executed, we therefore also print the message.
         project.gradle.taskGraph.whenReady {

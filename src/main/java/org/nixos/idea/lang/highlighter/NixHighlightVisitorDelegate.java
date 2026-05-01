@@ -75,7 +75,7 @@ abstract class NixHighlightVisitorDelegate {
             }
         } else if (element instanceof NixStdAttr attr &&
                 attr.getParent() instanceof NixBindInherit bindInherit &&
-                bindInherit.getExpr() == null) {
+                bindInherit.getSource() == null) {
             String identifier = attr.getText();
             PsiElement source = findSource(attr, identifier);
             highlight(attr, source, identifier);
@@ -144,8 +144,8 @@ abstract class NixHighlightVisitorDelegate {
                 }
             } else if (bind instanceof NixBindInherit bindInherit) {
                 // `let { inherit x; } in ...` does not actually introduce a new variable
-                if (bindInherit.getExpr() != null) {
-                    for (NixAttr attr : bindInherit.getAttrList()) {
+                if (bindInherit.getSource() != null) {
+                    for (NixAttr attr : bindInherit.getAttributes()) {
                         if (attr instanceof NixStdAttr && action.test(attr, fullPath ? attr.getText() : null)) {
                             return true;
                         }

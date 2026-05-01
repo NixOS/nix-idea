@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-    implementation(plugin(libs.plugins.jetbrains.intellij))
+    implementation(plugin(libs.plugins.jetbrains.intellij.platform))
 }
 
 /**

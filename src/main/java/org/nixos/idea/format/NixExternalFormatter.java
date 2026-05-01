@@ -10,7 +10,6 @@ import com.intellij.formatting.service.AsyncFormattingRequest;
 import com.intellij.openapi.util.NlsSafe;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.execution.ParametersListUtil;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nixos.idea.file.NixFile;
@@ -47,7 +46,6 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
         return psiFile instanceof NixFile;
     }
 
-
     @Override
     protected @Nullable FormattingTask createFormattingTask(@NotNull AsyncFormattingRequest request) {
         NixExternalFormatterSettings nixSettings = NixExternalFormatterSettings.getInstance();
@@ -58,55 +56,62 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
         var ioFile = request.getIOFile();
         if (ioFile == null) return null;
 
-        @NonNls
         var command = nixSettings.getFormatCommand();
         List<String> argv = ParametersListUtil.parse(command, false, true);
-
         var commandLine = new GeneralCommandLine(argv);
 
-        try {
-            var handler = new OSProcessHandler(commandLine.withCharset(StandardCharsets.UTF_8));
-            OutputStream processInput = handler.getProcessInput();
-            return new FormattingTask() {
-                @Override
-                public void run() {
-                    handler.addProcessListener(new CapturingProcessAdapter() {
+        return new FormattingTask() {
+            private @Nullable OSProcessHandler handler;
+            private boolean canceled;
 
-                        @Override
-                        public void processTerminated(@NotNull ProcessEvent event) {
-                            int exitCode = event.getExitCode();
-                            if (exitCode == 0) {
-                                request.onTextReady(getOutput().getStdout());
-                            } else {
-                                request.onError("NixIDEA", getOutput().getStderr());
-                            }
-                        }
-                    });
-                    handler.startNotify();
+            @Override
+            public void run() {
+                synchronized (this) {
+                    if (canceled) {
+                        return;
+                    }
                     try {
-                        Files.copy(ioFile.toPath(), processInput);
-                        processInput.flush();
-                        processInput.close();
-                    } catch (IOException e) {
-                        handler.destroyProcess();
+                        handler = new OSProcessHandler(commandLine.withCharset(StandardCharsets.UTF_8));
+                    } catch (ExecutionException e) {
                         request.onError("NixIDEA", e.getMessage());
+                        return;
                     }
                 }
-
-                @Override
-                public boolean cancel() {
+                handler.addProcessListener(new CapturingProcessAdapter() {
+                    @Override
+                    public void processTerminated(@NotNull ProcessEvent event) {
+                        int exitCode = event.getExitCode();
+                        if (exitCode == 0) {
+                            request.onTextReady(getOutput().getStdout());
+                        } else {
+                            request.onError("NixIDEA", getOutput().getStderr());
+                        }
+                    }
+                });
+                handler.startNotify();
+                try {
+                    OutputStream processInput = handler.getProcessInput();
+                    Files.copy(ioFile.toPath(), processInput);
+                    processInput.close();
+                } catch (IOException e) {
                     handler.destroyProcess();
-                    return true;
+                    request.onError("NixIDEA", e.getMessage());
                 }
+            }
 
-                @Override
-                public boolean isRunUnderProgress() {
-                    return true;
+            @Override
+            public synchronized boolean cancel() {
+                canceled = true;
+                if (handler != null) {
+                    handler.destroyProcess();
                 }
-            };
-        } catch (ExecutionException e) {
-            request.onError("NixIDEA", e.getMessage());
-            return null;
-        }
+                return true;
+            }
+
+            @Override
+            public boolean isRunUnderProgress() {
+                return true;
+            }
+        };
     }
 }

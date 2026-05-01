@@ -4,7 +4,7 @@
 
 ### Added
 
-- Support for code formatting via external commands ([#80](https://github.com/NixOS/nix-idea/pull/80))
+- Code folding for various expressions ([#99](https://github.com/NixOS/nix-idea/pull/99))
 
 ### Changed
 
@@ -15,6 +15,72 @@
 ### Fixed
 
 ### Security
+
+## [0.4.0.19] - 2026-04-19
+
+### Added
+
+- Language Server support using IDEA's LSP API now available without ultimate subscription
+
+### Removed
+
+- Support for IDEA 2025.1 and previous versions
+
+### Fixed
+
+- Freezing UI caused by performance bug in parser ([#95](https://github.com/NixOS/nix-idea/issues/95))
+
+## [0.4.0.18] - 2025-07-04
+
+### Added
+
+- Support for IDEA 2025.2 and potentially future versions
+
+### Changed
+
+- The `until-build` attribute has been removed from plugin configuration.
+  The plugin should now continue to work with future versions of IDEA without
+  requiring a plugin update as long as IDEA's API does not break.
+- Settings have been refactored. Different pages are now merged into one hierarchy.
+
+## [0.4.0.17] - 2025-01-29
+
+### Added
+
+- Experimental support for resolving variables.
+  The feature is disabled by default since the functionality is rather limited for now.
+  Feel free to comment your feedback at [issue #87](https://github.com/NixOS/nix-idea/issues/87).
+- Support for resolving simple path references
+- Support for simple spell checking
+- Automatic insertion of closing quotes and braces
+- Support for *Code | Move Element Left/Right* (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>←/→</kbd>)
+- Support for IDEA 2025.1
+
+## [0.4.0.16] - 2024-09-22
+
+### Added
+
+- Support for IDEA 2024.3
+
+### Removed
+
+- Support for IDEA 2023.3
+
+## [0.4.0.15] - 2024-08-14
+
+### Added
+
+- Support for IDEA 2024.2
+
+### Removed
+
+- Support for IDEA 2023.2
+
+## [0.4.0.14] - 2024-06-10
+
+### Added
+
+- Support for code formatting via external commands ([#80](https://github.com/NixOS/nix-idea/pull/80))
 
 ## [0.4.0.13] - 2024-04-29
 
@@ -227,23 +293,29 @@ the plugin.
 
 - Update project to build for recent IJ versions
 
-[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.13...HEAD
-[0.3.0.0]: https://github.com/NixOS/nix-idea/commits/v0.3.0.0
-[0.3.0.3]: https://github.com/NixOS/nix-idea/compare/v0.3.0.0...v0.3.0.3
-[0.3.0.4]: https://github.com/NixOS/nix-idea/compare/v0.3.0.3...v0.3.0.4
-[0.3.0.5]: https://github.com/NixOS/nix-idea/compare/v0.3.0.4...v0.3.0.5
-[0.3.0.6]: https://github.com/NixOS/nix-idea/compare/v0.3.0.5...v0.3.0.6
-[0.4.0.0]: https://github.com/NixOS/nix-idea/compare/v0.3.0.6...v0.4.0.0
-[0.4.0.1]: https://github.com/NixOS/nix-idea/compare/v0.4.0.0...v0.4.0.1
-[0.4.0.10]: https://github.com/NixOS/nix-idea/compare/v0.4.0.9...v0.4.0.10
-[0.4.0.11]: https://github.com/NixOS/nix-idea/compare/v0.4.0.10...v0.4.0.11
-[0.4.0.12]: https://github.com/NixOS/nix-idea/compare/v0.4.0.11...v0.4.0.12
-[0.4.0.13]: https://github.com/NixOS/nix-idea/compare/v0.4.0.12...v0.4.0.13
-[0.4.0.2]: https://github.com/NixOS/nix-idea/compare/v0.4.0.1...v0.4.0.2
-[0.4.0.3]: https://github.com/NixOS/nix-idea/compare/v0.4.0.2...v0.4.0.3
-[0.4.0.4]: https://github.com/NixOS/nix-idea/compare/v0.4.0.3...v0.4.0.4
-[0.4.0.5]: https://github.com/NixOS/nix-idea/compare/v0.4.0.4...v0.4.0.5
-[0.4.0.6]: https://github.com/NixOS/nix-idea/compare/v0.4.0.5...v0.4.0.6
-[0.4.0.7]: https://github.com/NixOS/nix-idea/compare/v0.4.0.6...v0.4.0.7
-[0.4.0.8]: https://github.com/NixOS/nix-idea/compare/v0.4.0.7...v0.4.0.8
+[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.19...HEAD
 [0.4.0.9]: https://github.com/NixOS/nix-idea/compare/v0.4.0.8...v0.4.0.9
+[0.4.0.8]: https://github.com/NixOS/nix-idea/compare/v0.4.0.7...v0.4.0.8
+[0.4.0.7]: https://github.com/NixOS/nix-idea/compare/v0.4.0.6...v0.4.0.7
+[0.4.0.6]: https://github.com/NixOS/nix-idea/compare/v0.4.0.5...v0.4.0.6
+[0.4.0.5]: https://github.com/NixOS/nix-idea/compare/v0.4.0.4...v0.4.0.5
+[0.4.0.4]: https://github.com/NixOS/nix-idea/compare/v0.4.0.3...v0.4.0.4
+[0.4.0.3]: https://github.com/NixOS/nix-idea/compare/v0.4.0.2...v0.4.0.3
+[0.4.0.2]: https://github.com/NixOS/nix-idea/compare/v0.4.0.1...v0.4.0.2
+[0.4.0.19]: https://github.com/NixOS/nix-idea/compare/v0.4.0.18...v0.4.0.19
+[0.4.0.18]: https://github.com/NixOS/nix-idea/compare/v0.4.0.17...v0.4.0.18
+[0.4.0.17]: https://github.com/NixOS/nix-idea/compare/v0.4.0.16...v0.4.0.17
+[0.4.0.16]: https://github.com/NixOS/nix-idea/compare/v0.4.0.15...v0.4.0.16
+[0.4.0.15]: https://github.com/NixOS/nix-idea/compare/v0.4.0.14...v0.4.0.15
+[0.4.0.14]: https://github.com/NixOS/nix-idea/compare/v0.4.0.13...v0.4.0.14
+[0.4.0.13]: https://github.com/NixOS/nix-idea/compare/v0.4.0.12...v0.4.0.13
+[0.4.0.12]: https://github.com/NixOS/nix-idea/compare/v0.4.0.11...v0.4.0.12
+[0.4.0.11]: https://github.com/NixOS/nix-idea/compare/v0.4.0.10...v0.4.0.11
+[0.4.0.10]: https://github.com/NixOS/nix-idea/compare/v0.4.0.9...v0.4.0.10
+[0.4.0.1]: https://github.com/NixOS/nix-idea/compare/v0.4.0.0...v0.4.0.1
+[0.4.0.0]: https://github.com/NixOS/nix-idea/compare/v0.3.0.6...v0.4.0.0
+[0.3.0.6]: https://github.com/NixOS/nix-idea/compare/v0.3.0.5...v0.3.0.6
+[0.3.0.5]: https://github.com/NixOS/nix-idea/compare/v0.3.0.4...v0.3.0.5
+[0.3.0.4]: https://github.com/NixOS/nix-idea/compare/v0.3.0.3...v0.3.0.4
+[0.3.0.3]: https://github.com/NixOS/nix-idea/compare/v0.3.0.0...v0.3.0.3
+[0.3.0.0]: https://github.com/NixOS/nix-idea/commits/v0.3.0.0

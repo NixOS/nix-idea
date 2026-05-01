@@ -1,0 +1,104 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.parser-run {
+
+    max-height: 100dvh;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    display: grid;
+    grid-template:
+            "code config" auto
+            "code info  " 1fr
+            / auto auto;
+
+    div.code-config {
+        grid-area: config;
+    }
+
+    pre.code-preview {
+        grid-area: code;
+
+        margin: 0;
+        padding: 8px;
+        letter-spacing: 0.2em;
+        overflow: auto;
+
+        span[data-token] {
+            @property --heat {
+                syntax: "<percentage>";
+                inherits: false;
+                initial-value: 0%;
+            }
+
+            @property --front-marker {
+                syntax: "<color>";
+                inherits: false;
+                initial-value: transparent;
+            }
+
+            @property --back-marker {
+                syntax: "<color>";
+                inherits: false;
+                initial-value: transparent;
+            }
+
+            background-color: color-mix(in oklab, #a71e14 var(--heat), white);
+            box-shadow:
+                    inset 2px 0 0 0 var(--front-marker),
+                    inset -2px 0 0 0 var(--front-marker);
+        }
+
+        span[data-token]:hover, span.hover {
+            outline: 1px solid darkblue;
+        }
+
+        span.selection {
+            outline: 1px solid green;
+        }
+    }
+
+    .side-panel {
+        grid-area: info;
+        overflow: auto;
+    }
+
+    table {
+        thead {
+            background-color: #2c5e77;
+            color: white;
+
+            & > tr > th.sortable {
+                cursor: pointer;
+            }
+
+            & > tr > th.sort-active {
+                background-color: #1a3847;
+            }
+        }
+
+        tbody {
+            background-color: whitesmoke;
+
+            & > tr > th {
+                border-top: 2px solid rgb(160 160 160);
+                border-bottom: 1px solid rgb(140 140 140);
+                background-color: #e4f0f5;
+                font-weight: normal;
+            }
+
+            & > tr.empty-row {
+                text-align: center;
+                color: darkgray;
+            }
+
+            & > tr.frame-row:hover {
+                background-color: lightgray;
+                cursor: pointer;
+            }
+        }
+    }
+}

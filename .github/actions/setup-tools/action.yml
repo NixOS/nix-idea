@@ -7,13 +7,14 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v5
       with:
-        java-version: 17
+        java-version: 21
         distribution: temurin
     - name: Set up Gradle
-      uses: gradle/actions/setup-gradle@v3
+      uses: gradle/actions/setup-gradle@v6
       with:
-        gradle-home-cache-cleanup: ${{ inputs.publish-caches == 'true' }}
         cache-read-only: ${{ inputs.publish-caches != 'true' }}
+        validate-wrappers: false
+        cache-provider: basic

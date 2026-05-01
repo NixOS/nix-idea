@@ -1,6 +1,7 @@
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.MapProperty
+import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
@@ -24,6 +25,10 @@ abstract class MetadataTask : DefaultTask() {
 
     fun file(fileName: String, content: () -> String) {
         files.put(fileName, providers.provider(content))
+    }
+
+    fun file(fileName: String, content: Provider<String>) {
+        files.put(fileName, content)
     }
 
     @TaskAction

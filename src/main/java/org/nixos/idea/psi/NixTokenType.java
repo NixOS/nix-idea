@@ -13,7 +13,7 @@ public class NixTokenType extends IElementType {
 
     @Override
     public String toString() {
-        if (NixTypeUtil.KEYWORDS.contains(this)) {
+        if (NixTokenSets.KEYWORDS.contains(this)) {
             // The character U+2060 (Word Joiner) is used as a workaround to
             // make Grammar-Kit put quotation marks around keywords. See
             // https://github.com/JetBrains/Grammar-Kit/issues/262
