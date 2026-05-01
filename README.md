@@ -11,6 +11,7 @@ The following features are available:
 
  *  Syntax Highlighting
  *  Real time detection of syntax errors
+ *  Code folding
 
 We would also like to provide additional support for Nix/NixOS/NixOps,
 but the following features are currently **not implemented**:
