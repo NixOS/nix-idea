@@ -12,7 +12,6 @@ import com.intellij.util.DocumentUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -54,7 +53,10 @@ import java.util.stream.Stream;
  *     assertEquals(markers.markers(TAG_NOUN), Markers.create(markers.unmarkedText(), TAG_NOUN, detectedNouns));
  * }}</pre>
  */
-public final class Markers extends AbstractCollection<Markers.Marker> {
+public final class Markers extends AbstractList<Markers.Marker> {
+
+    public static final TagName TAG_CARET = tagNameVoid("caret");
+    public static final TagName TAG_SELECTION = tagName("selection");
 
     private final @NotNull String myText;
     private final @NotNull Set<TagName> myKnownTagNames;
@@ -372,6 +374,11 @@ public final class Markers extends AbstractCollection<Markers.Marker> {
     @Override
     public int size() {
         return myMarkers.size();
+    }
+
+    @Override
+    public Marker get(int index) {
+        return myMarkers.get(index);
     }
 
     @Override

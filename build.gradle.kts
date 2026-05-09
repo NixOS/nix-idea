@@ -64,6 +64,7 @@ dependencies {
     intellijPlatform {
         create(platformType, platformVersion)
         bundledModule("intellij.spellchecker")
+        testBundledModule("org.intellij.intelliLang") // TODO Remove again?
         testFramework(TestFrameworkType.Platform)
         //testFramework(TestFrameworkType.JUnit5)
 

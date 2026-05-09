@@ -86,7 +86,9 @@ public class NixInjectionPerformer implements LanguageInjectionPerformer {
      * from assuming that all interpolations generate the same result.
      */
     private static String interpolationPlaceholder(int index) {
-        // TODO What should I return here? Would an empty string work? What do other plugins use as placeholders?
+        // TODO What should I return here? Would an empty string work?
+        //      What do other plugins use as placeholders?
+        //      I assume it should ideally be a valid expression or symbol in the guest language?
         return "(__interpolation" + index + "__)";
     }
 }
