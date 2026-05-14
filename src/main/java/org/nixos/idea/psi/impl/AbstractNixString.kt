@@ -10,8 +10,7 @@ import org.nixos.idea.psi.NixStringText
 import org.nixos.idea.util.NixStringUtil
 
 
-abstract class AbstractNixString(private val astNode: ASTNode) : PsiLanguageInjectionHost,
-    AbstractNixPsiElement(astNode), NixStringText {
+abstract class AbstractNixString(astNode: ASTNode) : AbstractNixPsiElement(astNode), NixStringText {
 
     override fun isValidHost() = true
 

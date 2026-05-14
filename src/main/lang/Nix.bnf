@@ -28,7 +28,7 @@
   implements("expr_let|expr_attrs|expr_lambda")="org.nixos.idea.psi.NixDeclarationHost"
   mixin("expr_let|expr_attrs|expr_lambda")="org.nixos.idea.psi.impl.AbstractNixDeclarationHost"
 
-   // make IndStrings language injection Hosts
+   // Make NixStringText a language injection host.
    implements("string_text")="com.intellij.psi.PsiLanguageInjectionHost"
    mixin("string_text")="org.nixos.idea.psi.impl.AbstractNixString"
 

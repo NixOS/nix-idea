@@ -2,14 +2,15 @@
 # -> https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [libraries]
+bytebuddy = { module = "net.bytebuddy:byte-buddy", version = "1.18.8" }
+bytebuddy-agent = { module = "net.bytebuddy:byte-buddy-agent", version = "1.18.8" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version = "26.0.2-1" }
 junit5-bom = { module = "org.junit:junit-bom", version = "6.0.1" }
 junit5-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit5-platform-testkit = { module = "org.junit.platform:junit-platform-testkit" }
 junit5-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine" }
 junit4 = { module = "junit:junit", version = "4.13.2" }
-bytebuddy = { module = "net.bytebuddy:byte-buddy", version = "1.18.8" }
-bytebuddy-agent = { module = "net.bytebuddy:byte-buddy-agent", version = "1.18.8" }
+mockito = { module = "org.mockito:mockito-core", version = "5.23.0" }
 
 [plugins]
 # read more: https://github.com/JetBrains/intellij-platform-gradle-plugin

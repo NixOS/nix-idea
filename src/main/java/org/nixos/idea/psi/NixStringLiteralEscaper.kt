@@ -2,29 +2,27 @@ package org.nixos.idea.psi
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.LiteralTextEscaper
-import org.nixos.idea.psi.impl.AbstractNixString
 import org.nixos.idea.util.NixStringUtil
 
-class NixStringLiteralEscaper(host: AbstractNixString) : LiteralTextEscaper<NixStringText>(host) {
-
-    override fun isOneLine(): Boolean = false
+class NixStringLiteralEscaper(host: NixStringText) : LiteralTextEscaper<NixStringText>(host) {
 
     private var outSourceOffsets: IntArray? = null
 
+    override fun isOneLine(): Boolean = false
+
     override fun decode(rangeInsideHost: TextRange, outChars: StringBuilder): Boolean {
         val maxIndent = NixStringUtil.detectMaxIndent(myHost.parent as NixString)
-        val subText: String = rangeInsideHost.substring(myHost.text)
         val outOffset = outChars.length
-        val array = IntArray(subText.length + 1)
+        val array = IntArray(rangeInsideHost.length + 1) // escape sequences can only make the result smaller
         var success = true
 
         fun addText(text: CharSequence, offset: Int): Boolean {
             for (i in text.indices) {
-                if (offset + i >= rangeInsideHost.startOffset) {
+                if (offset + i >= rangeInsideHost.endOffset) {
+                    return false
+                } else if (offset + i >= rangeInsideHost.startOffset) {
                     array[outChars.length - outOffset] = offset + i
                     outChars.append(text[i])
-                } else if (offset + i >= rangeInsideHost.endOffset) {
-                    return false
                 }
             }
             return true
