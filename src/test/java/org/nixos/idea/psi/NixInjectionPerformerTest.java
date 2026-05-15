@@ -7,9 +7,6 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.fileTypes.PlainTextLanguage;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiLanguageInjectionHost;
-import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.EditorTestFixture;
 import com.intellij.testFramework.fixtures.InjectionTestFixture;
@@ -19,9 +16,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Answers;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.nixos.idea._testutil.Markers;
 import org.nixos.idea._testutil.WithIdeaPlatform;
 import org.nixos.idea.lang.NixLanguage;
@@ -31,9 +25,6 @@ import java.util.regex.Matcher;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.same;
 
 @WithIdeaPlatform.CodeInsight
 @WithIdeaPlatform.OnEdt
@@ -46,8 +37,7 @@ final class NixInjectionPerformerTest {
     //      The closing '' also gains extra indent because nextSibling is IND_STRING_CLOSE.
     //      Fix requires implementing baseIndent() in AbstractNixString.
     // TODO issue3: How to handle cases when the last non-indented line is removed from an indented string?
-    // TODO issue4: Put caret in front of unescaped character when caret was on the escape sequence.
-    // TODO issue5: Throws InjectionRegistrarImpl$PatchException
+    // TODO issue6: Handle insertion of `{` behind `$`
 
     private final CodeInsightTestFixture myFixture;
     private final InjectionTestFixture myInjectionFixture;
@@ -117,7 +107,6 @@ final class NixInjectionPerformerTest {
         }
 
         @Test
-        @Disabled("issue4") // TODO
         void caret_on_escape_sequence() {
             // Moving the caret before the unescaped character seems like the better fit.
             // The significant character tends to be at the end of the escape sequence.
@@ -144,7 +133,31 @@ final class NixInjectionPerformerTest {
         }
 
         @Test
-        void trim_indentation() {
+        void trim_indentation_simple() {
+            doTestRead(
+                    """
+                            ''
+                              single<caret> line
+                            ''
+                            """,
+                    "single<caret> line\n"
+            );
+        }
+
+        @Test
+        void trim_indentation_empty() {
+            doTestRead(
+                    """
+                            ''
+                              <caret>
+                            ''
+                            """,
+                    "<caret>\n"
+            );
+        }
+
+        @Test
+        void trim_indentation_multiline() {
             doTestRead(
                     """
                             ''
@@ -194,7 +207,6 @@ final class NixInjectionPerformerTest {
         }
 
         @Test
-        @Disabled("issue5") // TODO
         void indented_string_starting_with_interpolation_on_new_line() {
             // Can trigger InjectionRegistrarImpl$PatchException (IJPL-244525),
             // depending on how LiteralTextEscaper.getRelevantTextRange is implemented.
@@ -208,7 +220,6 @@ final class NixInjectionPerformerTest {
         }
 
         @Test
-        @Disabled("issue5") // TODO
         void indented_string_starting_with_interpolation_after_spaces() {
             // Can trigger InjectionRegistrarImpl$PatchException (IJPL-244525),
             // depending on how LiteralTextEscaper.getRelevantTextRange is implemented.
@@ -362,6 +373,60 @@ final class NixInjectionPerformerTest {
                 );
             }
 
+            @Test
+            void braces_after_dollar_std() {
+                doTestUpdate(
+                        "\"|$<caret>|\"",
+                        "{",
+                        "\"|\\${|\""
+                );
+            }
+
+            @Test
+            void braces_after_dollar_ind() {
+                doTestUpdate(
+                        "''|$<caret>|''",
+                        "{",
+                        "''|''${|''"
+                );
+            }
+
+            @Test
+            void braces_after_double_dollar_std() {
+                doTestUpdate(
+                        "\"|$$<caret>|\"",
+                        "{",
+                        "\"|$${|\""
+                );
+            }
+
+            @Test
+            void braces_after_double_dollar_ind() {
+                doTestUpdate(
+                        "''|$$<caret>|''",
+                        "{",
+                        "''|$${|''"
+                );
+            }
+
+            @Test
+            void braces_after_escaped_dollar_std() {
+                doTestUpdate(
+                        "\"|\\$<caret>|\"",
+                        "{",
+                        "\"|\\${|\""
+                );
+            }
+
+            @Test
+            void braces_after_escaped_dollar_ind() {
+                doTestUpdate(
+                        "''|''$<caret>|''",
+                        "{",
+                        "''|''${|''"
+                );
+            }
+
         }
 
         @Nested
@@ -430,6 +495,7 @@ final class NixInjectionPerformerTest {
         }
 
         @Test
+        @Disabled("issue6") // TODO
         void multiselection() {
             doTestUpdate(
                     """
@@ -463,6 +529,24 @@ final class NixInjectionPerformerTest {
     final class Indentation {
 
         @Test
+        void add_line() {
+            doTestUpdate(
+                    """
+                            ''
+                              test<caret>
+                            ''
+                            """,
+                    "\n42",
+                    """
+                            ''
+                              test
+                              42
+                            ''
+                            """
+            );
+        }
+
+        @Test
         void keep_indentation_of_closing_quotes_1() {
             doTestUpdate(
                     """
@@ -490,21 +574,16 @@ final class NixInjectionPerformerTest {
             doTestUpdate(
                     """
                             ''
-                              first line<caret>
-                            
+                              first line
+                              <caret>
                               last line
                             ''
-                            """,
-                    """
-                            first line
-                            <caret>
-                            last line
                             """,
                     " ",
                     """
                             ''
                               first line<caret>
-                               \s
+                              \s
                               last line
                             ''
                             """
@@ -630,7 +709,7 @@ final class NixInjectionPerformerTest {
      */
     private void doTestRead(String sourceCode, String expectedFragment) {
         myFixture.configureByText("test.nix", sourceCode);
-        EditorTestFixture fragmentEditor = fixedOpenInFragmentEditor();
+        EditorTestFixture fragmentEditor = myInjectionFixture.openInFragmentEditor();
 
         int actualCaretOffset = fragmentEditor.getEditor().getCaretModel().getOffset();
         Markers actual = Markers.create(
@@ -664,7 +743,7 @@ final class NixInjectionPerformerTest {
      */
     private void doTestUpdate(String initialSource, @Nullable String selection, String input, String expectedSource) {
         myFixture.configureByText("test.nix", initialSource);
-        EditorTestFixture fragmentFixture = fixedOpenInFragmentEditor();
+        EditorTestFixture fragmentFixture = myInjectionFixture.openInFragmentEditor();
         Editor fragmentEditor = fragmentFixture.getEditor();
 
         if (selection != null) {
@@ -684,7 +763,7 @@ final class NixInjectionPerformerTest {
      */
     private void doTestUpdateInternal(String initialSource, String input, String expectedFragment) {
         myFixture.configureByText("test.nix", initialSource);
-        EditorTestFixture fragmentFixture = fixedOpenInFragmentEditor();
+        EditorTestFixture fragmentFixture = myInjectionFixture.openInFragmentEditor();
         Editor fragmentEditor = fragmentFixture.getEditor();
 
         fragmentFixture.type(input);
@@ -698,29 +777,6 @@ final class NixInjectionPerformerTest {
 
         Markers expected = Markers.parse(buildExpectedContent(expectedFragment), Markers.TAG_CARET);
         assertEquals(expected, actual, "resulting text in fragment editor");
-    }
-
-    private EditorTestFixture fixedOpenInFragmentEditor() {
-        // TODO Cannot open fragment editor when cursor is at the end of the string or before an interpolation.
-        //      This mocks fix the issue for tests, but we should find a solution for users as well.
-        try (MockedStatic<PsiTreeUtil> mock = Mockito.mockStatic(Answers.CALLS_REAL_METHODS)) {
-            mock.when(() -> PsiTreeUtil.getParentOfType(any(), same(PsiLanguageInjectionHost.class), eq(false))).then(invocation -> {
-                Object result = invocation.callRealMethod();
-                if (result == null) {
-                    PsiElement firstArg = invocation.getArgument(0);
-                    NixAntiquotation interpolation = PsiTreeUtil.getParentOfType(firstArg, NixAntiquotation.class, false);
-                    if (interpolation != null) {
-                        return interpolation.getPrevSibling();
-                    }
-                    NixString string = PsiTreeUtil.getParentOfType(firstArg, NixString.class, false);
-                    if (string != null) {
-                        return string.getStringParts().getLast();
-                    }
-                }
-                return result;
-            });
-            return myInjectionFixture.openInFragmentEditor();
-        }
     }
 
     private static void updateSelection(Editor editor, String selection) {

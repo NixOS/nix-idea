@@ -1,17 +1,17 @@
 package org.nixos.idea.psi;
 
+import com.intellij.lang.ASTNode;
 import com.intellij.lang.Language;
 import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.lang.injection.general.Injection;
 import com.intellij.lang.injection.general.LanguageInjectionPerformer;
 import com.intellij.openapi.fileTypes.LanguageFileType;
-import com.intellij.psi.LiteralTextEscaper;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.nixos.idea.util.NixStringUtil;
 
 public class NixInjectionPerformer implements LanguageInjectionPerformer {
 
@@ -45,38 +45,43 @@ public class NixInjectionPerformer implements LanguageInjectionPerformer {
         String injectedFileExtension = injectedFileType == null ? null : injectedFileType.getDefaultExtension();
 
         registrar.startInjecting(injectedLanguage, injectedFileExtension);
-        for (Place place : collectPlaces(string, injection.getPrefix(), injection.getSuffix())) {
-            LiteralTextEscaper<?> escaper = place.item().createLiteralTextEscaper();
-            registrar.addPlace(
-                    place.prefix().toString(), place.suffix().toString(),
-                    place.item(), escaper.getRelevantTextRange()
-            );
+        String prefix = injection.getPrefix();
+        int maxIndent = NixStringUtil.detectMaxIndent(string);
+        int interpolations = 0;
+        for (NixStringPart stringPart : string.getStringParts()) {
+            // Note: The list is never empty, all interpolations are surrounded by nodes of type NixStringText
+            if (stringPart instanceof NixStringText text) {
+                String suffix = text.getNextSibling() instanceof NixStringPart ? null : injection.getSuffix();
+                int startOffset = text.getNode().getStartOffset();
+                ASTNode nextToken = text.getNode().getFirstChildNode();
+                do {
+                    int endOffset = startOffset;
+                    boolean newLine = false;
+                    while (nextToken != null && !newLine) {
+                        IElementType tokenType = nextToken.getElementType();
+                        if (tokenType == NixTypes.IND_STR_LF) {
+                            newLine = true;
+                        } else if (tokenType == NixTypes.IND_STR_INDENT) {
+                            startOffset += Math.min(nextToken.getTextLength(), maxIndent);
+                        }
+                        endOffset += nextToken.getTextLength();
+                        nextToken = nextToken.getTreeNext();
+                    }
+                    registrar.addPlace(
+                            prefix, nextToken == null ? suffix : null,
+                            string, TextRange.create(startOffset, endOffset)
+                    );
+                    prefix = null;
+                    startOffset = endOffset;
+                } while (nextToken != null);
+            } else {
+                assert stringPart instanceof NixAntiquotation : stringPart.getClass();
+                assert prefix == null;
+                prefix = interpolationPlaceholder(interpolations++);
+            }
         }
         registrar.doneInjecting();
         return true;
-    }
-
-    private record Place(@NotNull NixStringText item, @NotNull CharSequence prefix, @NotNull CharSequence suffix) {}
-
-    private static List<Place> collectPlaces(@NotNull NixString string, @NotNull String prefix, @NotNull String suffix) {
-        int interpolations = 0;
-        StringBuilder prevSuffix = null;
-        List<Place> result = new ArrayList<>();
-        for (NixStringPart stringPart : string.getStringParts()) {
-            // Note: The first and last part is always of type NixStringText, the list is never empty
-            if (stringPart instanceof NixStringText text) {
-                prevSuffix = new StringBuilder();
-                result.add(new Place(text, prefix, prevSuffix));
-                prefix = "";
-            } else {
-                assert stringPart instanceof NixAntiquotation : stringPart.getClass();
-                assert prevSuffix != null;
-                prevSuffix.append(interpolationPlaceholder(interpolations++));
-            }
-        }
-        assert prevSuffix != null;
-        prevSuffix.append(suffix);
-        return result;
     }
 
     /**

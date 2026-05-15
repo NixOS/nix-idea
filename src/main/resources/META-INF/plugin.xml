@@ -92,7 +92,7 @@
                 language="Nix"
                 implementationClass="org.nixos.idea.psi.NixInjectionPerformer"/>
         <lang.elementManipulator
-                forClass="org.nixos.idea.psi.NixStringText"
+                forClass="org.nixos.idea.psi.NixString"
                 implementationClass="org.nixos.idea.psi.NixStringManipulator"/>
 
         <notificationGroup id="NixIDEA" displayType="BALLOON"/>

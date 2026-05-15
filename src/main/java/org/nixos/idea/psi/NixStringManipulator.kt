@@ -2,29 +2,45 @@ package org.nixos.idea.psi
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.AbstractElementManipulator
+import com.intellij.psi.util.endOffset
+import com.intellij.psi.util.startOffset
+import org.nixos.idea.psi.impl.AbstractNixString.Companion.indentForNewText
+import org.nixos.idea.util.NixStringUtil
 
-class NixStringManipulator : AbstractElementManipulator<NixStringText>() {
+class NixStringManipulator : AbstractElementManipulator<NixString>() {
 
     /**
      * This function's result changes the original text in the host language
      * when the fragment in the guest language changes
      */
     override fun handleContentChange(
-        element: NixStringText,
+        element: NixString,
         range: TextRange,
         newContent: String
-    ): NixStringText {
-        // TODO This implementation is wrong as escaped and non-escaped strings a mixed together.
-        //  The variable `replacement` is not supposed to be escaped,
-        //  but `element.text` is from the Nix source code, and therefore escaped.
-        //  We probably have to switch the call dependency and let `updateText` call this more generic method.
-        val escaped = newContent
-        val replacement = range.replace(element.text, escaped)
-        return element.updateText(replacement) as NixStringText
+    ): NixString {
+        // TODO Handle Insertion of `{` after `$`
+        // TODO Add separate tests
+        // TODO Verify that the range makes sense.
+        val oldText = element.text
+        val newText = buildString((1.1 * oldText.length).toInt()) {
+            append(oldText, 0, range.startOffset)
+            when (element) {
+                is NixStdString -> {
+                    NixStringUtil.escapeStd(this, newContent)
+                }
+                is NixIndString -> {
+                    val indent = indentForNewText(element)
+                    NixStringUtil.escapeInd(this, newContent, indent, false, indent)
+                }
+                else -> throw IllegalStateException("Unexpected string type: " + element.javaClass)
+            }
+            append(oldText, range.endOffset, oldText.length)
+        }
+        return element.replace(NixElementFactory.createString(element.project, newText)) as NixString
     }
 
-    override fun getRangeInElement(element: NixStringText): TextRange = when {
-        element.textLength == 0 -> TextRange.EMPTY_RANGE
-        else -> TextRange.from(0, element.textLength)
+    override fun getRangeInElement(element: NixString): TextRange {
+        val parts = element.stringParts
+        return TextRange.create(parts.first().startOffset, parts.last().endOffset)
     }
 }

@@ -57,12 +57,9 @@ dependencies {
     testImplementation(libs.junit5.platform.testkit)
     testImplementation(libs.junit4)
     testRuntimeOnly(libs.junit5.vintage.engine)
-
     testImplementation(libs.bytebuddy)
     testImplementation(libs.bytebuddy.agent)
     bytebuddyAgent(libs.bytebuddy.agent)
-
-    testImplementation(libs.mockito)
 
     intellijPlatform {
         create(platformType, platformVersion)

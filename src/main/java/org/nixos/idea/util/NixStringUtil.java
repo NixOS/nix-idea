@@ -147,7 +147,7 @@ public final class NixStringUtil {
             potentialClosing = nextChar == '\'' && !potentialClosing;
         }
         if (indentStart) {
-            builder.append(" ".repeat(Math.min(indent, indentEnd)));
+            builder.repeat(" ", Math.min(indent, indentEnd));
         }
     }
 
@@ -198,67 +198,46 @@ public final class NixStringUtil {
     public static @NotNull String parse(@NotNull NixStringText textNode) {
         int maxIndent = detectMaxIndent((NixString) textNode.getParent());
         StringBuilder builder = new StringBuilder();
-        visit(new StringVisitor() {
-            @Override
-            public boolean text(@NotNull CharSequence text, int offset) {
-                builder.append(text);
-                return true;
-            }
-
-            @Override
-            public boolean escapeSequence(@NotNull String text, int offset, @NotNull CharSequence escapeSequence) {
-                builder.append(text);
-                return true;
-            }
-        }, textNode, maxIndent);
+        for (ASTNode token = textNode.getNode().getFirstChildNode(); token != null; token = token.getTreeNext()) {
+            builder.append(parse(token, maxIndent));
+        }
         return builder.toString();
     }
 
-    public static void visit(@NotNull StringVisitor visitor, @NotNull NixStringText textNode, int maxIndent) {
-        int offset = 0;
-        for (ASTNode child = textNode.getNode().getFirstChildNode(); child != null; child = child.getTreeNext()) {
-            if (!parse(visitor, child, offset, maxIndent)) {
-                break;
-            }
-            offset += child.getTextLength();
-        }
-    }
-
-    private static boolean parse(@NotNull StringVisitor visitor, @NotNull ASTNode token, int offset, int maxIndent) {
+    public static @NotNull CharSequence parse(@NotNull ASTNode token, int maxIndent) {
         CharSequence text = token.getChars();
         IElementType type = token.getElementType();
         if (type == NixTypes.STR || type == NixTypes.IND_STR || type == NixTypes.IND_STR_LF) {
-            return visitor.text(text, offset);
+            return text;
         } else if (type == NixTypes.IND_STR_INDENT) {
             int end = text.length();
             if (end > maxIndent) {
-                CharSequence remain = text.subSequence(maxIndent, end);
-                return visitor.text(remain, offset + maxIndent);
+                return text.subSequence(maxIndent, end);
             }
-            return true;
+            return "";
         } else if (type == NixTypes.STR_ESCAPE) {
             assert text.length() == 2 && text.charAt(0) == '\\' : text;
             char c = text.charAt(1);
-            return visitor.escapeSequence(unescape(c), offset, text);
+            return unescape(c);
         } else if (type == NixTypes.IND_STR_ESCAPE) {
             return switch (text.charAt(2)) {
                 case '$' -> {
                     assert "''$".contentEquals(text) : text;
-                    yield visitor.escapeSequence("$", offset, text);
+                    yield "$";
                 }
                 case '\'' -> {
                     assert "'''".contentEquals(text) : text;
-                    yield visitor.escapeSequence("''", offset, text);
+                    yield "''";
                 }
                 case '\\' -> {
                     assert text.length() == 4 && "''\\".contentEquals(text.subSequence(0, 3)) : text;
                     char c = text.charAt(3);
-                    yield visitor.escapeSequence(unescape(c), offset, text);
+                    yield unescape(c);
                 }
                 default -> throw new IllegalStateException("Unknown escape sequence: " + text);
             };
         } else {
-            throw new IllegalStateException("Unexpected token in string: " + token);
+            throw new IllegalArgumentException("Unexpected string token: " + token);
         }
     }
 
@@ -269,11 +248,5 @@ public final class NixStringUtil {
             case 't' -> "\t";
             default -> String.valueOf(c);
         };
-    }
-
-    public interface StringVisitor {
-        boolean text(@NotNull CharSequence text, int offset);
-
-        boolean escapeSequence(@NotNull String text, int offset, @NotNull CharSequence escapeSequence);
     }
 }
