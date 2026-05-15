@@ -32,7 +32,7 @@ public final class NixTokenSets {
     /** All tokens representing closing quotes. */
     public static final TokenSet CLOSING_QUOTES = TokenSet.create(NixTypes.STRING_CLOSE, NixTypes.IND_STRING_CLOSE);
     /** All tokens representing text inside a string. */
-    public static final TokenSet STRING_CONTENT = TokenSet.create(NixTypes.STR, NixTypes.STR_ESCAPE, NixTypes.IND_STR, NixTypes.IND_STR_ESCAPE);
+    public static final TokenSet STRING_CONTENT = TokenSet.create(NixTypes.STR, NixTypes.STR_ESCAPE, NixTypes.IND_STR_INDENT, NixTypes.IND_STR, NixTypes.IND_STR_ESCAPE, NixTypes.IND_STR_LF);
     /** All tokens representing any part of a string, except interpolations. */
     public static final TokenSet STRING_ANY = TokenSet.orSet(CLOSING_QUOTES, OPENING_QUOTES, STRING_CONTENT);
 
