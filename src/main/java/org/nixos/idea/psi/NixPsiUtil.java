@@ -3,6 +3,8 @@ package org.nixos.idea.psi;
 import com.intellij.openapi.diagnostic.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
+import org.nixos.idea.psi.impl.AbstractNixString;
 import org.nixos.idea.psi.impl.NixStdAttrImpl;
 import org.nixos.idea.psi.impl.NixStringAttrImpl;
 import org.nixos.idea.util.NixStringUtil;
@@ -89,5 +91,9 @@ public final class NixPsiUtil {
     public static boolean isDeclaration(@NotNull NixAttr attr) {
         return attr.getParent() instanceof NixAttrPath path &&
                 path.getParent() instanceof NixBindAttr;
+    }
+
+    public static @Range(from = 0, to = Integer.MAX_VALUE) int getIndent(@NotNull NixString string) {
+        return ((AbstractNixString) string).getIndent();
     }
 }

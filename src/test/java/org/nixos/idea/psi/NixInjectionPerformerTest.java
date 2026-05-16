@@ -582,7 +582,7 @@ final class NixInjectionPerformerTest {
                     " ",
                     """
                             ''
-                              first line<caret>
+                              first line
                               \s
                               last line
                             ''

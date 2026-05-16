@@ -332,12 +332,20 @@ public final class Markers extends AbstractList<Markers.Marker> {
         }
     }
 
+    public int singleOffset() {
+        return single().offset();
+    }
+
     public int singleOffset(@NotNull TagName... tag) {
-        return markers(tag).single().offset();
+        return markers(tag).singleOffset();
+    }
+
+    public @NotNull TextRange singleRange() {
+        return single().range();
     }
 
     public @NotNull TextRange singleRange(@NotNull TagName... tag) {
-        return markers(tag).single().range();
+        return markers(tag).singleRange();
     }
 
     public @NotNull List<TextRange> ranges() {

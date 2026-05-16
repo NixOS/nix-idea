@@ -53,11 +53,39 @@ final class NixStringUtilTest {
             """)
     void escapeStd(String unescaped, String expectedResult) {
         StringBuilder stringBuilder = new StringBuilder();
-        NixStringUtil.escapeStd(stringBuilder, unescaped);
+        NixStringUtil.escapeStd(stringBuilder, unescaped, 0);
         assertEquals(expectedResult, stringBuilder.toString());
     }
 
     @ParameterizedTest(name = "[{index}] {0} -> {1}")
+    @CsvSource(textBlock = """
+            # Do not add escape sequences when not necessary
+            '|$|{x}'         , '\\${x}'
+            '|$$|{x}'        , '$${x}'
+            '|$$$|{x}'       , '$$\\${x}'
+            '|$|${}'         , '$${}'
+            '|$$|${}'        , '$$\\${}'
+            # Ignore anything before the look-back marker
+            '$||{x}'         , '${x}'
+            '$|$|{x}'        , '$\\${x}'
+            '$|$$|{x}'       , '$$${x}'
+            '$||${}'         , '$\\${}'
+            '$|$|${}'        , '$$${}'
+            # Only look at trailing dolla signs in look-back area
+            '|$x|${}'        , '$x\\${}'
+            '|$x$|{}'        , '$x\\${}'
+            '|$xx|${}'       , '$xx\\${}'
+            '|$xx$|{}'       , '$xx\\${}'
+            """)
+    void escapeStdWithLookback(String unescaped, String expectedResult) {
+        String[] split = unescaped.split("[|]", 3);
+        StringBuilder stringBuilder = new StringBuilder(expectedResult.length());
+        stringBuilder.append(split[0]).append(split[1]);
+        NixStringUtil.escapeStd(stringBuilder, split[2], split[1].length());
+        assertEquals(expectedResult, stringBuilder.toString());
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}, indent={1}, indentStart={2}, indentEnd={3} -> {4}")
     @CsvSource(quoteCharacter = '|', textBlock = """
             # Indent non-empty lines
             ||              , 4, false, 2, ||
@@ -94,14 +122,16 @@ final class NixStringUtilTest {
 
     @ParameterizedTest(name = "[{index}] {0} -> {1}")
     @CsvSource(quoteCharacter = '|', textBlock = """
-            # Non-indented strings always return the empty string
+            # Non-indented strings always return zero
             |""|                , 0
             |"    a"|           , 0
             |"  a\n  b"|        , 0
-            # When there are only spaces, we return Integer.MAX_VALUE
-            |''''|              , 2147483647
-            |''    ''|          , 2147483647
-            |''\n  \n  ''|      , 2147483647
+            # When there are only spaces, we return the fallback
+            |''''|              , 10
+            |''    ''|          , 10
+            |''\n  \n  ''|      , 10
+            # Unless the indention of the blank lines is larger then the fallback
+            |''\n            ''|, 12
             # The smallest indentation counts
             |''\n  a\n b''|     , 1
             |''\n a\n  b''|     , 1
@@ -132,9 +162,9 @@ final class NixStringUtilTest {
             |''  ${\n''a''}''|  , 2
             """)
     @WithIdeaPlatform.OnEdt
-    void detectMaxIndent(String code, int expectedResult, Project project) {
+    void detectIndent(String code, int expectedResult, Project project) {
         NixString string = NixElementFactory.createString(project, code);
-        assertEquals(expectedResult, NixStringUtil.detectMaxIndent(string));
+        assertEquals(expectedResult, NixStringUtil.detectIndent(string, () -> 10));
     }
 
     @ParameterizedTest(name = "[{index}] {0} -> {1}")

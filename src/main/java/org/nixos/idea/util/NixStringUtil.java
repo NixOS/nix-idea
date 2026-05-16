@@ -4,13 +4,17 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 import org.nixos.idea.psi.NixAntiquotation;
 import org.nixos.idea.psi.NixIndString;
+import org.nixos.idea.psi.NixPsiUtil;
 import org.nixos.idea.psi.NixStdString;
 import org.nixos.idea.psi.NixString;
 import org.nixos.idea.psi.NixStringPart;
 import org.nixos.idea.psi.NixStringText;
 import org.nixos.idea.psi.NixTypes;
+
+import java.util.function.IntSupplier;
 
 /**
  * Utilities for encoding and decoding strings in the Nix Expression Language.
@@ -36,7 +40,7 @@ public final class NixStringUtil {
     public static @NotNull String quote(@NotNull CharSequence unescaped) {
         StringBuilder builder = new StringBuilder();
         builder.append('"');
-        escapeStd(builder, unescaped);
+        escapeStd(builder, unescaped, 0);
         builder.append('"');
         return builder.toString();
     }
@@ -59,8 +63,11 @@ public final class NixStringUtil {
      * @param builder   The target string builder. The result will be appended to the given string builder.
      * @param unescaped The raw string which shall be escaped.
      */
-    public static void escapeStd(@NotNull StringBuilder builder, @NotNull CharSequence unescaped) {
+    public static void escapeStd(@NotNull StringBuilder builder, @NotNull CharSequence unescaped, int lookback) {
         boolean potentialInterpolation = false;
+        for (int i = builder.length() - 1; lookback-- > 0 && builder.charAt(i) == '$'; i--) {
+            potentialInterpolation = !potentialInterpolation;
+        }
         for (int charIndex = 0; charIndex < unescaped.length(); charIndex++) {
             char nextChar = unescaped.charAt(charIndex);
             switch (nextChar) {
@@ -152,35 +159,48 @@ public final class NixStringUtil {
     }
 
     /**
-     * Detects the maximal amount of characters removed from the start of the lines.
-     * May return {@link Integer#MAX_VALUE} if the content of the string is blank.
+     * Detects the indent of the given string.
+     * The indent represents the amount of characters removed from the start of each line.
+     * If all lines are blank, the indent is ambiguous.
+     * In such case, the method returns the smallest number greater or equal to {@code fallback},
+     * which also satisfies the language semantics of Nix.
+     * <p>
+     * You should probably use {@link NixPsiUtil#getIndent(NixString)},
+     * instead of calling this method directly.
      *
-     * @param string the string from which to get the indentation
+     * @param string   the string from which to get the indentation
+     * @param fallback supplier for the minimal indent used when no unambiguous indent was detected
      * @return the detected indentation, or {@link Integer#MAX_VALUE}
      */
-    public static int detectMaxIndent(@NotNull NixString string) {
+    public static @Range(from = 0, to = Integer.MAX_VALUE) int detectIndent(@NotNull NixString string, @NotNull IntSupplier fallback) {
         if (string instanceof NixStdString) {
             return 0;
         } else if (string instanceof NixIndString) {
+            int maxIndent = 0;
             int result = Integer.MAX_VALUE;
-            int preliminary = 0;
+            int currentIndent = 0;
             for (NixStringPart part : string.getStringParts()) {
                 if (part instanceof NixStringText textNode) {
                     for (ASTNode token = textNode.getNode().getFirstChildNode(); token != null; token = token.getTreeNext()) {
                         IElementType type = token.getElementType();
                         if (type == NixTypes.IND_STR_INDENT) {
-                            preliminary = Math.min(result, token.getTextLength());
+                            currentIndent = token.getTextLength();
+                            maxIndent = Math.max(maxIndent, currentIndent);
                         } else if (type == NixTypes.IND_STR_LF) {
-                            preliminary = 0;
+                            currentIndent = 0;
                         } else {
                             assert type == NixTypes.IND_STR || type == NixTypes.IND_STR_ESCAPE : type;
-                            result = preliminary;
+                            result = Math.min(result, currentIndent);
                         }
                     }
                 } else {
                     assert part instanceof NixAntiquotation : part.getClass();
-                    result = preliminary;
+                    result = Math.min(result, currentIndent);
                 }
+            }
+            if (result == Integer.MAX_VALUE) {
+                // We need to choose an indent which is large enough to strip all spaces.
+                result = Math.max(fallback.getAsInt(), maxIndent);
             }
             return result;
         } else {
@@ -196,23 +216,23 @@ public final class NixStringUtil {
      * @return The resulting string after resolving all escape sequences.
      */
     public static @NotNull String parse(@NotNull NixStringText textNode) {
-        int maxIndent = detectMaxIndent((NixString) textNode.getParent());
+        int indent = NixPsiUtil.getIndent((NixString) textNode.getParent());
         StringBuilder builder = new StringBuilder();
         for (ASTNode token = textNode.getNode().getFirstChildNode(); token != null; token = token.getTreeNext()) {
-            builder.append(parse(token, maxIndent));
+            builder.append(parse(token, indent));
         }
         return builder.toString();
     }
 
-    public static @NotNull CharSequence parse(@NotNull ASTNode token, int maxIndent) {
+    public static @NotNull CharSequence parse(@NotNull ASTNode token, int indent) {
         CharSequence text = token.getChars();
         IElementType type = token.getElementType();
         if (type == NixTypes.STR || type == NixTypes.IND_STR || type == NixTypes.IND_STR_LF) {
             return text;
         } else if (type == NixTypes.IND_STR_INDENT) {
             int end = text.length();
-            if (end > maxIndent) {
-                return text.subSequence(maxIndent, end);
+            if (end > indent) {
+                return text.subSequence(indent, end);
             }
             return "";
         } else if (type == NixTypes.STR_ESCAPE) {

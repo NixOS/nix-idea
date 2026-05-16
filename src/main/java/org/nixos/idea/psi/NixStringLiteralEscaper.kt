@@ -12,7 +12,7 @@ class NixStringLiteralEscaper(host: NixString) : LiteralTextEscaper<NixString>(h
     override fun isOneLine(): Boolean = false
 
     override fun decode(rangeInsideHost: TextRange, outChars: StringBuilder): Boolean {
-        val maxIndent = NixStringUtil.detectMaxIndent(myHost)
+        val indent = NixPsiUtil.getIndent(myHost)
         val array = IntArray(rangeInsideHost.length + 1) { -1 } // escape sequences can only make the result smaller
         var success = true
 
@@ -23,7 +23,7 @@ class NixStringLiteralEscaper(host: NixString) : LiteralTextEscaper<NixString>(h
         var offset = currentToken.startOffset - myHost.node.startOffset
         var written = 0
         while (currentToken != null && offset < rangeInsideHost.endOffset) {
-            val decodedText = NixStringUtil.parse(currentToken, maxIndent)
+            val decodedText = NixStringUtil.parse(currentToken, indent)
             outChars.append(decodedText)
 
             // Skip indention and start of escape sequences

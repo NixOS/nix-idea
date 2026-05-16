@@ -46,13 +46,13 @@ public class NixInjectionPerformer implements LanguageInjectionPerformer {
 
         registrar.startInjecting(injectedLanguage, injectedFileExtension);
         String prefix = injection.getPrefix();
-        int maxIndent = NixStringUtil.detectMaxIndent(string);
+        int indent = NixPsiUtil.getIndent(string);
         int interpolations = 0;
         for (NixStringPart stringPart : string.getStringParts()) {
             // Note: The list is never empty, all interpolations are surrounded by nodes of type NixStringText
             if (stringPart instanceof NixStringText text) {
                 String suffix = text.getNextSibling() instanceof NixStringPart ? null : injection.getSuffix();
-                int startOffset = text.getNode().getStartOffset();
+                int startOffset = text.getNode().getStartOffsetInParent();
                 ASTNode nextToken = text.getNode().getFirstChildNode();
                 do {
                     int endOffset = startOffset;
@@ -62,7 +62,7 @@ public class NixInjectionPerformer implements LanguageInjectionPerformer {
                         if (tokenType == NixTypes.IND_STR_LF) {
                             newLine = true;
                         } else if (tokenType == NixTypes.IND_STR_INDENT) {
-                            startOffset += Math.min(nextToken.getTextLength(), maxIndent);
+                            startOffset += Math.min(nextToken.getTextLength(), indent);
                         }
                         endOffset += nextToken.getTextLength();
                         nextToken = nextToken.getTreeNext();
