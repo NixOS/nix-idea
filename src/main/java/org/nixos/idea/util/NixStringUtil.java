@@ -110,10 +110,13 @@ public final class NixStringUtil {
      * @param indentStart Whether the start of the string needs to be indented
      * @param indentEnd   The number as spaces used for indentation in the last line
      */
-    public static void escapeInd(@NotNull StringBuilder builder, @NotNull CharSequence unescaped, int indent, boolean indentStart, int indentEnd) {
+    public static void escapeInd(@NotNull StringBuilder builder, @NotNull CharSequence unescaped, int indent, boolean indentStart, int indentEnd, int lookback) {
         String indentStr = " ".repeat(indent);
         boolean potentialInterpolation = false;
-        boolean potentialClosing = false;
+        boolean potentialClosing = lookback > 0 && builder.charAt(builder.length() - 1) == '\'';
+        for (int i = builder.length() - 1; lookback-- > 0 && builder.charAt(i) == '$'; i--) {
+            potentialInterpolation = !potentialInterpolation;
+        }
         for (int charIndex = 0; charIndex < unescaped.length(); charIndex++) {
             char nextChar = unescaped.charAt(charIndex);
             if (indentStart && nextChar != '\n') {
@@ -145,7 +148,8 @@ public final class NixStringUtil {
                     break;
                 case '\n':
                     indentStart = true;
-                    // fallthrough
+                    builder.append('\n');
+                    break;
                 default:
                     builder.append(nextChar);
                     break;

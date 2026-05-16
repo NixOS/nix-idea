@@ -93,7 +93,15 @@ public final class NixPsiUtil {
                 path.getParent() instanceof NixBindAttr;
     }
 
+    public static boolean isSingleLine(@NotNull NixString string) {
+        return ((AbstractNixString) string).isSingleLine();
+    }
+
     public static @Range(from = 0, to = Integer.MAX_VALUE) int getIndent(@NotNull NixString string) {
         return ((AbstractNixString) string).getIndent();
+    }
+
+    public static @Range(from = 0, to = Integer.MAX_VALUE) int getBaseIndent(@NotNull NixString string) {
+        return ((AbstractNixString) string).getBaseIndent();
     }
 }

@@ -31,11 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @NullMarked
 final class NixInjectionPerformerTest {
 
-    // TODO issue2: Preserving indentation doesn't work yet.
-    //      The first line is missing its indent because prevSibling (the leading PsiWhiteSpace
-    //      newline) is not null, so AbstractNixString.updateText sets indentStart=false.
-    //      The closing '' also gains extra indent because nextSibling is IND_STRING_CLOSE.
-    //      Fix requires implementing baseIndent() in AbstractNixString.
     // TODO issue3: How to handle cases when the last non-indented line is removed from an indented string?
     // TODO issue6: Handle insertion of `{` behind `$`
 
@@ -525,7 +520,6 @@ final class NixInjectionPerformerTest {
 
     @Nested
     @DisplayName("preserve indentation during edit via fragment editor")
-    @Disabled("issue2") // TODO
     final class Indentation {
 
         @Test

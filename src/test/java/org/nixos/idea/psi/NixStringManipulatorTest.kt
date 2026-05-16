@@ -31,7 +31,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `add text to empty string`() {
-                doChangeTest(
+                doTestChange(
                     """"<range/>"""",
                     "abc",
                     """"abc"""",
@@ -40,7 +40,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `make empty`() {
-                doChangeTest(
+                doTestChange(
                     """"<range>abc</range>"""",
                     "",
                     "\"\"",
@@ -49,7 +49,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `add escape sequence`() {
-                doChangeTest(
+                doTestChange(
                     """"|<range/>|"""",
                     """\n""",
                     """"|\\n|"""",
@@ -58,7 +58,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `add braces behind dollar`() {
-                doChangeTest(
+                doTestChange(
                     """"|$<range/>|"""",
                     "{x}",
                     $$""""|\${x}|"""",
@@ -66,8 +66,17 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             }
 
             @Test
+            fun `add dollar before braces`() {
+                doTestChange(
+                    """"|<range/>{x}|"""",
+                    "$",
+                    $$""""|\${x}|"""",
+                )
+            }
+
+            @Test
             fun `replace substring`() {
-                doChangeTest(
+                doTestChange(
                     """"|<range>old content</range>|"""",
                     $$"new ${content}",
                     $$""""|new \${content}|"""",
@@ -76,7 +85,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `replace interpolations`() {
-                doChangeTest(
+                doTestChange(
                     $$""""|<range>${x} and ${y}</range>|"""",
                     "new content",
                     """"|new content|"""",
@@ -87,7 +96,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             @Disabled("not supported")
             fun `insert mid escape sequence`() {
                 // TODO Do we need to support this? What would we expect?
-                doChangeTest(
+                doTestChange(
                     """"|\<range/>n|"""",
                     "test",
                     """"|test\n|"""",
@@ -98,7 +107,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             @Disabled("not supported")
             fun `fail on invalid range`() {
                 // TODO Do we need to support this? What type of error would we expect?
-                doChangeTest(
+                doTestChange(
                     $$""""|<range>${</range>x}|"""",
                     "new content",
                     "",
@@ -113,7 +122,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `add text to empty string`() {
-                doChangeTest(
+                doTestChange(
                     "''<range/>''",
                     "abc",
                     "''abc''",
@@ -124,7 +133,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             fun `add spaces to empty string`() {
                 // TODO Can we somehow handle this,
                 //  so that the string actually resolves to the spaces, not to an empty string?
-                doChangeTest(
+                doTestChange(
                     "''<range/>''",
                     "  ",
                     "''  ''",
@@ -132,8 +141,24 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             }
 
             @Test
+            fun `add line feed mid line`() {
+                doTestChange(
+                    """
+                        |''
+                        |  first<range> </range>line
+                        |''""".trimMargin(),
+                    "\n",
+                    """
+                        |''
+                        |  first
+                        |  line
+                        |''""".trimMargin(),
+                )
+            }
+
+            @Test
             fun `add multiple lines to empty string`() {
-                doChangeTest(
+                doTestChange(
                     "''<range/>''",
                     """
                         |first line
@@ -149,7 +174,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `add multiple lines to single-line string`() {
-                doChangeTest(
+                doTestChange(
                     "''first line<range/>''",
                     """
                         |
@@ -167,7 +192,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `make empty (single line)`() {
-                doChangeTest(
+                doTestChange(
                     "''<range>abc</range>''",
                     "",
                     "''''",
@@ -176,7 +201,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `make empty (multiline)`() {
-                doChangeTest(
+                doTestChange(
                     """
                         |''<range>
                         |  first line
@@ -189,7 +214,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `add escape sequence`() {
-                doChangeTest(
+                doTestChange(
                     "''|<range/>|''",
                     """''\n""",
                     """''|'''\n|''""",
@@ -198,7 +223,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `add braces behind dollar`() {
-                doChangeTest(
+                doTestChange(
                     "''|$<range/>|''",
                     "{x}",
                     $$"''|''${x}|''",
@@ -206,8 +231,35 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             }
 
             @Test
+            fun `add dollar before braces`() {
+                doTestChange(
+                    "''|<range/>{x}|''",
+                    "$",
+                    $$"''|''${x}|''",
+                )
+            }
+
+            @Test
+            fun `add quote after existing quote`() {
+                doTestChange(
+                    "''|'<range/>|''",
+                    "'",
+                    "''|'''|''",
+                )
+            }
+
+            @Test
+            fun `add quote before existing quote`() {
+                doTestChange(
+                    "''|<range/>'|''",
+                    "'",
+                    "''|'''|''",
+                )
+            }
+
+            @Test
             fun `remove line`() {
-                doChangeTest(
+                doTestChange(
                     """
                         |''
                         |  line 1
@@ -228,7 +280,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             @Test
             fun `replace single line`() {
                 // This is what the fragment editor will usually do
-                doChangeTest(
+                doTestChange(
                     """
                         |''
                         |  first line
@@ -251,23 +303,47 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             fun `insert in front of line`() {
                 // When adding content to the front of line 3 via the fragment editor,
                 // The content might be injected at the end of the range from the previous line.
-                doChangeTest(
+                doTestChange(
                     """
                         |''
                         |  line 1
                         |  <range>line 2
-                        |<range/>  line 3
+                        |</range>    line 3
                         |  line 4
                         |''""".trimMargin(),
                     """
-                        |''
                         |line 2
-                        |x ''""".trimMargin(),
+                        |x""".trimMargin(),
                     """
                         |''
                         |  line 1
                         |  line 2
-                        |  x line 3
+                        |  x  line 3
+                        |  line 4
+                        |''""".trimMargin(),
+                )
+            }
+
+            @Test
+            fun `insert in front of empty line`() {
+                // When adding content to the front of line 3 via the fragment editor,
+                // The content might be injected at the end of the range from the previous line.
+                doTestChange(
+                    """
+                        |''
+                        |  line 1
+                        |  <range>line 2
+                        |</range>${" "}
+                        |  line 4
+                        |''""".trimMargin(),
+                    """
+                        |line 2
+                        |x""".trimMargin(),
+                    """
+                        |''
+                        |  line 1
+                        |  line 2
+                        |  x
                         |  line 4
                         |''""".trimMargin(),
                 )
@@ -275,7 +351,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `replace multiple lines`() {
-                doChangeTest(
+                doTestChange(
                     """
                         |''
                         |  line 1
@@ -302,7 +378,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `replace entire multiline string`() {
-                doChangeTest(
+                doTestChange(
                     """
                         |''<range>
                         |  first line
@@ -322,7 +398,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `replace interpolations`() {
-                doChangeTest(
+                doTestChange(
                     $$"""
                         |''
                         |  line ${1}
@@ -343,7 +419,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `insert line`() {
-                doChangeTest(
+                doTestChange(
                     """
                         |''
                         |  line 1
@@ -365,7 +441,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             @Disabled("not supported")
             fun `insert mid escape sequence`() {
                 // TODO Do we need to support this? What would we expect?
-                doChangeTest(
+                doTestChange(
                     "''|''<range/>'|''",
                     "test",
                     "''|'test'|''",
@@ -376,7 +452,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             @Disabled("not supported")
             fun `fail on invalid range`() {
                 // TODO Do we need to support this? What type of error would we expect?
-                doChangeTest(
+                doTestChange(
                     $$"''|<range>${</range>x}|''",
                     "new content",
                     "",
@@ -384,8 +460,46 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             }
 
             @Test
+            fun `preserve indent when entire range is replaced`() {
+                doTestChange(
+                    """
+                        |{
+                        |    x = <string>''<range>
+                        |  strangely indented string
+                        | </range>''</string>;
+                        |}""".trimMargin(),
+                    "new strangely indented string\n",
+                    """
+                        |{
+                        |    x = ''
+                        |  new strangely indented string
+                        | '';
+                        |}""".trimMargin(),
+                )
+            }
+
+            @Test
+            fun `preserve indent when partial range is replaced`() {
+                doTestChange(
+                    """
+                        |{
+                        |    x = <string>''
+                        |  strangely indented string<range>
+                        |</range> ''</string>;
+                        |}""".trimMargin(),
+                    " again\n",
+                    """
+                        |{
+                        |    x = ''
+                        |  strangely indented string again
+                        | '';
+                        |}""".trimMargin(),
+                )
+            }
+
+            @Test
             fun `respect base indentation`() {
-                doChangeTest(
+                doTestChange(
                     """
                         |{
                         |  x = {
@@ -403,7 +517,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
                         |    y = ''
                         |      first line
                         |      second line
-                        |    ''
+                        |    '';
                         |  };
                         |}
                         |""".trimMargin(),
@@ -412,22 +526,30 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
         }
 
-        fun doChangeTest(initialSource: String, newContent: String, expectedSource: String) {
+        fun doTestChange(initialSource: String, newContent: String, expectedSource: String) {
             val input = Markers.parse(initialSource, TAG_RANGE, TAG_STRING)
-            val stringRange = input.markers(TAG_STRING).optional().map { it.range() }.orNull()
             ReadAction.run<RuntimeException> {
-                val stringElement = if (stringRange == null) {
-                    NixElementFactory.createString(myFixture.project, input.unmarkedText())
-                } else {
-                    NixElementFactory.createElement(
-                        myFixture.project, NixString::class.java,
-                        input.unmarkedText().substring(0, stringRange.startOffset),
-                        stringRange.substring(input.unmarkedText()),
-                        input.unmarkedText().substring(stringRange.endOffset),
-                    )
+                val (stringElement, rangeInElement) = let {
+                    val stringRange = input.markers(TAG_STRING).optional().map { it.range() }.orNull()
+                    if (stringRange == null) {
+                        Pair(
+                            NixElementFactory.createString(myFixture.project, input.unmarkedText()),
+                            input.singleRange(TAG_RANGE),
+                        )
+                    } else {
+                        Pair(
+                            NixElementFactory.createElement(
+                                myFixture.project, NixString::class.java,
+                                input.unmarkedText().substring(0, stringRange.startOffset),
+                                stringRange.substring(input.unmarkedText()),
+                                input.unmarkedText().substring(stringRange.endOffset),
+                            ),
+                            input.singleRange(TAG_RANGE).shiftLeft(stringRange.startOffset),
+                        )
+                    }
                 }
                 val file = stringElement.containingFile
-                val result = ElementManipulators.handleContentChange(stringElement, input.singleRange(TAG_RANGE), newContent)
+                val result = ElementManipulators.handleContentChange(stringElement, rangeInElement, newContent)
                 assertSame(file, result.containingFile)
                 assertEquals(expectedSource, file.text)
             }
@@ -444,17 +566,17 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun empty() {
-                doRangeTest("\"<range/>\"")
+                doTestRange("\"<range/>\"")
             }
 
             @Test
             fun blank() {
-                doRangeTest("\"<range>    </range>\"")
+                doTestRange("\"<range>    </range>\"")
             }
 
             @Test
             fun normal() {
-                doRangeTest("\"<range>abc</range>\"")
+                doTestRange("\"<range>abc</range>\"")
             }
 
         }
@@ -465,22 +587,22 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `single line`() {
-                doRangeTest("''<range>abc</range>''")
+                doTestRange("''<range>abc</range>''")
             }
 
             @Test
             fun `empty ()`() {
-                doRangeTest("''<range/>''")
+                doTestRange("''<range/>''")
             }
 
             @Test
             fun `empty with spaces on single line`() {
-                doRangeTest("''<range>    </range>''")
+                doTestRange("''<range>    </range>''")
             }
 
             @Test
             fun `empty on two lines`() {
-                doRangeTest(
+                doTestRange(
                     """
                     |''
                     |<range>    </range>''""".trimMargin()
@@ -489,7 +611,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `single newline`() {
-                doRangeTest(
+                doTestRange(
                     """
                     |''
                     |<range>    ${""}
@@ -499,7 +621,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
             @Test
             fun `multiple lines`() {
-                doRangeTest(
+                doTestRange(
                     """
                     |''
                     |<range>    first line
@@ -510,7 +632,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
 
         }
 
-        fun doRangeTest(source: String) {
+        fun doTestRange(source: String) {
             val expected = Markers.parse(source, TAG_RANGE)
             ReadAction.run<RuntimeException> {
                 val stringElement = NixElementFactory.createString(myFixture.project, expected.unmarkedText())
