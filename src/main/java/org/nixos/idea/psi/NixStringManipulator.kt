@@ -1,5 +1,6 @@
 package org.nixos.idea.psi
 
+import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.AbstractElementManipulator
 import com.intellij.psi.util.PsiTreeUtil
@@ -21,61 +22,91 @@ class NixStringManipulator : AbstractElementManipulator<NixString>() {
         newContent: String,
     ): NixString {
         val oldText = element.text
-        val globalStartOffset = element.startOffset
+        val elementStartOffset = element.startOffset
         val indent = NixPsiUtil.getIndent(element)
 
-        val (firstToken, offsetInFirstToken) = let {
-            val token = element.node.findLeafElementAt(range.startOffset)!!
-            val offset = globalStartOffset + range.startOffset - token.startOffset
-            if (offset == 0) {
-                val prevToken = PsiTreeUtil.prevLeaf(token.psi)!!.node
-                val prevTokenType = prevToken.elementType
-                if (prevTokenType === NixTypes.STR || prevTokenType === NixTypes.IND_STR || prevTokenType === NixTypes.IND_STR_INDENT) {
-                    return@let Pair(prevToken, prevToken.textLength)
+        var startOffset = range.startOffset
+        var endOffset = range.endOffset
+
+        // Extend selection to include surrounding tokens of type STR, IND_STR, and IND_STR_INDENT.
+        // STR and IND_STR are consumed to avoid bugs regarding escape sequences.
+        // Like when inserting `$` before `{x}`, or a second `'` next to another one in indented strings.
+        // IND_STR_INDENT is consumed, because the indent is re-applied later.
+        val unescaped = StringBuilder(newContent.length).apply {
+            fun consumePrevious(token: ASTNode, offset: Int = token.textLength) {
+                val type = token.elementType
+                if (type === NixTypes.STR || type === NixTypes.IND_STR) {
+                    startOffset -= offset
+                    token.treePrev?.let { consumePrevious(it) }
+                    append(token.text, 0, offset)
+                } else if (type === NixTypes.IND_STR_INDENT) {
+                    startOffset -= offset.coerceAtMost(indent)
                 }
             }
-            Pair(token, offset)
-        }
 
-        val lookback = let {
-            val firstTokenType = firstToken.elementType
-            if (firstTokenType === NixTypes.STR || firstTokenType === NixTypes.IND_STR) {
-                offsetInFirstToken
+            val prevPartialToken = element.node.findLeafElementAt(range.startOffset - 1)!!
+            val prevPartialTokenOffset = elementStartOffset + range.startOffset - prevPartialToken.startOffset
+            if (NixTokenSets.STRING_ESCAPE.contains(prevPartialToken.elementType) && prevPartialTokenOffset != prevPartialToken.textLength) {
+                val remaining = prevPartialToken.textLength - prevPartialTokenOffset
+                val parsed = NixStringUtil.parse(prevPartialToken, indent)
+                startOffset -= prevPartialTokenOffset
+                prevPartialToken.treePrev?.let { consumePrevious(it) }
+                append(parsed, 0, (parsed.length - remaining).coerceAtLeast(0))
             } else {
-                0
+                consumePrevious(prevPartialToken, prevPartialTokenOffset)
+            }
+
+            append(newContent)
+
+            fun consumeNext(token: ASTNode, offset: Int = 0) {
+                val type = token.elementType
+                if (type === NixTypes.STR || type === NixTypes.IND_STR) {
+                    endOffset += token.textLength - offset
+                    append(token.text, offset, token.textLength)
+                    token.treeNext?.let { consumeNext(it) }
+                } else if (type === NixTypes.IND_STR_INDENT) {
+                    val tokenEnd = token.startOffset + token.textLength.coerceAtMost(indent)
+                    endOffset = (tokenEnd - elementStartOffset).coerceAtLeast(endOffset)
+                }
+            }
+
+            val nextPartialToken = element.node.findLeafElementAt(range.endOffset)!!
+            val nextPartialTokenOffset = elementStartOffset + range.endOffset - nextPartialToken.startOffset
+            if (NixTokenSets.STRING_ESCAPE.contains(nextPartialToken.elementType) && nextPartialTokenOffset != 0) {
+                val remaining = nextPartialToken.textLength - nextPartialTokenOffset
+                val parsed = NixStringUtil.parse(nextPartialToken, indent)
+                endOffset += remaining
+                append(parsed, (parsed.length - remaining).coerceAtLeast(0), parsed.length)
+                nextPartialToken.treeNext?.let { consumeNext(it) }
+            } else {
+                consumeNext(nextPartialToken, nextPartialTokenOffset)
             }
         }
 
         val newText = buildString((1.1 * oldText.length).toInt()) {
             when (element) {
                 is NixStdString -> {
-                    append(oldText, 0, range.startOffset)
-                    NixStringUtil.escapeStd(this, newContent, lookback)
-                    append(oldText, range.endOffset, oldText.length)
+                    append(oldText, 0, startOffset)
+                    NixStringUtil.escapeStd(this, unescaped, 0)
+                    append(oldText, endOffset, oldText.length)
                 }
 
                 is NixIndString -> {
                     var indentStart = false
                     var indentEnd = indent
-                    var startOffset = range.startOffset
-                    var endOffset = range.endOffset
 
                     // If we start right after the indent, trim the ident and re-apply it later
+                    val firstToken = element.node.findLeafElementAt(startOffset)!!
                     if (firstToken.elementType === NixTypes.IND_STR_INDENT) {
                         indentStart = true
-                        startOffset -= offsetInFirstToken.coerceAtMost(indent)
                     }
 
-                    // Remove trailing indent and re-applied it later.
-                    val nextPartialToken = element.node.findLeafElementAt(range.endOffset)!!
-                    if (nextPartialToken.elementType === NixTypes.IND_STR_INDENT) {
-                        val tokenEnd = nextPartialToken.startOffset + nextPartialToken.textLength.coerceAtMost(indent)
-                        endOffset = (tokenEnd - globalStartOffset).coerceAtLeast(endOffset)
-                    }
+                    // Preserve indent of closing quotes.
+                    // If (adjusted) range ends just before the closing quotes, overwrite [indentEnd].
                     val closingQuotes = element.node.lastChildNode
                     if (endOffset == closingQuotes.startOffsetInParent) {
-                        indentEnd = nextPartialToken
-                            .let { if (nextPartialToken === closingQuotes) PsiTreeUtil.prevLeaf(nextPartialToken.psi)!!.node else it }
+                        indentEnd = element.node.findLeafElementAt(endOffset)!!
+                            .let { if (it === closingQuotes) PsiTreeUtil.prevLeaf(it.psi)!!.node else it }
                             .let { if (it.elementType === NixTypes.IND_STR_INDENT) it else null }
                             .let { it?.textLength ?: NixPsiUtil.getBaseIndent(element) }
                     }
@@ -99,7 +130,7 @@ class NixStringManipulator : AbstractElementManipulator<NixString>() {
                         append(oldText, 0, startOffset)
                     }
 
-                    NixStringUtil.escapeInd(this, newContent, indent, indentStart, indentEnd, lookback)
+                    NixStringUtil.escapeInd(this, unescaped, indent, indentStart, indentEnd, 0)
                     append(oldText, endOffset, oldText.length)
                 }
 

@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-abstract public class AbstractNixPsiElement extends ASTWrapperPsiElement implements NixPsiElement {
+abstract class AbstractNixPsiElement extends ASTWrapperPsiElement implements NixPsiElement {
 
     private static final Key<CachedValue<AbstractNixDeclarationHost>> KEY_DECLARATION_HOST = Key.create("AbstractNixPsiElement.declarationHost");
     private static final Key<CachedValue<Scope>> KEY_SCOPE = Key.create("AbstractNixPsiElement.scope");

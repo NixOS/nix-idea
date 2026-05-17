@@ -1,6 +1,8 @@
 package org.nixos.idea.util
 
 object NixIndStringUtil {
+    // TODO Delete
+
     /**
      * Unescapes the given string for use in a double-quoted string expression in the Nix Expression Language.
      *

@@ -93,9 +93,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             }
 
             @Test
-            @Disabled("not supported")
             fun `insert mid escape sequence`() {
-                // TODO Do we need to support this? What would we expect?
                 doTestChange(
                     """"|\<range/>n|"""",
                     "test",
@@ -258,6 +256,24 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             }
 
             @Test
+            fun `add quote before escape sequence`() {
+                doTestChange(
+                    $$"''|<range/>''${x}|''",
+                    "'",
+                    $$"''|'''${x}|''",
+                )
+            }
+
+            @Test
+            fun `add quote long before escape sequence`() {
+                doTestChange(
+                    $$"''|<range/>''''''''''''''${x}|''",
+                    "'",
+                    $$"''|'''''''''''''$''\\{x}|''",
+                )
+            }
+
+            @Test
             fun `remove line`() {
                 doTestChange(
                     """
@@ -276,6 +292,29 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
                         |''""".trimMargin(),
                 )
             }
+
+// TODO The following test cannot reproduce the issue of NixInjectionPerformerTest.Miscellaneous.new_line_at_document_start
+//            @Test
+//            fun `add line feed at the start of the document`() {
+//                // This is how the fragment editor will usually do
+//                doTestChange(
+//                    """
+//                        |''
+//                        |  <range>first line
+//                        |</range>  second line
+//                        |''""".trimMargin(),
+//                    """
+//                        |
+//                        |first line
+//                        |""".trimMargin(),
+//                    """
+//                        |''
+//                        |
+//                        |  first line
+//                        |  second line
+//                        |''""".trimMargin(),
+//                )
+//            }
 
             @Test
             fun `replace single line`() {
@@ -438,9 +477,7 @@ class NixStringManipulatorTest(private val myFixture: CodeInsightTestFixture) {
             }
 
             @Test
-            @Disabled("not supported")
             fun `insert mid escape sequence`() {
-                // TODO Do we need to support this? What would we expect?
                 doTestChange(
                     "''|''<range/>'|''",
                     "test",

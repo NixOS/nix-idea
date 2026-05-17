@@ -106,6 +106,8 @@ final class NixStringUtilTest {
             |'${|           , 2, false, 0, |'$''\\{|
             |\r|            , 2, false, 0, |''\\r|
             |\t|            , 2, false, 0, |''\\t|
+            |'\t|           , 2, false, 0, |''\\'''\\t|
+            |'\r|           , 2, false, 0, |''\\'''\\r|
             # Should not be escaped
             |\\|            , 2, false, 0, |\\|
             |\\x|           , 2, false, 0, |\\x|

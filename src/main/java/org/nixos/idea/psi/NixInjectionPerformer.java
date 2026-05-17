@@ -11,7 +11,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
-import org.nixos.idea.util.NixStringUtil;
 
 public class NixInjectionPerformer implements LanguageInjectionPerformer {
 

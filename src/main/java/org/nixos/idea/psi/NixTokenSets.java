@@ -31,6 +31,8 @@ public final class NixTokenSets {
     public static final TokenSet OPENING_QUOTES = TokenSet.create(NixTypes.STRING_OPEN, NixTypes.IND_STRING_OPEN);
     /** All tokens representing closing quotes. */
     public static final TokenSet CLOSING_QUOTES = TokenSet.create(NixTypes.STRING_CLOSE, NixTypes.IND_STRING_CLOSE);
+    /** All tokens representing escape sequences. */
+    public static final TokenSet STRING_ESCAPE = TokenSet.create(NixTypes.STR_ESCAPE, NixTypes.IND_STR_ESCAPE);
     /** All tokens representing text inside a string. */
     public static final TokenSet STRING_CONTENT = TokenSet.create(NixTypes.STR, NixTypes.STR_ESCAPE, NixTypes.IND_STR_INDENT, NixTypes.IND_STR, NixTypes.IND_STR_ESCAPE, NixTypes.IND_STR_LF);
     /** All tokens representing any part of a string, except interpolations. */

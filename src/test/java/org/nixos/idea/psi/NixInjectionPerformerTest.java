@@ -260,6 +260,28 @@ final class NixInjectionPerformerTest {
             );
         }
 
+        @Test
+        void new_line_at_document_start() {
+            doTestUpdate(
+                    """
+                            ''
+                              <caret>1
+                              2
+                              3
+                            ''
+                            """,
+                    "\n\n\b",
+                    """
+                            ''
+                            
+                              1
+                              2
+                              3
+                            ''
+                            """
+            );
+        }
+
     }
 
     @Nested
@@ -490,7 +512,6 @@ final class NixInjectionPerformerTest {
         }
 
         @Test
-        @Disabled("issue6") // TODO
         void multiselection() {
             doTestUpdate(
                     """

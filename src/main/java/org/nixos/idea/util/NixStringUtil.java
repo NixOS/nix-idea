@@ -147,9 +147,15 @@ public final class NixStringUtil {
                     }
                     break;
                 case '\r':
+                    if (potentialClosing) {
+                        builder.append("'\\'");
+                    }
                     builder.append("''\\r");
                     break;
                 case '\t':
+                    if (potentialClosing) {
+                        builder.append("'\\'");
+                    }
                     builder.append("''\\t");
                     break;
                 case '\n':
