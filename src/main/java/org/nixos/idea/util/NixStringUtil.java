@@ -111,9 +111,11 @@ public final class NixStringUtil {
      * @param indentEnd   The number as spaces used for indentation in the last line
      */
     public static void escapeInd(@NotNull StringBuilder builder, @NotNull CharSequence unescaped, int indent, boolean indentStart, int indentEnd, int lookback) {
+        // TODO Document lookback. Highlight that it does not support ''' and other escape sequences
         String indentStr = " ".repeat(indent);
         boolean potentialInterpolation = false;
         boolean potentialClosing = lookback > 0 && builder.charAt(builder.length() - 1) == '\'';
+        boolean quoteBeforeDollar = lookback > 1 && builder.charAt(builder.length() - 1) == '$' && builder.charAt(builder.length() - 2) == '\'';
         for (int i = builder.length() - 1; lookback-- > 0 && builder.charAt(i) == '$'; i--) {
             potentialInterpolation = !potentialInterpolation;
         }
@@ -132,11 +134,15 @@ public final class NixStringUtil {
                     builder.append('\'');
                     break;
                 case '{':
-                    // Convert `${` to `''${`, but leave `$${` untouched
-                    if (potentialInterpolation) {
+                    if (quoteBeforeDollar) {
+                        // Convert `'${` to `'$''\{`
+                        builder.append("''\\{");
+                    } else if (potentialInterpolation) {
+                        // Convert `${` to `''${`
                         builder.setLength(builder.length() - 1);
                         builder.append("''${");
                     } else {
+                        // Leave `$${` untouched
                         builder.append('{');
                     }
                     break;
@@ -154,6 +160,7 @@ public final class NixStringUtil {
                     builder.append(nextChar);
                     break;
             }
+            quoteBeforeDollar = nextChar == '$' && potentialClosing;
             potentialInterpolation = nextChar == '$' && !potentialInterpolation;
             potentialClosing = nextChar == '\'' && !potentialClosing;
         }

@@ -52,7 +52,7 @@ final class NixStringUtilTest {
             \uD83C\uDF09    , \uD83C\uDF09
             """)
     void escapeStd(String unescaped, String expectedResult) {
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder(expectedResult.length());
         NixStringUtil.escapeStd(stringBuilder, unescaped, 0);
         assertEquals(expectedResult, stringBuilder.toString());
     }
@@ -89,11 +89,11 @@ final class NixStringUtilTest {
     @CsvSource(quoteCharacter = '|', textBlock = """
             # Indent non-empty lines
             ||              , 4, false, 2, ||
-            ||              , 4, true , 2, ||
+            ||              , 4, true , 2, |  |
             |a|             , 4, false, 2, |a|
             |a|             , 4, true , 2, |    a|
-            |\n\n|          , 4, false, 2, |\n|
-            |\n\n|          , 4, true , 2, |\n|
+            |\n\n|          , 4, false, 2, |\n\n  |
+            |\n\n|          , 4, true , 2, |\n\n  |
             | \n \n|        , 4, false, 2, | \n     \n  |
             | \n \n |       , 4, false, 2, | \n     \n     |
             | \n \n|        , 4, true , 2, |     \n     \n  |
@@ -103,6 +103,7 @@ final class NixStringUtilTest {
             |'''|           , 2, false, 0, |''''|
             |''''|          , 2, false, 0, |''''''|
             |${|            , 2, false, 0, |''${|
+            |'${|           , 2, false, 0, |'$''\\{|
             |\r|            , 2, false, 0, |''\\r|
             |\t|            , 2, false, 0, |''\\t|
             # Should not be escaped
@@ -115,8 +116,39 @@ final class NixStringUtilTest {
             |\uD83C\uDF09|  , 2, false, 0, |\uD83C\uDF09|
             """)
     void escapeInd(String unescaped, int indent, boolean indentStart, int indentEnd, String expectedResult) {
-        StringBuilder stringBuilder = new StringBuilder();
-        NixStringUtil.escapeInd(stringBuilder, unescaped, indent, indentStart, indentEnd);
+        StringBuilder stringBuilder = new StringBuilder(expectedResult.length());
+        NixStringUtil.escapeInd(stringBuilder, unescaped, indent, indentStart, indentEnd, 0);
+        assertEquals(expectedResult, stringBuilder.toString());
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} -> {1}")
+    @CsvSource(quoteCharacter = '"', textBlock = """
+            # Add escape sequences only when not necessary
+            "|$$|{x}"        , "$${x}"
+            "|$$$|{x}"       , "$$''${x}"
+            "|$$$|${}"       , "$$$${}"
+            "|$$$$|${}"      , "$$$$''${}"
+            "|'|'"           , "'''"
+            "|'$|{x}"        , "'$''\\{x}"
+            "|$'|${x}"       , "$'$''\\{x}"
+            # Ignore anything before the look-back marker
+            "$|$|{x}"        , "$''${x}"
+            "$|$$|{x}"       , "$$${x}"
+            "$|$$|${}"       , "$$$''${}"
+            "$|$$$|${}"      , "$$$$${}"
+            "'||'"           , "''"
+            "'''||'"         , "''''"
+            # Only look at trailing dolla signs
+            "|$x|${}"        , "$x''${}"
+            "|$x$|{}"        , "$x''${}"
+            "|'$'|'"         , "'$'''"
+            "|'$$'|'"        , "'$$'''"
+            """)
+    void escapeIndWithLookback(String unescaped, String expectedResult) {
+        String[] split = unescaped.split("[|]", 3);
+        StringBuilder stringBuilder = new StringBuilder(expectedResult.length());
+        stringBuilder.append(split[0]).append(split[1]);
+        NixStringUtil.escapeInd(stringBuilder, split[2], 0, false, 0, split[1].length());
         assertEquals(expectedResult, stringBuilder.toString());
     }
 
