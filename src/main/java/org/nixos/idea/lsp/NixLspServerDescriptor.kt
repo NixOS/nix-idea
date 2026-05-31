@@ -33,20 +33,26 @@ internal class NixLspServerDescriptor(project: Project, private var settings: Ni
 
     override val lspCustomization: LspCustomization = object : LspCustomization() {
         override val codeActionsCustomizer = object : LspCodeActionsSupport() {
-            private fun getNoogleUrl(codeAction: CodeAction): String? =
-                (codeAction.data as? JsonObject)?.get("noogleUrl")?.asString
-
-            override fun createIntentionAction(lspServer: LspServer, codeAction: CodeAction): LspIntentionAction? {
-                if (getNoogleUrl(codeAction) != null) {
-                    /* set an empty edit to prevent the IDE from calling
-                       the LSP server and automatically opening the url */
-                    codeAction.edit = WorkspaceEdit()
-                    return object : LspIntentionAction(lspServer, codeAction) {
-                        override fun invoke(project: Project, editor: Editor, psiFile: PsiFile) {
-                            BrowserUtil.open(getNoogleUrl(codeAction)!!)
-                        }
+            private fun handleOpenNoogleCodeAction(lspServer: LspServer, codeAction: CodeAction): LspIntentionAction? {
+                var noogleUrl = (codeAction.data as? JsonObject)?.get("noogleUrl")?.asString ?: return null
+                /* set an empty edit to prevent the IDE from calling
+                   the LSP server and automatically opening the url */
+                codeAction.edit = WorkspaceEdit()
+                return object : LspIntentionAction(lspServer, codeAction) {
+                    override fun invoke(project: Project, editor: Editor, psiFile: PsiFile) {
+                        BrowserUtil.open(noogleUrl)
                     }
                 }
+            }
+
+            override fun createQuickFix(lspServer: LspServer, codeAction: CodeAction): LspIntentionAction? {
+                /* discard the "open Noogle" codeAction, or it will be shown twice */
+                handleOpenNoogleCodeAction(lspServer, codeAction)?.let {return null}
+                return super.createQuickFix(lspServer, codeAction)
+            }
+
+            override fun createIntentionAction(lspServer: LspServer, codeAction: CodeAction): LspIntentionAction? {
+                handleOpenNoogleCodeAction(lspServer, codeAction)?.let {return it}
                 return super.createIntentionAction(lspServer, codeAction)
             }
         }
