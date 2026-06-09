@@ -14,6 +14,12 @@
 
 ### Security
 
+## [0.4.0.21] - 2026-06-09
+
+### Fixed
+
+- Unprompted opening of noogle.dev on syntax errors when using `nixd` as language server ([#101](https://github.com/NixOS/nix-idea/pull/101))
+
 ## [0.4.0.20] - 2026-05-04
 
 ### Added
@@ -301,7 +307,7 @@ the plugin.
 
 - Update project to build for recent IJ versions
 
-[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.20...HEAD
+[Unreleased]: https://github.com/NixOS/nix-idea/compare/v0.4.0.21...HEAD
 [0.4.0.9]: https://github.com/NixOS/nix-idea/compare/v0.4.0.8...v0.4.0.9
 [0.4.0.8]: https://github.com/NixOS/nix-idea/compare/v0.4.0.7...v0.4.0.8
 [0.4.0.7]: https://github.com/NixOS/nix-idea/compare/v0.4.0.6...v0.4.0.7
@@ -309,6 +315,7 @@ the plugin.
 [0.4.0.5]: https://github.com/NixOS/nix-idea/compare/v0.4.0.4...v0.4.0.5
 [0.4.0.4]: https://github.com/NixOS/nix-idea/compare/v0.4.0.3...v0.4.0.4
 [0.4.0.3]: https://github.com/NixOS/nix-idea/compare/v0.4.0.2...v0.4.0.3
+[0.4.0.21]: https://github.com/NixOS/nix-idea/compare/v0.4.0.20...v0.4.0.21
 [0.4.0.20]: https://github.com/NixOS/nix-idea/compare/v0.4.0.19...v0.4.0.20
 [0.4.0.2]: https://github.com/NixOS/nix-idea/compare/v0.4.0.1...v0.4.0.2
 [0.4.0.19]: https://github.com/NixOS/nix-idea/compare/v0.4.0.18...v0.4.0.19
