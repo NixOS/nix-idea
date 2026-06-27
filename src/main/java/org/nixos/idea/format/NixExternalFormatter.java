@@ -60,6 +60,10 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
         List<String> argv = ParametersListUtil.parse(command, false, true);
         var commandLine = new GeneralCommandLine(argv);
 
+        if (nixSettings.isFormatCommandRunInFileDirectory()) {
+            commandLine.setWorkDirectory(ioFile.getParent());
+        }
+
         return new FormattingTask() {
             private @Nullable OSProcessHandler handler;
             private boolean canceled;

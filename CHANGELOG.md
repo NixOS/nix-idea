@@ -4,6 +4,8 @@
 
 ### Added
 
+- Support `nix fmt` as external formatter ([#102](https://github.com/NixOS/nix-idea/pull/102))
+
 ### Changed
 
 ### Deprecated
