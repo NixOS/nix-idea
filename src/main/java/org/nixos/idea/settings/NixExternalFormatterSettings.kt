@@ -21,12 +21,14 @@ class NixExternalFormatterSettings : SimplePersistentStateComponent<NixExternalF
         var enabled by property(false)
         var command by string()
         var history: Deque<String> by property(ArrayDeque(), { it.isEmpty() })
+        var runInFileDirectory by property(false)
     }
 
     var isFormatEnabled: Boolean by delegate(State::enabled)
     var formatCommand: String by delegate(State::command, State::history)
     val commandHistory: Collection<String>
         get() = Collections.unmodifiableCollection(state.history)
+    var isFormatCommandRunInFileDirectory: Boolean by delegate(State::runInFileDirectory)
 
     companion object {
         @JvmStatic

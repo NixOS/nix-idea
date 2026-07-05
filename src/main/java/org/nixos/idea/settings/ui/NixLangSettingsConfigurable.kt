@@ -50,6 +50,11 @@ class NixLangSettingsConfigurable :
                             it.text.isNullOrBlank()
                         }
                 }
+                row() {
+                    checkBox("Run formatter in file's parent directory")
+                        .bindSelected(settings::isFormatCommandRunInFileDirectory)
+                        .comment("<html>Required for <b>nix fmt</b> to work.</html>")
+                }
             }.enabledIf(enabledCheckBox.selected)
         }
     }
@@ -64,5 +69,9 @@ private val BUILTIN_SUGGESTIONS: List<CommandSuggestionsPopup.Suggestion> = list
     CommandSuggestionsPopup.Suggestion.builtin(
         "<html>Use <b>nixpkgs-fmt</b> from nixpkgs</html>",
         "nix --extra-experimental-features \"nix-command flakes\" run nixpkgs#nixpkgs-fmt"
+    ),
+    CommandSuggestionsPopup.Suggestion.builtin(
+        "<html>Use <b>nix fmt</b> from flake.nix</html>",
+        "nix --extra-experimental-features \"nix-command flakes\" fmt"
     )
 )
