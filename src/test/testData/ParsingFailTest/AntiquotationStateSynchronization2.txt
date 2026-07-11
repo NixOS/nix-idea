@@ -2,6 +2,8 @@ Nix File(0,16)
   NixExprAppImpl(EXPR_APP)(0,16)
     NixStdStringImpl(STD_STRING)(0,12)
       PsiElement(STRING_OPEN)('"')(0,1)
+      NixStringTextImpl(STRING_TEXT)(1,1)
+        <empty list>
       NixAntiquotationImpl(ANTIQUOTATION)(1,8)
         PsiElement($)('$')(1,2)
         PsiElement({)('{')(2,3)
