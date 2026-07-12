@@ -7,9 +7,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("java")
     kotlin("jvm") version embeddedKotlinVersion
-    alias(libs.plugins.jetbrains.intellij.platform)
     alias(libs.plugins.jetbrains.changelog)
-    alias(libs.plugins.jetbrains.grammarkit)
+    alias(libs.plugins.jetbrains.intellij.platform)
+    alias(libs.plugins.jetbrains.intellij.grammarkit)
     id("local.bump-version")
     id("local.jbr-guidance")
 }
@@ -69,10 +69,10 @@ dependencies {
 
         // version of IntelliJ patched JFlex
         // -> https://github.com/JetBrains/intellij-deps-jflex
-        jflex("1.9.2")
+        jflex("1.10.17")
         // tag or short commit hash of Grammar-Kit to use
         // -> https://github.com/JetBrains/Grammar-Kit
-        grammarKit("2023.3")
+        grammarKit("2023.3.4")
     }
 }
 
@@ -148,12 +148,11 @@ changelog {
     combinePreReleases = false
 }
 
-val lexerSource = layout.buildDirectory.dir("generated/sources/lexer/java/main")
 sourceSets {
     main {
         java {
-            srcDir(lexerSource)
-            srcDir(tasks.generateParser)
+            srcDir(tasks.generateLexer.flatMap { it.targetRootOutputDir })
+            srcDir(tasks.generateParser.flatMap { it.targetRootOutputDir })
         }
     }
 }
@@ -197,35 +196,35 @@ tasks {
         outputDir = layout.projectDirectory.dir("gradle")
         file(
             "productsReleases.txt",
-            intellijPlatform.pluginVerification.ides.ProductReleasesValueSource().map {
+            printProductsReleases.flatMap {
+                it.productsReleases
+            }.map {
                 it.joinToString("\n", "", "\n")
-            })
+            },
+        )
     }
 
     generateLexer {
         sourceFile = layout.projectDirectory.file("src/main/lang/Nix.flex")
-        targetOutputDir = lexerSource.map { it.dir("org/nixos/idea/lang") }
-        purgeOldFiles = true
+        pathToClass = "org/nixos/idea/lang/_NixLexer.java"
     }
 
     generateParser {
         sourceFile = layout.projectDirectory.file("src/main/lang/Nix.bnf")
-        targetRootOutputDir = layout.buildDirectory.dir("generated/sources/parser/java/main")
         // Maybe we can remove the following properties in the future
         // https://github.com/JetBrains/gradle-grammar-kit-plugin/issues/178
         pathToParser = "org/nixos/idea/lang/NixParser.java"
         pathToPsiRoot = "org/nixos/idea/psi"
-        purgeOldFiles = true
     }
 
     compileJava {
         dependsOn(generateLexer)
-        // dependency to generateParser is implicitly detected by Gradle
+        dependsOn(generateParser)
     }
 
     compileKotlin {
         dependsOn(generateLexer)
-        // dependency to generateParser is implicitly detected by Gradle
+        dependsOn(generateParser)
     }
 
     test {

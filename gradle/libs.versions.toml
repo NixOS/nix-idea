@@ -1,20 +1,36 @@
 # Gradle Version Catalog
 # -> https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
+[versions]
+# ── Production ───────────────────────────────
+# read more: https://github.com/JetBrains/java-annotations
+jetbrains-annotations = "26.1.0"
+
+# ── Testing ──────────────────────────────────
+# read more: https://github.com/raphw/byte-buddy
+bytebuddy = "1.18.11"
+# read more: https://github.com/junit-team/junit-framework
+junit5 = "6.1.1"
+# read more: https://github.com/junit-team/junit4
+junit4 = "4.13.2"
+
+# ── Plugins ──────────────────────────────────
+# read more: https://github.com/JetBrains/intellij-platform-gradle-plugin
+intellij-platform-gradle-plugin = "2.18.1"
+# read more: https://github.com/JetBrains/gradle-changelog-plugin
+jetbrains-changelog = "2.5.0"
+
 [libraries]
-jetbrains-annotations = { module = "org.jetbrains:annotations", version = "26.0.2-1" }
-junit5-bom = { module = "org.junit:junit-bom", version = "6.0.1" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
+junit5-bom = { module = "org.junit:junit-bom", version.ref = "junit5" }
 junit5-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit5-platform-testkit = { module = "org.junit.platform:junit-platform-testkit" }
 junit5-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine" }
-junit4 = { module = "junit:junit", version = "4.13.2" }
-bytebuddy = { module = "net.bytebuddy:byte-buddy", version = "1.18.8" }
-bytebuddy-agent = { module = "net.bytebuddy:byte-buddy-agent", version = "1.18.8" }
+junit4 = { module = "junit:junit", version.ref = "junit4" }
+bytebuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "bytebuddy" }
+bytebuddy-agent = { module = "net.bytebuddy:byte-buddy-agent", version.ref = "bytebuddy" }
 
 [plugins]
-# read more: https://github.com/JetBrains/intellij-platform-gradle-plugin
-jetbrains-intellij-platform = { id = "org.jetbrains.intellij.platform", version = "2.13.1" }
-# read more: https://github.com/JetBrains/gradle-changelog-plugin
-jetbrains-changelog = { id = "org.jetbrains.changelog", version = "2.5.0" }
-# read more: https://github.com/JetBrains/gradle-grammar-kit-plugin
-jetbrains-grammarkit = { id = "org.jetbrains.intellij.platform.grammarkit", version = "2.13.1" }
+jetbrains-changelog = { id = "org.jetbrains.changelog", version.ref = "jetbrains-changelog" }
+jetbrains-intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform-gradle-plugin" }
+jetbrains-intellij-grammarkit = { id = "org.jetbrains.intellij.platform.grammarkit", version.ref = "intellij-platform-gradle-plugin" }
