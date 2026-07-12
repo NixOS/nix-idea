@@ -15,16 +15,16 @@ plugins {
 }
 
 // Import variables from gradle.properties file
-val pluginGroup: String by project
-val pluginName: String by project
-val pluginVersion: String by project
-val pluginSinceBuild: String by project
+val pluginGroup = providers.gradleProperty("pluginGroup")
+val pluginName = providers.gradleProperty("pluginName")
+val pluginVersion = providers.gradleProperty("pluginVersion")
+val pluginSinceBuild = providers.gradleProperty("pluginSinceBuild")
 
-val platformType: String by project
-val platformVersion: String by project
+val platformType = providers.gradleProperty("platformType")
+val platformVersion = providers.gradleProperty("platformVersion")
 
-group = pluginGroup
-version = pluginVersion
+group = pluginGroup.get()
+version = pluginVersion.get()
 
 java {
     // Don't use Gradle's toolchain feature as it prevents building the project with more recent JDKs. Related issues:
@@ -48,7 +48,7 @@ repositories {
     }
 }
 
-val bytebuddyAgent by configurations.creating
+val bytebuddyAgent = configurations.register("bytebuddyAgent")
 dependencies {
     compileOnly(libs.jetbrains.annotations)
 
@@ -108,7 +108,7 @@ intellijPlatform {
         changeNotes = provider {
             with(changelog) {
                 renderItem(
-                    (getOrNull(pluginVersion) ?: getUnreleased())
+                    (getOrNull(pluginVersion.get()) ?: getUnreleased())
                         .withHeader(false)
                         .withEmptySections(false),
                     Changelog.OutputType.HTML
@@ -136,7 +136,10 @@ intellijPlatform {
         token = providers.environmentVariable("JETBRAINS_TOKEN")
         // Note: `listOf("foo").first()` does not what you think on Java 21 and Gradle 8.6. (The return type is TaskProvider<Task>)
         // See https://github.com/gradle/gradle/issues/27699 and https://youtrack.jetbrains.com/issue/KT-65235.
-        channels = listOf(pluginVersion.split('-').getOrElse(1) { "default" }.split('.')[0])
+        channels = pluginVersion
+            .map { it.split('-').getOrNull(1) }
+            .map { listOf(it.split('.')[0]) }
+            .orElse(listOf("default"))
     }
 }
 
@@ -144,7 +147,7 @@ changelog {
     repositoryUrl = "https://github.com/NixOS/nix-idea"
     lineSeparator = "\n"
     // Workarounds because our version numbers do not match the format of semantic versioning:
-    headerParserRegex = "^[-._+0-9a-zA-Z]+\$"
+    headerParserRegex = "^[-._+0-9a-zA-Z]+$"
     combinePreReleases = false
 }
 
@@ -159,7 +162,7 @@ sourceSets {
 
 tasks {
 
-    val runIntellij by intellijPlatformTesting.runIde.registering {
+    intellijPlatformTesting.runIde.register("runIntellij") {
         type = IntelliJPlatformType.IntellijIdeaCommunity
     }
 
@@ -176,13 +179,14 @@ tasks {
     }
 
     register<MetadataTask>("metadata") {
+        description = "Writes metadata used by the CI to build/metadata"
         outputDir = layout.buildDirectory.dir("metadata")
         file("version.txt", pluginVersion)
         file("zipfile.txt") { buildPlugin.get().archiveFile.get().toString() }
         file("latest_changelog.md") {
             with(changelog) {
                 renderItem(
-                    (getOrNull(pluginVersion) ?: getUnreleased())
+                    (getOrNull(pluginVersion.get()) ?: getUnreleased())
                         .withHeader(false)
                         .withEmptySections(false),
                     Changelog.OutputType.MARKDOWN
@@ -192,6 +196,7 @@ tasks {
     }
 
     register<MetadataTask>("updateProductsReleases") {
+        description = "Updates gradle/productsReleases.txt used by Plugin Verifier"
         doNotTrackState("Updates files outside of build directory")
         outputDir = layout.projectDirectory.dir("gradle")
         file(
@@ -233,7 +238,7 @@ tasks {
         }
 
         jvmArgs(
-            "-javaagent:${bytebuddyAgent.singleFile}"
+            "-javaagent:${bytebuddyAgent.get().singleFile}"
         )
     }
 
