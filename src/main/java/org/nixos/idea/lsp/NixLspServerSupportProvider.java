@@ -16,7 +16,10 @@ public final class NixLspServerSupportProvider implements LspServerSupportProvid
     public void fileOpened(@NotNull Project project, @NotNull VirtualFile virtualFile, @NotNull LspServerStarter lspServerStarter) {
         if (virtualFile.getFileType() == NixFileType.INSTANCE) {
             NixLspSettings settings = NixLspSettings.getInstance();
-            if (settings.isEnabled()) {
+            if (settings.isDevenvEnabled()
+                    && DevenvLspServerDescriptor.DEVENV_FILE_NAME.equals(virtualFile.getName())) {
+                lspServerStarter.ensureServerStarted(new DevenvLspServerDescriptor(project, settings));
+            } else if (settings.isEnabled()) {
                 lspServerStarter.ensureServerStarted(new NixLspServerDescriptor(project, settings));
             }
         }

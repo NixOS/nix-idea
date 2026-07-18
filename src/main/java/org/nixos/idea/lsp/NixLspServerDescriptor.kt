@@ -18,17 +18,24 @@ import org.eclipse.lsp4j.CodeAction
 import org.eclipse.lsp4j.WorkspaceEdit
 import org.nixos.idea.file.NixFileType
 
-internal class NixLspServerDescriptor(project: Project, private var settings: NixLspSettings) :
-    ProjectWideLspServerDescriptor(project, "Nix") {
+internal open class NixLspServerDescriptor @JvmOverloads constructor(
+    project: Project,
+    protected val settings: NixLspSettings,
+    presentableName: String = "Nix",
+) : ProjectWideLspServerDescriptor(project, presentableName) {
+
+    protected open val commandString: String
+        get() = settings.command
 
     @Throws(ExecutionException::class)
     override fun createCommandLine(): GeneralCommandLine {
-        val argv = ParametersListUtil.parse(settings.command, false, true)
+        val argv = ParametersListUtil.parse(commandString, false, true)
         return GeneralCommandLine(argv)
     }
 
     override fun isSupportedFile(file: VirtualFile): Boolean {
-        return file.fileType === NixFileType.INSTANCE
+        return file.fileType === NixFileType.INSTANCE &&
+                !(settings.isDevenvEnabled && file.name == DevenvLspServerDescriptor.DEVENV_FILE_NAME)
     }
 
     override val lspCustomization: LspCustomization = object : LspCustomization() {

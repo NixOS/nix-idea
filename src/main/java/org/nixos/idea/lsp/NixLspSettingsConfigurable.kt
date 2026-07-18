@@ -44,6 +44,25 @@ class NixLspSettingsConfigurable :
                     }
             }
         }.enabledIf(enabledCheckBox.selected)
+        lateinit var devenvCheckBox: Cell<JBCheckBox>
+        row {
+            devenvCheckBox = checkBox("Enable devenv.sh integration for devenv.nix files")
+                .bindSelected(settings::isDevenvEnabled)
+        }
+        group("Devenv Language Server Configuration") {
+            row("Command:") {
+                cell(RawCommandLineEditor())
+                    .bindText(settings::devenvCommand)
+                    .placeholderText("Command to start devenv Language Server")
+                    .suggestionsPopup(settings.devenvCommandHistory, DEVENV_SUGGESTIONS)
+                    .align(AlignX.FILL)
+                    .validateOnReset()
+                    .validateWhenTextChanged()
+                    .warnOnInput("You have to specify the command to start the Language Server") {
+                        it.text.isNullOrBlank()
+                    }
+            }
+        }.enabledIf(devenvCheckBox.selected)
     }
 
     @Suppress("UnstableApiUsage")
@@ -64,5 +83,12 @@ private val BUILTIN_SUGGESTIONS: List<CommandSuggestionsPopup.Suggestion> = list
     CommandSuggestionsPopup.Suggestion.builtin(
         "<html>Use <b>nixd</b> from nixpkgs</html>",
         "nix --extra-experimental-features \"nix-command flakes\" run nixpkgs#nixd"
+    )
+)
+
+private val DEVENV_SUGGESTIONS: List<CommandSuggestionsPopup.Suggestion> = listOf(
+    CommandSuggestionsPopup.Suggestion.builtin(
+        "<html>Use <b>devenv lsp</b> (requires devenv on PATH)</html>",
+        "devenv lsp"
     )
 )

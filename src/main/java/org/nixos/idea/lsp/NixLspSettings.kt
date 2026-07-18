@@ -19,6 +19,9 @@ class NixLspSettings : SimplePersistentStateComponent<NixLspSettings.State>(Stat
         var enabled by property(false)
         var command by string()
         var history: Deque<String> by property(ArrayDeque(), { it.isEmpty() })
+        var devenvEnabled by property(false)
+        var devenvCommand by string(DEFAULT_DEVENV_COMMAND)
+        var devenvHistory: Deque<String> by property(ArrayDeque(), { it.isEmpty() })
     }
 
     var isEnabled: Boolean by delegate(State::enabled)
@@ -26,7 +29,15 @@ class NixLspSettings : SimplePersistentStateComponent<NixLspSettings.State>(Stat
     val commandHistory: Collection<String>
         get() = Collections.unmodifiableCollection(state.history)
 
+    @get:JvmName("isDevenvEnabled")
+    var isDevenvEnabled: Boolean by delegate(State::devenvEnabled)
+    var devenvCommand: String by delegate(State::devenvCommand, State::devenvHistory)
+    val devenvCommandHistory: Collection<String>
+        get() = Collections.unmodifiableCollection(state.devenvHistory)
+
     companion object {
+        const val DEFAULT_DEVENV_COMMAND = "devenv lsp"
+
         @JvmStatic
         fun getInstance(): NixLspSettings {
             return ApplicationManager.getApplication().getService(NixLspSettings::class.java)
