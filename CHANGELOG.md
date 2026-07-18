@@ -4,6 +4,8 @@
 
 ### Added
 
+- Completion and documentation for devenv options in `devenv.nix` files via the `devenv lsp` language server
+
 ### Changed
 
 ### Deprecated
