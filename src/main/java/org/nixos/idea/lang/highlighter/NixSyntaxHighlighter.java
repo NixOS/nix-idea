@@ -55,6 +55,8 @@ public class NixSyntaxHighlighter extends SyntaxHighlighterBase {
             entry(NixTypes.AND, NixTextAttributes.OPERATION_SIGN),
             entry(NixTypes.OR, NixTextAttributes.OPERATION_SIGN),
             entry(NixTypes.IMPL, NixTextAttributes.OPERATION_SIGN),
+            entry(NixTypes.PIPE_FROM, NixTextAttributes.OPERATION_SIGN),
+            entry(NixTypes.PIPE_INTO, NixTextAttributes.OPERATION_SIGN),
             // Parentheses
             entry(NixTypes.LPAREN, NixTextAttributes.PARENTHESES),
             entry(NixTypes.RPAREN, NixTextAttributes.PARENTHESES),

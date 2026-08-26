@@ -75,6 +75,8 @@
     AND = '&&'
     OR = '||'
     IMPL = '->'
+    PIPE_FROM = '<|'
+    PIPE_INTO = '|>'
 
     // This two tokens must be declared here because they are not used by the
     // parser and therefore not declared anywhere else in the file.
@@ -122,7 +124,8 @@ parameter_name ::= ID { implements=identifier }
 // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360001258300-What-s-the-alternative-to-left-recursion-in-GrammarKit-#community_comment_360000201199
 ;{ extends("expr_op_.*")=expr_op }
 expr_op ::=
-    expr_op_implication
+    group_pipe
+  | expr_op_implication
   | expr_op_or
   | expr_op_and
   | group_eq
@@ -139,7 +142,10 @@ private group_eq ::= expr_op_eq | expr_op_ne
 private group_cmp ::= expr_op_lt | expr_op_le | expr_op_gt | expr_op_ge
 private group_add ::= expr_op_plus | expr_op_minus
 private group_mul ::= expr_op_mul | expr_op_div
+private group_pipe ::= expr_op_pipe_from | expr_op_pipe_into
 
+expr_op_pipe_from ::= expr_op PIPE_FROM expr_op { rightAssociative=true }
+expr_op_pipe_into ::= expr_op PIPE_INTO expr_op
 expr_op_implication ::= expr_op IMPL expr_op
 expr_op_or ::= expr_op OR expr_op
 expr_op_and ::= expr_op AND expr_op
