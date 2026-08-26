@@ -193,7 +193,7 @@ expr_uri ::= URI
 ;{ extends("expr_lookup_path|expr_std_path")=expr_path }
 expr_path ::= expr_lookup_path | expr_std_path
 expr_lookup_path ::= SPATH
-expr_std_path ::= PATH_SEGMENT (PATH_SEGMENT | antiquotation)* PATH_END {
+expr_std_path ::= PATH_SEGMENT (PATH_SEGMENT | interpolation)* PATH_END {
   mixin="org.nixos.idea.psi.impl.NixExprStdPathMixin"
 }
 expr_parens ::= LPAREN expr recover_parens RPAREN { pin=1 }
@@ -209,11 +209,11 @@ private list_recover ::= brac_recover !expr_select
 std_string ::= STRING_OPEN string_part* STRING_CLOSE { pin=1 }
 ind_string ::= IND_STRING_OPEN string_part* IND_STRING_CLOSE { pin=1 }
 fake string ::= string_part* { methods=[ string_parts="string_part" ] }
-;{ extends("string_text|antiquotation")=string_part }
-string_part ::= string_text | antiquotation { recoverWhile=string_part_recover }
+;{ extends("string_text|interpolation")=string_part }
+string_part ::= string_text | interpolation { recoverWhile=string_part_recover }
 string_text ::= string_token+
-antiquotation ::= DOLLAR LCURLY expr recover_antiquotation RCURLY { pin=1 }
-private recover_antiquotation ::= { recoverWhile=curly_recover }
+interpolation ::= DOLLAR LCURLY expr recover_interpolation RCURLY { pin=1 }
+private recover_interpolation ::= { recoverWhile=curly_recover }
 private string_part_recover ::= !(DOLLAR | STRING_CLOSE | IND_STRING_CLOSE | string_token)
 private string_token ::= STR | IND_STR | STR_ESCAPE | IND_STR_ESCAPE
 
@@ -232,7 +232,7 @@ private missing_semi ::= <<parseIsBindValue>> ( RCURLY | IN | is_bind )
 ;{ extends(".*_attr")=attr }
 attr ::= std_attr | string_attr
 std_attr ::= ID | OR_KW { implements=identifier }
-string_attr ::= std_string | antiquotation
+string_attr ::= std_string | interpolation
 
 attr_path ::= attr ( attr_path_inner )* { methods=[ firstAttr="/attr[0]" ] }
 private attr_path_inner ::= DOT attr { pin=1 }

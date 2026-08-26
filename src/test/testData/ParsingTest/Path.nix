@@ -3,7 +3,7 @@
 ./builder.sh
 ~/foo
 <nixpkgs>
-# antiquotations
+# interpolations
 /${fileName}
 /${fileName}/
 ./${foo}-${bar}.nix

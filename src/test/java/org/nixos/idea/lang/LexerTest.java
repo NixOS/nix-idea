@@ -4,7 +4,7 @@ import com.intellij.lexer.Lexer;
 import com.intellij.testFramework.LexerTestCase;
 
 public final class LexerTest extends LexerTestCase {
-  public void testRestartabilityWithAntiquotations() {
+  public void testRestartabilityWithStringInterpolation() {
     // Checks that the lexer is restartable. See
     // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360010305800
     checkCorrectRestart("""
@@ -12,8 +12,8 @@ public final class LexerTest extends LexerTestCase {
               ${
                 [
                   "pure string",
-                  "string with ${antiquotation}",
-                  ''ind string with ${multiple} ${antiquotations}''
+                  "string with ${interpolation}",
+                  ''ind string with ${multiple} ${interpolations}''
                 ]
               }
             ''

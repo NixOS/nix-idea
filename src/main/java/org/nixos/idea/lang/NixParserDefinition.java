@@ -68,11 +68,11 @@ public class NixParserDefinition implements ParserDefinition {
             return SpaceRequirements.MUST_NOT;
         }
         else if (leftType == NixTypes.PATH_SEGMENT) {
-            // path segment, antiquotation or PATH_END on the right
+            // path segment, interpolation or PATH_END on the right
             return SpaceRequirements.MUST_NOT;
         }
         else if (rightType == NixTypes.PATH_END) {
-            // path segment or antiquotation on the left
+            // path segment or interpolation on the left
             return SpaceRequirements.MUST_NOT;
         }
         else if (NixTokenSets.MIGHT_COLLAPSE_WITH_ID.contains(leftType) &&

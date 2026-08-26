@@ -18,16 +18,6 @@ public final class ParsingFailTest extends ParsingTestCase {
   //  https://nixos.org/manual/nix/stable/#ch-expression-language
   //  https://github.com/NixOS/nix/blob/master/src/libexpr/parser.y
 
-  public void testAntiquotationStateSynchronization1() {
-    // See https://intellij-support.jetbrains.com/hc/en-us/community/posts/360010379000
-    doTest(true);
-  }
-
-  public void testAntiquotationStateSynchronization2() {
-    // See https://intellij-support.jetbrains.com/hc/en-us/community/posts/360010379000
-    doTest(true);
-  }
-
   public void testComment() {
     doTest(true);
   }
@@ -49,10 +39,6 @@ public final class ParsingFailTest extends ParsingTestCase {
   }
 
   public void testMissingSemicolonTrap() {
-    doTest(true);
-  }
-
-  public void testRecoverFromAntiquotation() {
     doTest(true);
   }
 
@@ -88,11 +74,25 @@ public final class ParsingFailTest extends ParsingTestCase {
     doTest(true);
   }
 
+  public void testRecoverFromStringInterpolation() {
+    doTest(true);
+  }
+
   public void testRecoverFromWith() {
     doTest(true);
   }
 
   public void testRecWithoutSet() {
+    doTest(true);
+  }
+
+  public void testStringInterpolationStateSynchronization1() {
+    // See https://intellij-support.jetbrains.com/hc/en-us/community/posts/360010379000
+    doTest(true);
+  }
+
+  public void testStringInterpolationStateSynchronization2() {
+    // See https://intellij-support.jetbrains.com/hc/en-us/community/posts/360010379000
     doTest(true);
   }
 

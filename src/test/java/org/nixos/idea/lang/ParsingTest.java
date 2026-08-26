@@ -125,11 +125,11 @@ public final class ParsingTest extends ParsingTestCase {
     doTest(true);
   }
 
-  public void testStringWithAntiquotation() {
+  public void testStringWithEscapeSequences() {
     doTest(true);
   }
 
-  public void testStringWithEscapeSequences() {
+  public void testStringWithInterpolation() {
     doTest(true);
   }
 

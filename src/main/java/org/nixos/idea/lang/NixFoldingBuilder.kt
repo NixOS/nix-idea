@@ -8,7 +8,6 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
-import org.nixos.idea.psi.NixAntiquotation
 import org.nixos.idea.psi.NixBindInherit
 import org.nixos.idea.psi.NixElementVisitor
 import org.nixos.idea.psi.NixExprAttrs
@@ -16,6 +15,7 @@ import org.nixos.idea.psi.NixExprLet
 import org.nixos.idea.psi.NixExprList
 import org.nixos.idea.psi.NixExprParens
 import org.nixos.idea.psi.NixFormals
+import org.nixos.idea.psi.NixInterpolation
 import org.nixos.idea.psi.NixString
 import org.nixos.idea.psi.NixTypes
 
@@ -47,9 +47,9 @@ class NixFoldingBuilder : CustomFoldingBuilder() {
                 super.visitString(o)
             }
 
-            override fun visitAntiquotation(o: NixAntiquotation) {
+            override fun visitInterpolation(o: NixInterpolation) {
                 descriptors.add(FoldingDescriptor(o.node, o.textRange, null, "\${ ... }"))
-                return super.visitAntiquotation(o)
+                return super.visitInterpolation(o)
             }
 
             override fun visitExprList(o: NixExprList) {

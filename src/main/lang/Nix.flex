@@ -44,7 +44,7 @@ import static org.nixos.idea.psi.NixTypes.*;
 %function advance
 %type IElementType
 %unicode
-%state BLOCK STRING IND_STRING ANTIQUOTATION_START ANTIQUOTATION PATH
+%state BLOCK STRING IND_STRING INTERPOLATION_START INTERPOLATION PATH
 
 ANY=[^]
 ID=[a-zA-Z_][a-zA-Z0-9_'-]*
@@ -67,7 +67,7 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   [^\$\"\\]+            { return STR; }
   "$"|"$$"|\\           { return STR; }
   \\{ANY}               { return STR_ESCAPE; }
-  "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
+  "$"/"{"               { pushState(INTERPOLATION_START); return DOLLAR; }
   \"                    { popState(STRING); return STRING_CLOSE; }
 }
 
@@ -76,18 +76,18 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   "$"|"$$"|"'"          { return IND_STR; }
   "''$"|"'''"           { return IND_STR_ESCAPE; }
   "''"\\{ANY}           { return IND_STR_ESCAPE; }
-  "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
+  "$"/"{"               { pushState(INTERPOLATION_START); return DOLLAR; }
   "''"                  { popState(IND_STRING); return IND_STRING_CLOSE; }
 }
 
-<ANTIQUOTATION_START> {
+<INTERPOLATION_START> {
   // '$' and '{' must be two separate tokens to make NixBraceMatcher work
   // correctly with Grammar-Kit.
-  "{"                   { popState(ANTIQUOTATION_START); pushState(ANTIQUOTATION); return LCURLY; }
+  "{"                   { popState(INTERPOLATION_START); pushState(INTERPOLATION); return LCURLY; }
 }
 
-<ANTIQUOTATION> {
-  "}"                   { popState(ANTIQUOTATION); return RCURLY; }
+<INTERPOLATION> {
+  "}"                   { popState(INTERPOLATION); return RCURLY; }
 }
 
 <BLOCK> {
@@ -95,7 +95,7 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
 }
 
 <PATH> {
-  "$"/"{"               { pushState(ANTIQUOTATION_START); return DOLLAR; }
+  "$"/"{"               { pushState(INTERPOLATION_START); return DOLLAR; }
   {PATH_SEG}            { return PATH_SEGMENT; }
   {PATH_CHAR}+          { return PATH_SEGMENT; }
   // anything else, e.g. whitespace, stops lexing of a PATH
@@ -104,7 +104,7 @@ MCOMMENT=\/\*([^*]|\*[^\/])*\*\/
   [^]                   { popState(PATH); yypushback(yylength()); return PATH_END; }
 }
 
-<YYINITIAL, BLOCK, ANTIQUOTATION> {
+<YYINITIAL, BLOCK, INTERPOLATION> {
   "if"                  { return IF; }
   "then"                { return THEN; }
   "else"                { return ELSE; }
