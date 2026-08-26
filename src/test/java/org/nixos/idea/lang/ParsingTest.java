@@ -109,6 +109,10 @@ public final class ParsingTest extends ParsingTestCase {
     doTest(true);
   }
 
+  public void testPipeOperators() {
+    doTest(true);
+  }
+
   public void testRecursiveSet() {
     doTest(true);
   }

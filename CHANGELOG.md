@@ -4,6 +4,8 @@
 
 ### Added
 
+- Support for experimental pipe operators ([#106](https://github.com/NixOS/nix-idea/issues/106))
+
 ### Changed
 
 ### Deprecated
