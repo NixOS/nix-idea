@@ -173,11 +173,6 @@ tasks {
         options.encoding = "UTF-8"
     }
 
-    withType<Test> {
-        systemProperty("idea.test.execution.policy", "org.nixos.idea.NixTestExecutionPolicy")
-        systemProperty("plugin.testDataPath", rootProject.rootDir.resolve("src/test/testData").path)
-    }
-
     register<MetadataTask>("metadata") {
         description = "Writes metadata used by the CI to build/metadata"
         outputDir = layout.buildDirectory.dir("metadata")
@@ -233,9 +228,15 @@ tasks {
     }
 
     test {
+        val testDataPath = rootProject.rootDir.resolve("src/test/testData").path
+        inputs.dir(testDataPath).withPathSensitivity(PathSensitivity.RELATIVE)
+
         useJUnitPlatform {
             excludeTags("mock")
         }
+
+        systemProperty("idea.test.execution.policy", "org.nixos.idea.NixTestExecutionPolicy")
+        systemProperty("plugin.testDataPath", testDataPath)
 
         jvmArgs(
             "-javaagent:${bytebuddyAgent.get().singleFile}"
