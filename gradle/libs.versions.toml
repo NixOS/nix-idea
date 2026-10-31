@@ -8,15 +8,15 @@ jetbrains-annotations = "26.1.0"
 
 # ── Testing ──────────────────────────────────
 # read more: https://github.com/raphw/byte-buddy
-bytebuddy = "1.18.11"
+bytebuddy = "1.18.16"
 # read more: https://github.com/junit-team/junit-framework
-junit5 = "6.1.1"
+junit5 = "6.1.3"
 # read more: https://github.com/junit-team/junit4
 junit4 = "4.13.2"
 
 # ── Plugins ──────────────────────────────────
 # read more: https://github.com/JetBrains/intellij-platform-gradle-plugin
-intellij-platform-gradle-plugin = "2.18.1"
+intellij-platform-gradle-plugin = "2.19.0"
 # read more: https://github.com/JetBrains/gradle-changelog-plugin
 jetbrains-changelog = "2.5.0"
 

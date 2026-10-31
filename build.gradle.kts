@@ -69,7 +69,7 @@ dependencies {
 
         // version of IntelliJ patched JFlex
         // -> https://github.com/JetBrains/intellij-deps-jflex
-        jflex("1.10.17")
+        jflex("1.10.18")
         // tag or short commit hash of Grammar-Kit to use
         // -> https://github.com/JetBrains/Grammar-Kit
         grammarKit("2023.3.4")
