@@ -53,7 +53,7 @@ class NixLangSettingsConfigurable :
                 row() {
                     checkBox("Run formatter in file's parent directory")
                         .bindSelected(settings::isFormatCommandRunInFileDirectory)
-                        .comment("<html>Required for <b>nix fmt</b> to work.</html>")
+                        .comment("Required for <b>nix fmt</b> to work.")
                 }
             }.enabledIf(enabledCheckBox.selected)
         }

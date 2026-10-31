@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.tooling.Failure
 import org.gradle.tooling.events.FailureResult
@@ -9,7 +10,7 @@ import java.util.function.Predicate
 
 val jbrHome = rootProject.file("jbr")
 
-task<Exec>("jbr") {
+tasks.register<Exec>("jbr") {
     description = "Create a symlink to package jetbrains.jdk"
     group = "build setup"
     commandLine("nix-build", "<nixpkgs>", "-A", "jetbrains.jdk", "-o", jbrHome)
