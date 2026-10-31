@@ -36,6 +36,8 @@ jbrHome.resolve("bin/java").takeIf { it.exists() }
         // Unfortunately, only failures in tasks are reported to the JbrGuidance build service.
         // If there are tasks scheduled, but none of them is executed, we therefore also print the message.
         project.gradle.taskGraph.whenReady {
+            // TODO The call to `getAllTasks` in the following line currently causes an InvalidUserCodeException
+            //  https://github.com/gradle/gradle/issues/32692
             if (allTasks.isNotEmpty()) {
                 service.get().expectAtLeastOneTask()
             }
