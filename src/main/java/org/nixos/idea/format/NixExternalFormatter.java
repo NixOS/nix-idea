@@ -7,6 +7,10 @@ import com.intellij.execution.process.OSProcessHandler;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.formatting.service.AsyncDocumentFormattingService;
 import com.intellij.formatting.service.AsyncFormattingRequest;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.util.NlsSafe;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -29,6 +33,7 @@ import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 public final class NixExternalFormatter extends AsyncDocumentFormattingService {
@@ -70,6 +75,7 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
         // `getIOFile()` returns the file backing the document when it is a local file,
         // and a temporary copy otherwise (this check mirrors the platform's logic).
         VirtualFile virtualFile = request.getContext().getVirtualFile();
+        Document document = request.getContext().getContainingFile().getFileDocument();
         Charset fileCharset = virtualFile != null ? virtualFile.getCharset() : EncodingManager.getInstance().getDefaultCharset();
         boolean formatsBackingFile = virtualFile != null
                 && virtualFile.isInLocalFileSystem()
@@ -95,81 +101,94 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
             commandLine.withWorkingDirectory(ioPath.getParent());
         }
 
+        // Mark document as read-only and afterward call FileDocumentManager.getInstance().saveDocument(...).
+        // This avoids race conditions when user continues typing, which otherwise leads to either
+        // - a "File Cache Conflict" dialog: "Changes have been made to '<path>' in memory and on disk."
+        // - the formatter overwriting changes made by the user, silently losing them
+        @SuppressWarnings("resource")
+        DocumentFreezeGuard freezeGuard = new DocumentFreezeGuard(!useStdIo && formatsBackingFile, document);
+
         return new FormattingTask() {
             private @Nullable OSProcessHandler handler;
             private boolean canceled;
 
             @Override
             public void run() {
-                // No need to call FileDocumentManager.getInstance().saveDocument(...):
-                // The platform has already saved it before this task was created.
-
-                // Start formatter process
-                synchronized (this) {
-                    if (canceled) {
-                        return;
-                    }
-                    try {
-                        handler = new OSProcessHandler(commandLine);
-                    } catch (ExecutionException e) {
-                        request.onError("NixIDEA", e.getMessage());
-                        return;
-                    }
-                }
-                // Configure output handling
-                handler.addProcessListener(new CapturingProcessAdapter() {
-                    @Override
-                    public void processTerminated(@NotNull ProcessEvent event) {
-                        int exitCode = event.getExitCode();
-                        if (useStdIo) {
-                            if (exitCode == 0) {
-                                request.onTextReady(StringUtil.convertLineSeparators(getOutput().getStdout()));
-                            } else {
-                                request.onError("NixIDEA", StringUtil.convertLineSeparators(getOutput().getStderr()));
-                            }
-                        } else {
-                            if (formatsBackingFile) {
-                                // The formatter may have modified the file backing the document in place,
-                                // even if it failed or the request was canceled and the process got killed.
-                                // Let the VFS pick up any external change.
-                                // Passing the new text to onTextReady() instead would modify
-                                // the document in parallel to the file and could trigger the
-                                // "File Cache Conflict" dialog on the next VFS refresh.
-                                VfsUtil.markDirtyAndRefresh(false, false, false, virtualFile);
-                            }
-                            if (exitCode == 0) {
-                                if (formatsBackingFile) {
-                                    request.onTextReady(null);
-                                } else {
-                                    // The formatter modified a temporary copy.
-                                    // Read the result back and apply it to the document.
-                                    // The platform wrote the copy with the file's charset,
-                                    // and Document.setText() rejects CRLF line separators, so normalize accordingly.
-                                    try {
-                                        String text = Files.readString(ioPath, fileCharset);
-                                        request.onTextReady(StringUtil.convertLineSeparators(text));
-                                    } catch (IOException e) {
-                                        request.onError("NixIDEA", e.getMessage());
-                                    }
-                                }
-                            } else {
-                                // Use `getStdout()` as we enabled `withRedirectErrorStream`.
-                                request.onError("NixIDEA", StringUtil.convertLineSeparators(getOutput().getStdout()));
-                            }
+                try (freezeGuard) {
+                    // Start formatter process
+                    synchronized (this) {
+                        if (canceled) {
+                            return;
+                        }
+                        try {
+                            handler = new OSProcessHandler(commandLine);
+                        } catch (ExecutionException e) {
+                            request.onError("NixIDEA", e.getMessage());
+                            return;
                         }
                     }
-                });
-                handler.startNotify();
-                // Write formatter input
-                try {
-                    OutputStream processInput = handler.getProcessInput();
-                    if (useStdIo) {
-                        processInput.write(request.getDocumentText().getBytes(fileCharset));
+
+                    // Configure output handling
+                    handler.addProcessListener(new CapturingProcessAdapter() {
+                        @Override
+                        public void processTerminated(@NotNull ProcessEvent event) {
+                            try {
+                                int exitCode = event.getExitCode();
+                                if (useStdIo) {
+                                    if (exitCode == 0) {
+                                        request.onTextReady(StringUtil.convertLineSeparators(getOutput().getStdout()));
+                                    } else {
+                                        request.onError("NixIDEA", StringUtil.convertLineSeparators(getOutput().getStderr()));
+                                    }
+                                } else {
+                                    if (formatsBackingFile) {
+                                        // The formatter may have modified the file backing the document in place,
+                                        // even if it failed or the request was canceled and the process got killed.
+                                        // Let the VFS pick up any external change.
+                                        // Passing the new text to onTextReady() instead would modify
+                                        // the document in parallel to the file and could trigger the
+                                        // "File Cache Conflict" dialog on the next VFS refresh.
+                                        VfsUtil.markDirtyAndRefresh(false, false, false, virtualFile);
+                                    }
+                                    if (exitCode == 0) {
+                                        if (formatsBackingFile) {
+                                            request.onTextReady(null);
+                                        } else {
+                                            // The formatter modified a temporary copy.
+                                            // Read the result back and apply it to the document.
+                                            // The platform wrote the copy with the file's charset,
+                                            // and Document.setText() rejects CRLF line separators, so normalize accordingly.
+                                            try {
+                                                String text = Files.readString(ioPath, fileCharset);
+                                                request.onTextReady(StringUtil.convertLineSeparators(text));
+                                            } catch (IOException e) {
+                                                request.onError("NixIDEA", e.getMessage());
+                                            }
+                                        }
+                                    } else {
+                                        // Use `getStdout()` as we enabled `withRedirectErrorStream`.
+                                        request.onError("NixIDEA", StringUtil.convertLineSeparators(getOutput().getStdout()));
+                                    }
+                                }
+                            } finally {
+                                freezeGuard.unfreeze();
+                            }
+                        }
+                    });
+                    handler.startNotify();
+                    freezeGuard.keepAfterClose();
+
+                    // Write formatter input
+                    try {
+                        OutputStream processInput = handler.getProcessInput();
+                        if (useStdIo) {
+                            processInput.write(request.getDocumentText().getBytes(fileCharset));
+                        }
+                        processInput.close();
+                    } catch (IOException e) {
+                        handler.destroyProcess();
+                        request.onError("NixIDEA", e.getMessage());
                     }
-                    processInput.close();
-                } catch (IOException e) {
-                    handler.destroyProcess();
-                    request.onError("NixIDEA", e.getMessage());
                 }
             }
 
@@ -279,6 +298,44 @@ public final class NixExternalFormatter extends AsyncDocumentFormattingService {
                     case STDIO -> true;
                     case CLI_ARGUMENT -> false;
                 };
+            }
+        }
+    }
+
+    private static final class DocumentFreezeGuard implements AutoCloseable {
+
+        private final @Nullable Document myDocument;
+        private final AtomicBoolean myReleased = new AtomicBoolean();
+        private boolean myKeepAfterClose;
+
+        public DocumentFreezeGuard(boolean freeze, Document document) {
+            if (freeze) {
+                if (document.isWritable()) {
+                    document.setReadOnly(true);
+                    FileDocumentManager.getInstance().saveDocument(document);
+                    myDocument = document;
+                } else {
+                    myDocument = null;
+                }
+            } else {
+                myDocument = null;
+            }
+        }
+
+        private void keepAfterClose() {
+            myKeepAfterClose = true;
+        }
+
+        private void unfreeze() {
+            if (myReleased.compareAndSet(false, true) && myDocument != null) {
+                ApplicationManager.getApplication().invokeLater(() -> myDocument.setReadOnly(false), ModalityState.any());
+            }
+        }
+
+        @Override
+        public void close() {
+            if (!myKeepAfterClose) {
+                unfreeze();
             }
         }
     }
