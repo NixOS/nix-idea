@@ -6,6 +6,24 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
+    directories:
+      - "/"
+      # Composite actions in .github/actions are not covered by "/"
+      - "/.github/actions/*"
+    schedule:
+      interval: "monthly"
+    # Combine all updates into a single pull request
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "gradle"
     directory: "/"
     schedule:
       interval: "monthly"
+    # Combine all updates into a single pull request
+    groups:
+      gradle:
+        patterns:
+          - "*"
