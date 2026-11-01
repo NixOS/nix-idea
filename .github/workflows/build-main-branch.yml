@@ -19,7 +19,7 @@ jobs:
     steps:
     # Remove old release drafts
     - name: Remove old release drafts
-      uses: actions/github-script@v8
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       with:
         script: |
           const owner = context.repo.owner;
@@ -31,14 +31,14 @@ jobs:
           }
     # Download build artifacts
     - name: Download build result
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
         artifact-ids: ${{ needs.build.outputs.build-artifact-id }}
         skip-decompress: true
         path: build/distributions/
         merge-multiple: true
     - name: Download metadata
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
         artifact-ids: ${{ needs.build.outputs.metadata-artifact-id }}
         path: build/metadata/
@@ -52,7 +52,7 @@ jobs:
         echo "zipname=$(basename "$(cat build/metadata/zipfile.txt)")" >> "$GITHUB_OUTPUT"
     # Fail job if the release tag already exists and points to a different commit
     - name: Check release tag
-      uses: actions/github-script@v8
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       env:
         TAG_NAME: v${{ steps.metadata.outputs.version }}
       with:
@@ -85,7 +85,7 @@ jobs:
           }
     # Create GitHub release draft
     - name: Create GitHub release draft
-      uses: actions/github-script@v8
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       env:
         TAG_NAME: v${{ steps.metadata.outputs.version }}
         ZIP_FILE: ${{ steps.metadata.outputs.zipfile }}

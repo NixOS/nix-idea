@@ -20,9 +20,9 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
     - name: Validate Gradle Wrapper
-      uses: gradle/actions/wrapper-validation@v6
+      uses: gradle/actions/wrapper-validation@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
 
   build:
 
@@ -37,7 +37,7 @@ jobs:
     steps:
     # Setup environment
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
     - name: Set up build tools
       uses: ./.github/actions/setup-tools
       with:
@@ -58,7 +58,7 @@ jobs:
     # Upload artifacts
     - name: Upload build reports
       if: always()
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: build-reports
         path: |
@@ -67,14 +67,14 @@ jobs:
         if-no-files-found: ignore
     - name: Upload build result
       id: upload-build-result
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         archive: false
         path: build/distributions/*
         if-no-files-found: error
     - name: Upload metadata
       id: upload-metadata
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: metadata
         path: build/metadata/
